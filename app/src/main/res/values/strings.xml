@@ -2,4 +2,5 @@
     <string name="app_name">Snapwalls</string>
     <string name="submit">Submit</string>
     <string name="auth">Auth</string>
+    <string name="shared_preferences">reddit_params</string>
 </resources>

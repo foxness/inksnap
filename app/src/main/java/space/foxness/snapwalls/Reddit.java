@@ -1,7 +1,6 @@
 package space.foxness.snapwalls;
 
 import android.net.Uri;
-import android.util.Log;
 
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -43,9 +42,62 @@ public class Reddit
         callbacks = cbs;
     }
     
+    public static class Params
+    {
+        private String accessToken;
+        private String refreshToken;
+        private Date accessTokenExpirationDate;
+
+        public void setAccessToken(String accessToken)
+        {
+            this.accessToken = accessToken;
+        }
+
+        public void setRefreshToken(String refreshToken)
+        {
+            this.refreshToken = refreshToken;
+        }
+
+        public void setAccessTokenExpirationDate(Date accessTokenExpirationDate)
+        {
+            this.accessTokenExpirationDate = accessTokenExpirationDate;
+        }
+        
+        public String getAccessToken()
+        {
+            return accessToken;
+        }
+
+        public String getRefreshToken()
+        {
+            return refreshToken;
+        }
+
+        public Date getAccessTokenExpirationDate()
+        {
+            return accessTokenExpirationDate;
+        }
+    }
+    
+    public Params getParams()
+    {
+        Params p = new Params();
+        p.setAccessToken(accessToken);
+        p.setRefreshToken(refreshToken);
+        p.setAccessTokenExpirationDate(accessTokenExpirationDate);
+        return p;
+    }
+    
+    public void setParams(Params params)
+    {
+        accessToken = params.getAccessToken();
+        refreshToken = params.getRefreshToken();
+        accessTokenExpirationDate = params.getAccessTokenExpirationDate();
+    }
+    
     public interface Callbacks
     {
-        void onTokenRetrieval(boolean success);
+        void onTokenFetchFinish(boolean success);
     }
     
     private static String getRandomState()
@@ -56,10 +108,11 @@ public class Reddit
     
     public boolean canSubmit()
     {
-        return accessToken != null && accessTokenExpirationDate.after(new Date());
+        return refreshToken != null;
+//        return accessToken != null && accessTokenExpirationDate.after(new Date());
     }
     
-    public void getTokens()
+    public void fetchAuthTokens()
     {
         assert authCode != null;
         
@@ -92,7 +145,7 @@ public class Reddit
                     throw new RuntimeException(e);
                 }
                 
-                callbacks.onTokenRetrieval(true);
+                callbacks.onTokenFetchFinish(true);
             }
 
             @Override
@@ -102,12 +155,9 @@ public class Reddit
                 
                 // TODO: handle this
                 
-                callbacks.onTokenRetrieval(false);
+                callbacks.onTokenFetchFinish(false);
             }
         });
-        
-//        Log.d(TAG, "CODE: " + authCode);
-        // TODO: implement this method
     }
     
     public boolean tryExtractCode(String url)
