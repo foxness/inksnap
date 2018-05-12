@@ -18,6 +18,9 @@ public class SubmitActivity extends AppCompatActivity implements Reddit.Callback
     private static final String REDDIT_REFRESH_TOKEN = "refreshToken";
     private static final String REDDIT_ACCESS_TOKEN_EXPIRATION_DATE = "accessTokenExpirationDate";
     
+    private Button authButton;
+    private Button submitButton;
+    
     private Reddit reddit;
     
     @Override
@@ -26,13 +29,13 @@ public class SubmitActivity extends AppCompatActivity implements Reddit.Callback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_submit);
 
-        Button submitButton = findViewById(R.id.submit_button);
+        submitButton = findViewById(R.id.submit_button);
         submitButton.setOnClickListener(v ->
         {
             Toast.makeText(this, "Testy is besty!", Toast.LENGTH_SHORT).show();
         });
         
-        Button authButton = findViewById(R.id.auth_button);
+        authButton = findViewById(R.id.auth_button);
         authButton.setOnClickListener(v ->
         {
             Dialog authDialog = new Dialog(SubmitActivity.this);
@@ -60,7 +63,14 @@ public class SubmitActivity extends AppCompatActivity implements Reddit.Callback
 
         reddit = new Reddit(this);
         restoreConfig();
-        Toast.makeText(this, reddit.canSubmit() ? "I CAN SUBMIT BOYS" : "OH NOES YOU NEED TO AUTH", Toast.LENGTH_SHORT).show();
+        
+        updateButtons();
+    }
+
+    private void updateButtons()
+    {
+        authButton.setEnabled(!reddit.canSubmit());
+        submitButton.setEnabled(reddit.canSubmit());
     }
 
     @Override
