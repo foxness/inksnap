@@ -9,7 +9,7 @@ import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.Toast;
 
-public class SubmitActivity extends AppCompatActivity
+public class SubmitActivity extends AppCompatActivity implements Reddit.Callbacks
 {
     private Reddit reddit;
     
@@ -25,7 +25,7 @@ public class SubmitActivity extends AppCompatActivity
             Toast.makeText(this, "Testy is besty!", Toast.LENGTH_SHORT).show();
         });
         
-        reddit = new Reddit();
+        reddit = new Reddit(this);
         Button authButton = findViewById(R.id.auth_button);
         authButton.setOnClickListener(v ->
         {
@@ -41,12 +41,22 @@ public class SubmitActivity extends AppCompatActivity
                     super.onPageFinished(view, url);
 
                     if (reddit.tryExtractCode(url))
+                    {
                         authDialog.dismiss();
+                        reddit.getTokens();
+                    }
                 }
             });
             
             authWebview.loadUrl(reddit.getAuthorizationUrl());
             authDialog.show();
         });
+    }
+
+    @Override
+    public void onTokenRetrieval(boolean success)
+    {
+        Toast.makeText(this, "SUCCESS: " + success, Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "CAN SUBMIT: " + reddit.canSubmit(), Toast.LENGTH_LONG).show();
     }
 }
