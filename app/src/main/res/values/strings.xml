@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Snapwalls</string>
     <string name="submit">Submit</string>
+    <string name="auth">Auth</string>
 </resources>
