@@ -1,28 +1,19 @@
 package space.foxness.snapwalls;
 
-import android.content.Context;
 import android.net.Uri;
-import android.util.Log;
 
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
-import com.loopj.android.http.ResponseHandlerInterface;
-import com.loopj.android.http.TextHttpResponseHandler;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
 import java.util.Calendar;
 import java.util.Date;
 
 import cz.msebera.android.httpclient.Header;
-import cz.msebera.android.httpclient.HttpResponse;
-import cz.msebera.android.httpclient.entity.ContentType;
-import cz.msebera.android.httpclient.entity.StringEntity;
-import cz.msebera.android.httpclient.message.BasicHeader;
-import cz.msebera.android.httpclient.protocol.HTTP;
 
 public class Reddit
 {
@@ -141,7 +132,7 @@ public class Reddit
             params.add("sr", "test");
             params.add("text", "testy is besty");
             params.add("title", "testy is besty?");
-
+            
             ahc.post(SUBMIT_ENDPOINT, params, new JsonHttpResponseHandler()
             {
                 @Override
@@ -149,14 +140,27 @@ public class Reddit
                 {
                     super.onSuccess(statusCode, headers, response);
                     
-                    try
+                    response = response.optJSONObject("json");
+                    JSONArray errors = response.optJSONArray("errors");
+                    
+                    if (errors.length() != 0)
                     {
-                        callbacks.onSubmit(response.getJSONObject("json").getJSONObject("data").getString("url"));
+                        if (errors.length() != 1)
+                            throw new RuntimeException("wtf do i do with multiple errors?");
+                        
+                        JSONArray error = errors.optJSONArray(0);
+                        String name = error.optString(0);
+                        String description = error.optString(1);
+                        
+                        switch (name)
+                        {
+                            case "RATELIMIT": callbacks.onSubmit(name + " " + description); return;
+                            default: throw new RuntimeException("Unknown error: " + name + " " + description);
+                        }
                     }
-                    catch (JSONException e)
+                    else
                     {
-                        // todo: handle this
-                        throw new RuntimeException(e);
+                        callbacks.onSubmit(response.optJSONObject("data").optString("url"));
                     }
                 }
 
@@ -164,7 +168,7 @@ public class Reddit
                 public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse)
                 {
                     super.onFailure(statusCode, headers, throwable, errorResponse);
-                    
+
                     // todo: handle this
                     throw new RuntimeException(throwable);
                 }
@@ -175,7 +179,7 @@ public class Reddit
                     super.onSuccess(statusCode, headers, responseString);
 
                     // todo: handle this
-                    throw new RuntimeException();
+                    throw new RuntimeException("RESPONSE STRING ONSUCCESS");
                 }
 
                 @Override
@@ -188,7 +192,7 @@ public class Reddit
                 }
             });
             
-        }, () -> // error callback
+        }, () -> // error callback, happens when you couldn't get a good access token
         {
             // todo: handle this
             throw new RuntimeException();
