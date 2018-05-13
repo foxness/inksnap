@@ -98,7 +98,8 @@ public class Reddit
     
     public interface Callbacks
     {
-        void onTokenFetchFinish(boolean success);
+        void onTokenFetchFinish();
+        void onNewParams();
     }
     
     private static String getRandomState()
@@ -144,8 +145,8 @@ public class Reddit
                     // TODO: handle this
                     throw new RuntimeException(e);
                 }
-                
-//                Log.d(TAG, response.toString());
+
+                callbacks.onNewParams();
             }
 
             @Override
@@ -154,9 +155,7 @@ public class Reddit
                 super.onFailure(statusCode, headers, throwable, errorResponse);
                 
                 // todo: handle this
-                throw new RuntimeException("ACCESS TOKEN REFRESH FAILURE");
-                
-//                Log.d(TAG, errorResponse.toString());
+                throw new RuntimeException(throwable);
             }
         });
     }
@@ -198,8 +197,9 @@ public class Reddit
                     // TODO: handle this
                     throw new RuntimeException(e);
                 }
-                
-                callbacks.onTokenFetchFinish(true);
+
+                callbacks.onNewParams();
+                callbacks.onTokenFetchFinish();
             }
 
             @Override
@@ -208,9 +208,9 @@ public class Reddit
                 super.onFailure(statusCode, headers, throwable, errorResponse);
                 
                 // TODO: handle this
-                throw new RuntimeException("REFRESH TOKEN FETCH FAILURE");
+                throw new RuntimeException(throwable);
                 
-//                callbacks.onTokenFetchFinish(false);
+//                callbacks.onTokenFetchFinish();
             }
         });
     }

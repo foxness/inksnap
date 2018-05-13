@@ -75,11 +75,16 @@ public class SubmitActivity extends AppCompatActivity implements Reddit.Callback
     }
 
     @Override
-    public void onTokenFetchFinish(boolean success)
+    public void onTokenFetchFinish()
     {
-        Toast.makeText(this, "SUCCESS: " + success, Toast.LENGTH_SHORT).show();
-        Toast.makeText(this, "CAN SUBMIT: " + reddit.canSubmit(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "can I submit after token fetching? " + reddit.canSubmit(), Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onNewParams()
+    {
         saveConfig();
+        Toast.makeText(this, "SAVED THE CONFIG", Toast.LENGTH_SHORT).show();
     }
 
     private void saveConfig()
