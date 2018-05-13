@@ -17,7 +17,7 @@ import android.widget.Toast;
 
 import java.util.Date;
 
-public class QueueFragment extends Fragment implements Reddit.Callbacks
+public class SubmissionFragment extends Fragment implements Reddit.Callbacks
 {
     private static final String CONFIG_ACCESS_TOKEN = "accessToken";
     private static final String CONFIG_REFRESH_TOKEN = "refreshToken";
