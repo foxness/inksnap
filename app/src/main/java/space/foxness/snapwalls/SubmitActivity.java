@@ -32,7 +32,7 @@ public class SubmitActivity extends AppCompatActivity implements Reddit.Callback
         submitButton = findViewById(R.id.submit_button);
         submitButton.setOnClickListener(v ->
         {
-            reddit.ensureValidAccessToken();
+            reddit.submit();
             Toast.makeText(this, "Testy is besty!", Toast.LENGTH_SHORT).show();
         });
         
@@ -85,6 +85,12 @@ public class SubmitActivity extends AppCompatActivity implements Reddit.Callback
     {
         saveConfig();
         Toast.makeText(this, "SAVED THE CONFIG", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onSubmit(String link)
+    {
+        Toast.makeText(this, "GOT LINK: " + link, Toast.LENGTH_SHORT).show();
     }
 
     private void saveConfig()

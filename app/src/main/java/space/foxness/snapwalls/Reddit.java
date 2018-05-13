@@ -1,19 +1,28 @@
 package space.foxness.snapwalls;
 
+import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
+import com.loopj.android.http.ResponseHandlerInterface;
+import com.loopj.android.http.TextHttpResponseHandler;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Calendar;
 import java.util.Date;
 
 import cz.msebera.android.httpclient.Header;
+import cz.msebera.android.httpclient.HttpResponse;
+import cz.msebera.android.httpclient.entity.ContentType;
+import cz.msebera.android.httpclient.entity.StringEntity;
+import cz.msebera.android.httpclient.message.BasicHeader;
+import cz.msebera.android.httpclient.protocol.HTTP;
 
 public class Reddit
 {
@@ -25,10 +34,12 @@ public class Reddit
     
     private final static String AUTORIZE_ENDPOINT = "https://www.reddit.com/api/v1/authorize.compact";
     private final static String ACCESS_TOKEN_ENDPOINT = "https://www.reddit.com/api/v1/access_token";
+    private final static String SUBMIT_ENDPOINT = "https://oauth.reddit.com/api/submit";
     
     private final static String AUTH_DURATION = "permanent";
     private final static String AUTH_SCOPE = "submit";
     private final static String AUTH_RESPONSE_TYPE = "code";
+    private final static String USER_AGENT = "Snapwalls by /u/foxneZz";
     
     private String authState;
     private String authCode;
@@ -100,6 +111,7 @@ public class Reddit
     {
         void onTokenFetchFinish();
         void onNewParams();
+        void onSubmit(String link);
     }
     
     private static String getRandomState()
@@ -113,16 +125,90 @@ public class Reddit
         return refreshToken != null;
     }
     
-    public void ensureValidAccessToken() // TODO: change to private after you add 'submit' method
+    public void submit()
+    {
+        ensureValidAccessToken(() -> // success callback
+        {
+            AsyncHttpClient ahc = new AsyncHttpClient();
+            ahc.setUserAgent(USER_AGENT);
+            ahc.addHeader("Authorization", "bearer " + accessToken);
+            
+            RequestParams params = new RequestParams();
+            params.add("api_type", "json");
+            params.add("kind", "self");
+            params.add("resubmit", "true");
+            params.add("sendreplies", "true");
+            params.add("sr", "test");
+            params.add("text", "testy is besty");
+            params.add("title", "testy is besty?");
+
+            ahc.post(SUBMIT_ENDPOINT, params, new JsonHttpResponseHandler()
+            {
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONObject response)
+                {
+                    super.onSuccess(statusCode, headers, response);
+                    
+                    try
+                    {
+                        callbacks.onSubmit(response.getJSONObject("json").getJSONObject("data").getString("url"));
+                    }
+                    catch (JSONException e)
+                    {
+                        // todo: handle this
+                        throw new RuntimeException(e);
+                    }
+                }
+
+                @Override
+                public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse)
+                {
+                    super.onFailure(statusCode, headers, throwable, errorResponse);
+                    
+                    // todo: handle this
+                    throw new RuntimeException(throwable);
+                }
+
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, String responseString)
+                {
+                    super.onSuccess(statusCode, headers, responseString);
+
+                    // todo: handle this
+                    throw new RuntimeException();
+                }
+
+                @Override
+                public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable)
+                {
+                    super.onFailure(statusCode, headers, responseString, throwable);
+
+                    // todo: handle this
+                    throw new RuntimeException(throwable);
+                }
+            });
+            
+        }, () -> // error callback
+        {
+            // todo: handle this
+            throw new RuntimeException();
+        });
+    }
+    
+    private void ensureValidAccessToken(Runnable successCallback, Runnable errorCallback)
     {
         if (accessToken != null && accessTokenExpirationDate.after(new Date()))
-            return; // access token is good
+        {
+            successCallback.run();
+            return;
+        }
         
         // access token is null or expired
         
         assert refreshToken != null;
         
         AsyncHttpClient ahc = new AsyncHttpClient();
+        ahc.setUserAgent(USER_AGENT);
         ahc.setBasicAuth(APP_CLIENT_ID, APP_CLIENT_SECRET);
 
         RequestParams params = new RequestParams();
@@ -147,6 +233,7 @@ public class Reddit
                 }
 
                 callbacks.onNewParams();
+                successCallback.run();
             }
 
             @Override
@@ -173,6 +260,7 @@ public class Reddit
         assert authCode != null;
         
         AsyncHttpClient ahc = new AsyncHttpClient();
+        ahc.setUserAgent(USER_AGENT);
         ahc.setBasicAuth(APP_CLIENT_ID, APP_CLIENT_SECRET);
 
         RequestParams params = new RequestParams();
