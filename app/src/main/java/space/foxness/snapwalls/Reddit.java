@@ -142,8 +142,20 @@ public class Reddit
         return lastSubmissionDate != null && new Date().getTime() < lastSubmissionDate.getTime() + RATELIMIT;
     }
     
-    public void submit()
+    public void submit(Submission submission)
     {
+        submit(submission, true, true);
+    }
+    
+    public void submit(Submission submission, boolean resubmit, boolean sendReplies)
+    {
+        boolean validTitle = submission.getTitle() != null && !submission.getTitle().isEmpty();
+        boolean validContent = submission.getContent() != null && !submission.getContent().isEmpty();
+        boolean validSubreddit = submission.getSubreddit() != null && !submission.getSubreddit().isEmpty();
+        
+        if (!validTitle || !validContent || !validSubreddit)
+            throw new RuntimeException("Bad submission");
+        
         ensureValidAccessToken(() -> // success callback
         {
             AsyncHttpClient ahc = new AsyncHttpClient();
@@ -152,12 +164,12 @@ public class Reddit
             
             RequestParams params = new RequestParams();
             params.add("api_type", "json");
-            params.add("kind", "self");
-            params.add("resubmit", "true");
-            params.add("sendreplies", "true");
-            params.add("sr", "test");
-            params.add("text", "testy is besty");
-            params.add("title", "testy is besty?");
+            params.add("kind", submission.isLink() ? "link" : "self");
+            params.add("resubmit", resubmit ? "true" : "false");
+            params.add("sendreplies", sendReplies ? "true" : "false");
+            params.add("sr", submission.getSubreddit());
+            params.add(submission.isLink() ? "url" : "text", submission.getContent());
+            params.add("title", submission.getTitle());
             
             ahc.post(SUBMIT_ENDPOINT, params, new JsonHttpResponseHandler()
             {

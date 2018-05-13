@@ -7,12 +7,17 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.EditText;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import java.util.Date;
@@ -30,6 +35,7 @@ public class SubmissionFragment extends Fragment implements Reddit.Callbacks
     private Button submitButton;
 
     private Reddit reddit;
+    private Submission submission;
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -41,13 +47,19 @@ public class SubmissionFragment extends Fragment implements Reddit.Callbacks
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
-        View v = inflater.inflate(R.layout.fragment_queue, container, false);
+        View v = inflater.inflate(R.layout.fragment_submission, container, false);
         
         submitButton = v.findViewById(R.id.submit_button);
         submitButton.setOnClickListener(v1 ->
         {
+            if (!reddit.canSubmitRightNow())
+            {
+                Toast.makeText(getActivity(), "Can't submit right now", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             submitButton.setEnabled(false);
-            reddit.submit();
+            reddit.submit(new Submission(submission));
         });
 
         authButton = v.findViewById(R.id.auth_button);
@@ -76,7 +88,80 @@ public class SubmissionFragment extends Fragment implements Reddit.Callbacks
             authWebview.loadUrl(reddit.getAuthorizationUrl());
             authDialog.show();
         });
+        
+        EditText titleET = v.findViewById(R.id.submission_title);
+        titleET.addTextChangedListener(new TextWatcher()
+        {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after)
+            {
+                
+            }
 
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count)
+            {
+                submission.setTitle(s.toString());
+                updateButtons();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s)
+            {
+
+            }
+        });
+
+        EditText contentET = v.findViewById(R.id.submission_content);
+        contentET.addTextChangedListener(new TextWatcher()
+        {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after)
+            {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count)
+            {
+                submission.setContent(s.toString());
+                updateButtons();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s)
+            {
+
+            }
+        });
+
+        EditText subredditET = v.findViewById(R.id.submission_subreddit);
+        subredditET.addTextChangedListener(new TextWatcher()
+        {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after)
+            {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count)
+            {
+                submission.setSubreddit(s.toString());
+                updateButtons();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s)
+            {
+
+            }
+        });
+        
+        Switch typeSwitch = v.findViewById(R.id.submission_type);
+        typeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> submission.setLink(isChecked));
+
+        submission = new Submission();
         reddit = new Reddit(this);
         restoreConfig();
         updateButtons();
@@ -87,7 +172,11 @@ public class SubmissionFragment extends Fragment implements Reddit.Callbacks
     private void updateButtons()
     {
         authButton.setEnabled(!reddit.isLoggedIn());
-        submitButton.setEnabled(reddit.canSubmitRightNow());
+        
+        boolean validTitle = submission.getTitle() != null && !submission.getTitle().isEmpty();
+        boolean validContent = submission.getContent() != null && !submission.getContent().isEmpty();
+        boolean validSubreddit = submission.getSubreddit() != null && !submission.getSubreddit().isEmpty();
+        submitButton.setEnabled(validTitle && validContent && validSubreddit);
     }
 
     @Override
