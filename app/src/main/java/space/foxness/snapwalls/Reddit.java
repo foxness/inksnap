@@ -32,11 +32,14 @@ public class Reddit
     private final static String AUTH_RESPONSE_TYPE = "code";
     private final static String USER_AGENT = "Snapwalls by /u/foxneZz";
     
+    private final static int RATELIMIT = 10 * 60 * 1000; // in milliseconds, also 10 minutes
+    
     private String authState;
     private String authCode;
     private String accessToken;
     private String refreshToken;
     private Date accessTokenExpirationDate;
+    private Date lastSubmissionDate;
     
     private Callbacks callbacks;
     
@@ -44,12 +47,18 @@ public class Reddit
     {
         callbacks = cbs;
     }
-    
+
+    public boolean canSubmitRightNow()
+    {
+        return isLoggedIn() && !isRestrictedByRatelimit();
+    }
+
     public static class Params
     {
         private String accessToken;
         private String refreshToken;
         private Date accessTokenExpirationDate;
+        private Date lastSubmissionDate;
 
         public void setAccessToken(String accessToken)
         {
@@ -64,6 +73,11 @@ public class Reddit
         public void setAccessTokenExpirationDate(Date accessTokenExpirationDate)
         {
             this.accessTokenExpirationDate = accessTokenExpirationDate;
+        }
+
+        public void setLastSubmissionDate(Date lastSubmissionDate)
+        {
+            this.lastSubmissionDate = lastSubmissionDate;
         }
         
         public String getAccessToken()
@@ -80,6 +94,11 @@ public class Reddit
         {
             return accessTokenExpirationDate;
         }
+
+        public Date getLastSubmissionDate()
+        {
+            return lastSubmissionDate;
+        }
     }
     
     public Params getParams()
@@ -88,6 +107,7 @@ public class Reddit
         p.setAccessToken(accessToken);
         p.setRefreshToken(refreshToken);
         p.setAccessTokenExpirationDate(accessTokenExpirationDate);
+        p.setLastSubmissionDate(lastSubmissionDate);
         return p;
     }
     
@@ -96,6 +116,7 @@ public class Reddit
         accessToken = params.getAccessToken();
         refreshToken = params.getRefreshToken();
         accessTokenExpirationDate = params.getAccessTokenExpirationDate();
+        lastSubmissionDate = params.getLastSubmissionDate();
     }
     
     public interface Callbacks
@@ -111,9 +132,14 @@ public class Reddit
         return "testy";
     }
     
-    public boolean canSubmit()
+    public boolean isLoggedIn()
     {
         return refreshToken != null;
+    }
+    
+    public boolean isRestrictedByRatelimit()
+    {
+        return lastSubmissionDate != null && new Date().getTime() < lastSubmissionDate.getTime() + RATELIMIT;
     }
     
     public void submit()
@@ -160,6 +186,8 @@ public class Reddit
                     }
                     else
                     {
+                        lastSubmissionDate = new Date();
+                        callbacks.onNewParams();
                         callbacks.onSubmit(response.optJSONObject("data").optString("url"));
                     }
                 }

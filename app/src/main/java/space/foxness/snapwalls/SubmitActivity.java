@@ -14,9 +14,12 @@ import java.util.Date;
 
 public class SubmitActivity extends AppCompatActivity implements Reddit.Callbacks
 {
-    private static final String REDDIT_ACCESS_TOKEN = "accessToken";
-    private static final String REDDIT_REFRESH_TOKEN = "refreshToken";
-    private static final String REDDIT_ACCESS_TOKEN_EXPIRATION_DATE = "accessTokenExpirationDate";
+    private static final String CONFIG_ACCESS_TOKEN = "accessToken";
+    private static final String CONFIG_REFRESH_TOKEN = "refreshToken";
+    private static final String CONFIG_ACCESS_TOKEN_EXPIRATION_DATE = "accessTokenExpirationDate";
+    private static final String CONFIG_LAST_SUBMISSION_DATE = "lastSubmissionDate";
+    
+    private static final long CONFIG_NULL_SUBSTITUTE = 0;
     
     private Button authButton;
     private Button submitButton;
@@ -32,6 +35,7 @@ public class SubmitActivity extends AppCompatActivity implements Reddit.Callback
         submitButton = findViewById(R.id.submit_button);
         submitButton.setOnClickListener(v ->
         {
+            submitButton.setEnabled(false);
             reddit.submit();
             Toast.makeText(this, "Testy is besty!", Toast.LENGTH_SHORT).show();
         });
@@ -39,6 +43,7 @@ public class SubmitActivity extends AppCompatActivity implements Reddit.Callback
         authButton = findViewById(R.id.auth_button);
         authButton.setOnClickListener(v ->
         {
+            authButton.setEnabled(false);
             Dialog authDialog = new Dialog(SubmitActivity.this);
             authDialog.setContentView(R.layout.dialog_auth);
 
@@ -70,14 +75,15 @@ public class SubmitActivity extends AppCompatActivity implements Reddit.Callback
 
     private void updateButtons()
     {
-        authButton.setEnabled(!reddit.canSubmit());
-        submitButton.setEnabled(reddit.canSubmit());
+        authButton.setEnabled(!reddit.isLoggedIn());
+        submitButton.setEnabled(reddit.canSubmitRightNow());
     }
 
     @Override
     public void onTokenFetchFinish()
     {
-        Toast.makeText(this, "can I submit after token fetching? " + reddit.canSubmit(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "fetched tokens, can post? " + reddit.canSubmitRightNow(), Toast.LENGTH_SHORT).show();
+        updateButtons();
     }
 
     @Override
@@ -91,6 +97,7 @@ public class SubmitActivity extends AppCompatActivity implements Reddit.Callback
     public void onSubmit(String link)
     {
         Toast.makeText(this, "GOT LINK: " + link, Toast.LENGTH_SHORT).show();
+        updateButtons();
     }
 
     private void saveConfig()
@@ -98,9 +105,10 @@ public class SubmitActivity extends AppCompatActivity implements Reddit.Callback
         Reddit.Params rp = reddit.getParams();
         getSharedPreferences(getString(R.string.shared_preferences), Context.MODE_PRIVATE)
                 .edit()
-                .putString(REDDIT_ACCESS_TOKEN, rp.getAccessToken())
-                .putString(REDDIT_REFRESH_TOKEN, rp.getRefreshToken())
-                .putLong(REDDIT_ACCESS_TOKEN_EXPIRATION_DATE, rp.getAccessTokenExpirationDate().getTime())
+                .putString(CONFIG_ACCESS_TOKEN, rp.getAccessToken())
+                .putString(CONFIG_REFRESH_TOKEN, rp.getRefreshToken())
+                .putLong(CONFIG_ACCESS_TOKEN_EXPIRATION_DATE, rp.getAccessTokenExpirationDate() == null ? CONFIG_NULL_SUBSTITUTE : rp.getAccessTokenExpirationDate().getTime())
+                .putLong(CONFIG_LAST_SUBMISSION_DATE, rp.getLastSubmissionDate() == null ? CONFIG_NULL_SUBSTITUTE : rp.getLastSubmissionDate().getTime())
                 .apply();
     }
     
@@ -109,12 +117,14 @@ public class SubmitActivity extends AppCompatActivity implements Reddit.Callback
         Reddit.Params rp = new Reddit.Params();
         
         SharedPreferences sp = getSharedPreferences(getString(R.string.shared_preferences), Context.MODE_PRIVATE);
-        rp.setAccessToken(sp.getString(REDDIT_ACCESS_TOKEN, null));
-        rp.setRefreshToken(sp.getString(REDDIT_REFRESH_TOKEN, null));
+        rp.setAccessToken(sp.getString(CONFIG_ACCESS_TOKEN, null));
+        rp.setRefreshToken(sp.getString(CONFIG_REFRESH_TOKEN, null));
         
-        final long defaultValue = 0;
-        Long dateInMs = sp.getLong(REDDIT_ACCESS_TOKEN_EXPIRATION_DATE, defaultValue);
-        rp.setAccessTokenExpirationDate(dateInMs == defaultValue ? null : new Date(dateInMs));
+        Long dateInMs = sp.getLong(CONFIG_ACCESS_TOKEN_EXPIRATION_DATE, CONFIG_NULL_SUBSTITUTE);
+        rp.setAccessTokenExpirationDate(dateInMs == CONFIG_NULL_SUBSTITUTE ? null : new Date(dateInMs));
+        
+        dateInMs = sp.getLong(CONFIG_LAST_SUBMISSION_DATE, CONFIG_NULL_SUBSTITUTE);
+        rp.setLastSubmissionDate(dateInMs == CONFIG_NULL_SUBSTITUTE ? null : new Date(dateInMs));
         
         reddit.setParams(rp);
     }
