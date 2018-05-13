@@ -164,11 +164,11 @@ public class Reddit
             
             RequestParams params = new RequestParams();
             params.add("api_type", "json");
-            params.add("kind", submission.isLink() ? "link" : "self");
+            params.add("kind", submission.getType() ? "link" : "self");
             params.add("resubmit", resubmit ? "true" : "false");
             params.add("sendreplies", sendReplies ? "true" : "false");
             params.add("sr", submission.getSubreddit());
-            params.add(submission.isLink() ? "url" : "text", submission.getContent());
+            params.add(submission.getType() ? "url" : "text", submission.getContent());
             params.add("title", submission.getTitle());
             
             ahc.post(SUBMIT_ENDPOINT, params, new JsonHttpResponseHandler()

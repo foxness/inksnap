@@ -15,7 +15,6 @@ import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.Toast;
@@ -41,6 +40,16 @@ public class SubmissionFragment extends Fragment implements Reddit.Callbacks
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+
+        submission = new Submission();
+        submission.setTitle("is testy besty?");
+        submission.setType(false);
+        submission.setContent("yes, testy is besty");
+        submission.setSubreddit("test");
+
+        reddit = new Reddit(this);
+        
+        restoreConfig();
     }
 
     @Nullable
@@ -90,6 +99,7 @@ public class SubmissionFragment extends Fragment implements Reddit.Callbacks
         });
         
         EditText titleET = v.findViewById(R.id.submission_title);
+        titleET.setText(submission.getTitle());
         titleET.addTextChangedListener(new TextWatcher()
         {
             @Override
@@ -113,6 +123,7 @@ public class SubmissionFragment extends Fragment implements Reddit.Callbacks
         });
 
         EditText contentET = v.findViewById(R.id.submission_content);
+        contentET.setText(submission.getContent());
         contentET.addTextChangedListener(new TextWatcher()
         {
             @Override
@@ -136,6 +147,7 @@ public class SubmissionFragment extends Fragment implements Reddit.Callbacks
         });
 
         EditText subredditET = v.findViewById(R.id.submission_subreddit);
+        subredditET.setText(submission.getSubreddit());
         subredditET.addTextChangedListener(new TextWatcher()
         {
             @Override
@@ -159,11 +171,9 @@ public class SubmissionFragment extends Fragment implements Reddit.Callbacks
         });
         
         Switch typeSwitch = v.findViewById(R.id.submission_type);
-        typeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> submission.setLink(isChecked));
+        typeSwitch.setChecked(submission.getType());
+        typeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> submission.setType(isChecked));
 
-        submission = new Submission();
-        reddit = new Reddit(this);
-        restoreConfig();
         updateButtons();
         
         return v;

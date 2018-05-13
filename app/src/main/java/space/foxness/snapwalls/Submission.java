@@ -8,7 +8,7 @@ public class Submission
     private String title;
     private String subreddit;
     private String content;
-    private boolean isLink;
+    private boolean type; // true - link, false - self/text
     
     public Submission()
     {
@@ -21,7 +21,7 @@ public class Submission
         title = s.title;
         subreddit = s.subreddit;
         content = s.content;
-        isLink = s.isLink;
+        type = s.type;
     }
 
     public UUID getId()
@@ -59,13 +59,13 @@ public class Submission
         this.content = content;
     }
 
-    public boolean isLink()
+    public boolean getType()
     {
-        return isLink;
+        return type;
     }
 
-    public void setLink(boolean link)
+    public void setType(boolean type)
     {
-        isLink = link;
+        this.type = type;
     }
 }
