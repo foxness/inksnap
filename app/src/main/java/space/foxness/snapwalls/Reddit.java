@@ -1,6 +1,7 @@
 package space.foxness.snapwalls;
 
 import android.net.Uri;
+import android.util.Log;
 
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -109,7 +110,63 @@ public class Reddit
     public boolean canSubmit()
     {
         return refreshToken != null;
-//        return accessToken != null && accessTokenExpirationDate.after(new Date());
+    }
+    
+    public void ensureValidAccessToken() // TODO: change to private after you add 'submit' method
+    {
+        if (accessToken != null && accessTokenExpirationDate.after(new Date()))
+            return; // access token is good
+        
+        // access token is null or expired
+        
+        assert refreshToken != null;
+        
+        AsyncHttpClient ahc = new AsyncHttpClient();
+        ahc.setBasicAuth(APP_CLIENT_ID, APP_CLIENT_SECRET);
+
+        RequestParams params = new RequestParams();
+        params.add("grant_type", "refresh_token");
+        params.add("refresh_token", refreshToken);
+        ahc.post(ACCESS_TOKEN_ENDPOINT, params, new JsonHttpResponseHandler()
+        {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response)
+            {
+                super.onSuccess(statusCode, headers, response);
+
+                try
+                {
+                    // TODO: compare received scope with intended scope?
+                    updateAccessToken(response.getString("access_token"), response.getInt("expires_in"));
+                }
+                catch (JSONException e)
+                {
+                    // TODO: handle this
+                    throw new RuntimeException(e);
+                }
+                
+//                Log.d(TAG, response.toString());
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse)
+            {
+                super.onFailure(statusCode, headers, throwable, errorResponse);
+                
+                // todo: handle this
+                throw new RuntimeException("ACCESS TOKEN REFRESH FAILURE");
+                
+//                Log.d(TAG, errorResponse.toString());
+            }
+        });
+    }
+    
+    private void updateAccessToken(String accessToken_, int expiresIn)
+    {
+        accessToken = accessToken_;
+        Calendar date = Calendar.getInstance(); // current time
+        date.add(Calendar.SECOND, expiresIn); // expiresIn == 1 hour
+        accessTokenExpirationDate = date.getTime();
     }
     
     public void fetchAuthTokens()
@@ -132,12 +189,9 @@ public class Reddit
                 
                 try
                 {
-                    accessToken = response.getString("access_token");
+                    // TODO: compare received scope with intended scope?
                     refreshToken = response.getString("refresh_token");
-                    
-                    Calendar date = Calendar.getInstance(); // current time
-                    date.add(Calendar.SECOND, response.getInt("expires_in")); // add ~1 hour
-                    accessTokenExpirationDate = date.getTime();
+                    updateAccessToken(response.getString("access_token"), response.getInt("expires_in"));
                 }
                 catch (JSONException e)
                 {
@@ -154,8 +208,9 @@ public class Reddit
                 super.onFailure(statusCode, headers, throwable, errorResponse);
                 
                 // TODO: handle this
+                throw new RuntimeException("REFRESH TOKEN FETCH FAILURE");
                 
-                callbacks.onTokenFetchFinish(false);
+//                callbacks.onTokenFetchFinish(false);
             }
         });
     }
