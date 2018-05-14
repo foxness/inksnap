@@ -213,12 +213,14 @@ public class SubmissionFragment extends Fragment implements Reddit.Callbacks
     private void saveConfig()
     {
         Reddit.Params rp = reddit.getParams();
+        long expirationDate = rp.getAccessTokenExpirationDate() == null ? CONFIG_NULL_SUBSTITUTE : rp.getAccessTokenExpirationDate().getTime();
+        long lastSubmissionDate = rp.getLastSubmissionDate() == null ? CONFIG_NULL_SUBSTITUTE : rp.getLastSubmissionDate().getTime();
         getActivity().getSharedPreferences(getString(R.string.shared_preferences), Context.MODE_PRIVATE)
                 .edit()
                 .putString(CONFIG_ACCESS_TOKEN, rp.getAccessToken())
                 .putString(CONFIG_REFRESH_TOKEN, rp.getRefreshToken())
-                .putLong(CONFIG_ACCESS_TOKEN_EXPIRATION_DATE, rp.getAccessTokenExpirationDate() == null ? CONFIG_NULL_SUBSTITUTE : rp.getAccessTokenExpirationDate().getTime())
-                .putLong(CONFIG_LAST_SUBMISSION_DATE, rp.getLastSubmissionDate() == null ? CONFIG_NULL_SUBSTITUTE : rp.getLastSubmissionDate().getTime())
+                .putLong(CONFIG_ACCESS_TOKEN_EXPIRATION_DATE, expirationDate)
+                .putLong(CONFIG_LAST_SUBMISSION_DATE, lastSubmissionDate)
                 .apply();
     }
 
