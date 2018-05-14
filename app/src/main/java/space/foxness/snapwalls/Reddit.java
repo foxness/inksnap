@@ -181,26 +181,31 @@ public class Reddit
                     response = response.optJSONObject("json");
                     JSONArray errors = response.optJSONArray("errors");
                     
-                    if (errors.length() != 0)
-                    {
-                        if (errors.length() != 1)
-                            throw new RuntimeException("wtf do i do with multiple errors?");
-                        
-                        JSONArray error = errors.optJSONArray(0);
-                        String name = error.optString(0);
-                        String description = error.optString(1);
-                        
-                        switch (name)
-                        {
-                            case "RATELIMIT": callbacks.onSubmit(name + " " + description); return;
-                            default: throw new RuntimeException("Unknown error: " + name + " " + description);
-                        }
-                    }
-                    else
+                    if (errors.length() == 0)
                     {
                         lastSubmissionDate = new Date();
                         callbacks.onNewParams();
                         callbacks.onSubmit(response.optJSONObject("data").optString("url"));
+                    }
+                    else
+                    {
+                        StringBuilder errorString = new StringBuilder("You got " + errors.length() + " errors: ");
+                        for (int i = 0; i < errors.length(); ++i)
+                        {
+                            JSONArray error = errors.optJSONArray(i);
+                            String name = error.optString(0);
+                            String description = error.optString(1);
+
+                            switch (name)
+                            {
+                                case "RATELIMIT":
+                                case "NO_URL":
+                                    errorString.append(name).append(" ").append(description).append("\n"); break;
+                                default: throw new RuntimeException("I FOUND AN UNKNOWN ERROR:\nNAME: " + name + "\nDESCRIPTION: " + description);
+                            }
+                        }
+                        
+                        callbacks.onSubmit(errorString.toString());
                     }
                 }
 

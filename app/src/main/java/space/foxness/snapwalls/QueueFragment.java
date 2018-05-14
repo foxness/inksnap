@@ -86,7 +86,7 @@ public class QueueFragment extends Fragment
         
         private void onClick(View v)
         {
-            Intent i = SubmissionActivity.newIntent(getActivity(), submission.getId());
+            Intent i = SubmissionPagerActivity.newIntent(getActivity(), submission.getId());
             startActivity(i);
         }
     }
