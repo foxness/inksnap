@@ -2,6 +2,7 @@ package space.foxness.snapwalls;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -36,6 +37,7 @@ public class QueueFragment extends Fragment implements Reddit.Callbacks
     
     private RecyclerView recyclerView;
     private SubmissionAdapter adapter;
+    private MenuItem signinMenuItem;
 
     private Reddit reddit;
 
@@ -91,6 +93,48 @@ public class QueueFragment extends Fragment implements Reddit.Callbacks
     {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.menu_queue, menu);
+        
+        signinMenuItem = menu.findItem(R.id.menu_queue_signin);
+        
+        updateMenu();
+    }
+
+    private void AddNewSubmission()
+    {
+        Submission s = new Submission();
+        s.setSubreddit("test"); // todo: change this
+        Queue.get().addSubmission(s);
+        startActivity(SubmissionPagerActivity.newIntent(getActivity(), s.getId()));
+    }
+    
+    private void ShowSigninDialog()
+    {
+        signinMenuItem.setEnabled(false);
+        // we need ^ this because there's a token doesn't arrive immediately after the dialog is dismissed
+        // and the user should not be able to press it when the token is being fetched
+        
+        Dialog authDialog = new Dialog(getActivity());
+        authDialog.setContentView(R.layout.dialog_auth);
+        authDialog.setOnCancelListener(dialog -> signinMenuItem.setEnabled(true));
+
+        WebView authWebview = authDialog.findViewById(R.id.auth_webview);
+        authWebview.setWebViewClient(new WebViewClient()
+        {
+            @Override
+            public void onPageFinished(WebView view, String url)
+            {
+                super.onPageFinished(view, url);
+
+                if (reddit.tryExtractCode(url))
+                {
+                    authDialog.dismiss();
+                    reddit.fetchAuthTokens();
+                }
+            }
+        });
+
+        authWebview.loadUrl(reddit.getAuthorizationUrl());
+        authDialog.show();
     }
 
     @Override
@@ -98,41 +142,9 @@ public class QueueFragment extends Fragment implements Reddit.Callbacks
     {
         switch (item.getItemId())
         {
-            case R.id.menu_queue_add:
-                Submission s = new Submission();
-                s.setSubreddit("test"); // todo: change this
-                Queue.get().addSubmission(s);
-                startActivity(SubmissionPagerActivity.newIntent(getActivity(), s.getId()));
-
-                return true;
-
-            case R.id.menu_queue_signin:
-                Dialog authDialog = new Dialog(getActivity());
-                authDialog.setContentView(R.layout.dialog_auth);
-
-                WebView authWebview = authDialog.findViewById(R.id.auth_webview);
-                authWebview.setWebViewClient(new WebViewClient()
-                {
-                    @Override
-                    public void onPageFinished(WebView view, String url)
-                    {
-                        super.onPageFinished(view, url);
-
-                        if (reddit.tryExtractCode(url))
-                        {
-                            authDialog.dismiss();
-                            reddit.fetchAuthTokens();
-                        }
-                    }
-                });
-
-                authWebview.loadUrl(reddit.getAuthorizationUrl());
-                authDialog.show();
-
-                return true;
-
-            default:
-                return super.onOptionsItemSelected(item);
+            case R.id.menu_queue_add: AddNewSubmission(); return true;
+            case R.id.menu_queue_signin: ShowSigninDialog(); return true;
+            default: return super.onOptionsItemSelected(item);
         }
     }
 
@@ -151,6 +163,12 @@ public class QueueFragment extends Fragment implements Reddit.Callbacks
     public void onTokenFetchFinish()
     {
         Toast.makeText(getActivity(), "fetched tokens, can post? " + reddit.canSubmitRightNow(), Toast.LENGTH_SHORT).show();
+        updateMenu();
+    }
+    
+    private void updateMenu()
+    {
+        signinMenuItem.setEnabled(!reddit.isSignedIn());
     }
 
     @Override

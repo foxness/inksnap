@@ -50,7 +50,7 @@ public class Reddit
 
     public boolean canSubmitRightNow()
     {
-        return isLoggedIn() && !isRestrictedByRatelimit();
+        return isSignedIn() && !isRestrictedByRatelimit();
     }
 
     public static class Params
@@ -132,7 +132,7 @@ public class Reddit
         return "testy";
     }
     
-    public boolean isLoggedIn()
+    public boolean isSignedIn()
     {
         return refreshToken != null;
     }
