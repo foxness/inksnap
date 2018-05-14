@@ -9,7 +9,9 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.List;
 
@@ -43,13 +45,33 @@ public class QueueFragment extends Fragment
 
     private class SubmissionHolder extends RecyclerView.ViewHolder
     {
-        public TextView titleTextView;
+        private TextView titleTextView;
+        private TextView contentTextView;
+        private CheckBox typeCheckBox;
+        
+        private Submission submission;
         
         public SubmissionHolder(View itemView)
         {
             super(itemView);
+            itemView.setOnClickListener(this::onClick);
             
-            titleTextView = (TextView)itemView;
+            titleTextView = itemView.findViewById(R.id.queue_submission_title);
+            contentTextView = itemView.findViewById(R.id.queue_submission_content);
+            typeCheckBox = itemView.findViewById(R.id.queue_submission_type);
+        }
+
+        public void bindSubmission(Submission s)
+        {
+            submission = s;
+            titleTextView.setText(submission.getTitle());
+            contentTextView.setText(submission.getContent());
+            typeCheckBox.setChecked(submission.getType());
+        }
+        
+        private void onClick(View v)
+        {
+            Toast.makeText(getActivity(), submission.getTitle() + " clicked", Toast.LENGTH_SHORT).show();
         }
     }
     
@@ -57,9 +79,9 @@ public class QueueFragment extends Fragment
     {
         private List<Submission> submissions;
         
-        public SubmissionAdapter(List<Submission> queue_)
+        public SubmissionAdapter(List<Submission> submissions_)
         {
-            submissions = queue_;
+            submissions = submissions_;
         }
 
         @NonNull
@@ -67,7 +89,7 @@ public class QueueFragment extends Fragment
         public SubmissionHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
         {
             LayoutInflater inflater = LayoutInflater.from(getActivity());
-            View v = inflater.inflate(android.R.layout.simple_list_item_1, parent, false);
+            View v = inflater.inflate(R.layout.queue_submission, parent, false);
             return new SubmissionHolder(v);
         }
 
@@ -75,7 +97,7 @@ public class QueueFragment extends Fragment
         public void onBindViewHolder(@NonNull SubmissionHolder holder, int position)
         {
             Submission s = submissions.get(position);
-            holder.titleTextView.setText(s.getTitle());
+            holder.bindSubmission(s);
         }
 
         @Override
