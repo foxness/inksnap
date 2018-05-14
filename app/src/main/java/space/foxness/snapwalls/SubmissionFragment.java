@@ -20,9 +20,12 @@ import android.widget.Switch;
 import android.widget.Toast;
 
 import java.util.Date;
+import java.util.UUID;
 
 public class SubmissionFragment extends Fragment implements Reddit.Callbacks
 {
+    private static final String ARG_SUBMISSION_ID = "submission_id";
+    
     private static final String CONFIG_ACCESS_TOKEN = "accessToken";
     private static final String CONFIG_REFRESH_TOKEN = "refreshToken";
     private static final String CONFIG_ACCESS_TOKEN_EXPIRATION_DATE = "accessTokenExpirationDate";
@@ -40,12 +43,15 @@ public class SubmissionFragment extends Fragment implements Reddit.Callbacks
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        
+        UUID submissionId = (UUID)getArguments().getSerializable(ARG_SUBMISSION_ID);
+        submission = Queue.get().getSubmission(submissionId);
 
-        submission = new Submission();
-        submission.setTitle("is testy besty?");
-        submission.setType(false);
-        submission.setContent("yes, testy is besty");
-        submission.setSubreddit("test");
+//        submission = new Submission();
+//        submission.setTitle("is testy besty?");
+//        submission.setType(false);
+//        submission.setContent("yes, testy is besty");
+//        submission.setSubreddit("test");
 
         reddit = new Reddit(this);
         
@@ -177,6 +183,16 @@ public class SubmissionFragment extends Fragment implements Reddit.Callbacks
         updateButtons();
         
         return v;
+    }
+    
+    public static SubmissionFragment newInstance(UUID submissionId)
+    {
+        Bundle args = new Bundle();
+        args.putSerializable(ARG_SUBMISSION_ID, submissionId);
+        
+        SubmissionFragment fragment = new SubmissionFragment();
+        fragment.setArguments(args);
+        return fragment;
     }
 
     private void updateButtons()

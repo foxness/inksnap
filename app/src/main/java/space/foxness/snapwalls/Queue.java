@@ -26,7 +26,7 @@ public class Queue
         {
             Submission s = new Submission();
             s.setTitle("title " + i);
-            s.setSubreddit("subreddit" + i);
+            s.setSubreddit("test");
             s.setContent("content " + i);
             s.setType(i % 2 == 0);
             submissions.add(s);

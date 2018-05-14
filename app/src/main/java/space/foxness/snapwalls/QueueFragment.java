@@ -1,5 +1,6 @@
 package space.foxness.snapwalls;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -34,13 +35,27 @@ public class QueueFragment extends Fragment
         return v;
     }
 
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        updateUI();
+    }
+
     private void updateUI()
     {
         Queue queue = Queue.get();
         List<Submission> submissions = queue.getSubmissions();
         
-        adapter = new SubmissionAdapter(submissions);
-        recyclerView.setAdapter(adapter);
+        if (adapter == null)
+        {
+            adapter = new SubmissionAdapter(submissions);
+            recyclerView.setAdapter(adapter);
+        }
+        else
+        {
+            adapter.notifyDataSetChanged();
+        }
     }
 
     private class SubmissionHolder extends RecyclerView.ViewHolder
@@ -71,7 +86,8 @@ public class QueueFragment extends Fragment
         
         private void onClick(View v)
         {
-            Toast.makeText(getActivity(), submission.getTitle() + " clicked", Toast.LENGTH_SHORT).show();
+            Intent i = SubmissionActivity.newIntent(getActivity(), submission.getId());
+            startActivity(i);
         }
     }
     
