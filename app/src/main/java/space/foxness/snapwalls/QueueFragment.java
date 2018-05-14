@@ -8,6 +8,9 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
@@ -20,7 +23,14 @@ public class QueueFragment extends Fragment
 {
     private RecyclerView recyclerView;
     private SubmissionAdapter adapter;
-    
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
@@ -55,6 +65,29 @@ public class QueueFragment extends Fragment
         else
         {
             adapter.notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
+    {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_queue, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        switch (item.getItemId())
+        {
+            case R.id.menu_queue_add:
+                Submission s = new Submission();
+                s.setSubreddit("test"); // todo: change this
+                Queue.get().addSubmission(s);
+                startActivity(SubmissionPagerActivity.newIntent(getActivity(), s.getId()));
+                return true;
+                
+            default: return super.onOptionsItemSelected(item); 
         }
     }
 

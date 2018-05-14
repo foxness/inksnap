@@ -21,16 +21,11 @@ public class Queue
     private Queue()
     {
         submissions = new ArrayList<>();
-        
-        for (int i = 0; i < 100; ++i)
-        {
-            Submission s = new Submission();
-            s.setTitle("title " + i);
-            s.setSubreddit("test");
-            s.setContent("content " + i);
-            s.setType(i % 2 == 0);
-            submissions.add(s);
-        }
+    }
+    
+    public void addSubmission(Submission s)
+    {
+        submissions.add(s);
     }
     
     public List<Submission> getSubmissions()

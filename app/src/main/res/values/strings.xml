@@ -10,4 +10,6 @@
     <string name="content_hint">Enter the content of the submission</string>
     <string name="subreddit_label">Subreddit</string>
     <string name="subreddit_hint">Enter the name of the subreddit</string>
+    <string name="menu_signin">Sign In</string>
+    <string name="menu_add">Add submission</string>
 </resources>
