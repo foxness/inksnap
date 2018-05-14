@@ -8,7 +8,7 @@ public class Queue
 {
     private static Queue queueInstance;
     
-    private List<Submission> queue;
+    private List<Submission> submissions;
     
     public static Queue get()
     {
@@ -20,7 +20,7 @@ public class Queue
     
     private Queue()
     {
-        queue = new ArrayList<>();
+        submissions = new ArrayList<>();
         
         for (int i = 0; i < 100; ++i)
         {
@@ -29,18 +29,18 @@ public class Queue
             s.setSubreddit("subreddit" + i);
             s.setContent("content " + i);
             s.setType(i % 2 == 0);
-            queue.add(s);
+            submissions.add(s);
         }
     }
     
-    public List<Submission> getQueue()
+    public List<Submission> getSubmissions()
     {
-        return queue;
+        return submissions;
     }
     
     public Submission getSubmission(UUID id)
     {
-        for (Submission s : queue)
+        for (Submission s : submissions)
             if (s.getId().equals(id))
                 return s;
         
