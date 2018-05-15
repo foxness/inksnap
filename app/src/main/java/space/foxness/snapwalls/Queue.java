@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class Queue
+public class Queue // todo: use Room to store the queue
 {
     private static Queue queueInstance;
     
