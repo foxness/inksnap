@@ -2,7 +2,7 @@ package space.foxness.snapwalls;
 
 import java.util.UUID;
 
-public class Submission
+public class Post
 {
     private UUID id;
     private String title;
@@ -10,12 +10,12 @@ public class Submission
     private String content;
     private boolean type; // true - link, false - self/text
     
-    public Submission()
+    public Post()
     {
         id = UUID.randomUUID();
     }
     
-    public Submission(Submission s)
+    public Post(Post s)
     {
         this();
         title = s.title;

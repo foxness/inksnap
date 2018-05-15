@@ -142,19 +142,19 @@ public class Reddit
         return lastSubmissionDate != null && new Date().getTime() < lastSubmissionDate.getTime() + RATELIMIT;
     }
     
-    public void submit(Submission submission)
+    public void submit(Post post)
     {
-        submit(submission, true, true);
+        submit(post, true, true);
     }
     
-    public void submit(Submission submission, boolean resubmit, boolean sendReplies)
+    public void submit(Post post, boolean resubmit, boolean sendReplies)
     {
-        boolean validTitle = submission.getTitle() != null && !submission.getTitle().isEmpty();
-        boolean validContent = submission.getContent() != null && !submission.getContent().isEmpty();
-        boolean validSubreddit = submission.getSubreddit() != null && !submission.getSubreddit().isEmpty();
+        boolean validTitle = post.getTitle() != null && !post.getTitle().isEmpty();
+        boolean validContent = post.getContent() != null && !post.getContent().isEmpty();
+        boolean validSubreddit = post.getSubreddit() != null && !post.getSubreddit().isEmpty();
         
         if (!validTitle || !validContent || !validSubreddit)
-            throw new RuntimeException("Bad submission");
+            throw new RuntimeException("Bad post");
         
         ensureValidAccessToken(() -> // success callback
         {
@@ -164,12 +164,12 @@ public class Reddit
             
             RequestParams params = new RequestParams();
             params.add("api_type", "json");
-            params.add("kind", submission.getType() ? "link" : "self");
+            params.add("kind", post.getType() ? "link" : "self");
             params.add("resubmit", resubmit ? "true" : "false");
             params.add("sendreplies", sendReplies ? "true" : "false");
-            params.add("sr", submission.getSubreddit());
-            params.add(submission.getType() ? "url" : "text", submission.getContent());
-            params.add("title", submission.getTitle());
+            params.add("sr", post.getSubreddit());
+            params.add(post.getType() ? "url" : "text", post.getContent());
+            params.add("title", post.getTitle());
             
             ahc.post(SUBMIT_ENDPOINT, params, new JsonHttpResponseHandler()
             {

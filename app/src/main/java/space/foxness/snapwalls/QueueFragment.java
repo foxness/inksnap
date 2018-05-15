@@ -2,7 +2,6 @@ package space.foxness.snapwalls;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -36,7 +35,7 @@ public class QueueFragment extends Fragment implements Reddit.Callbacks
     private static final long CONFIG_NULL_SUBSTITUTE = 0;
     
     private RecyclerView recyclerView;
-    private SubmissionAdapter adapter;
+    private PostAdapter adapter;
     private MenuItem signinMenuItem;
 
     private Reddit reddit;
@@ -75,11 +74,11 @@ public class QueueFragment extends Fragment implements Reddit.Callbacks
     private void updateUI()
     {
         Queue queue = Queue.get();
-        List<Submission> submissions = queue.getSubmissions();
+        List<Post> posts = queue.getPosts();
 
         if (adapter == null)
         {
-            adapter = new SubmissionAdapter(submissions);
+            adapter = new PostAdapter(posts);
             recyclerView.setAdapter(adapter);
         }
         else
@@ -99,12 +98,12 @@ public class QueueFragment extends Fragment implements Reddit.Callbacks
         updateMenu();
     }
 
-    private void AddNewSubmission()
+    private void AddNewPost()
     {
-        Submission s = new Submission();
+        Post s = new Post();
         s.setSubreddit("test"); // todo: change this
-        Queue.get().addSubmission(s);
-        startActivity(SubmissionPagerActivity.newIntent(getActivity(), s.getId()));
+        Queue.get().addPost(s);
+        startActivity(PostPagerActivity.newIntent(getActivity(), s.getId()));
     }
     
     private void ShowSigninDialog()
@@ -142,13 +141,13 @@ public class QueueFragment extends Fragment implements Reddit.Callbacks
     {
         switch (item.getItemId())
         {
-            case R.id.menu_queue_add: AddNewSubmission(); return true;
+            case R.id.menu_queue_add: AddNewPost(); return true;
             case R.id.menu_queue_signin: ShowSigninDialog(); return true;
             default: return super.onOptionsItemSelected(item);
         }
     }
 
-    private void submit(Submission s)
+    private void submit(Post s)
     {
         if (!reddit.canSubmitRightNow())
         {
@@ -156,7 +155,7 @@ public class QueueFragment extends Fragment implements Reddit.Callbacks
             return;
         }
 
-        reddit.submit(new Submission(s));
+        reddit.submit(new Post(s));
     }
 
     @Override
@@ -216,68 +215,68 @@ public class QueueFragment extends Fragment implements Reddit.Callbacks
         reddit.setParams(rp);
     }
 
-    private class SubmissionHolder extends RecyclerView.ViewHolder
+    private class PostHolder extends RecyclerView.ViewHolder
     {
         private TextView titleTextView;
         private TextView contentTextView;
         private CheckBox typeCheckBox;
 
-        private Submission submission;
+        private Post post;
 
-        public SubmissionHolder(View itemView)
+        public PostHolder(View itemView)
         {
             super(itemView);
             itemView.setOnClickListener(this::onClick);
 
-            titleTextView = itemView.findViewById(R.id.queue_submission_title);
-            contentTextView = itemView.findViewById(R.id.queue_submission_content);
-            typeCheckBox = itemView.findViewById(R.id.queue_submission_type);
+            titleTextView = itemView.findViewById(R.id.queue_post_title);
+            contentTextView = itemView.findViewById(R.id.queue_post_content);
+            typeCheckBox = itemView.findViewById(R.id.queue_post_type);
         }
 
-        public void bindSubmission(Submission s)
+        public void bindPost(Post s)
         {
-            submission = s;
-            titleTextView.setText(submission.getTitle());
-            contentTextView.setText(submission.getContent());
-            typeCheckBox.setChecked(submission.getType());
+            post = s;
+            titleTextView.setText(post.getTitle());
+            contentTextView.setText(post.getContent());
+            typeCheckBox.setChecked(post.getType());
         }
 
         private void onClick(View v)
         {
-            Intent i = SubmissionPagerActivity.newIntent(getActivity(), submission.getId());
+            Intent i = PostPagerActivity.newIntent(getActivity(), post.getId());
             startActivity(i);
         }
     }
 
-    private class SubmissionAdapter extends RecyclerView.Adapter<SubmissionHolder>
+    private class PostAdapter extends RecyclerView.Adapter<PostHolder>
     {
-        private List<Submission> submissions;
+        private List<Post> posts;
 
-        public SubmissionAdapter(List<Submission> submissions_)
+        public PostAdapter(List<Post> posts_)
         {
-            submissions = submissions_;
+            posts = posts_;
         }
 
         @NonNull
         @Override
-        public SubmissionHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
+        public PostHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
         {
             LayoutInflater inflater = LayoutInflater.from(getActivity());
-            View v = inflater.inflate(R.layout.queue_submission, parent, false);
-            return new SubmissionHolder(v);
+            View v = inflater.inflate(R.layout.queue_post, parent, false);
+            return new PostHolder(v);
         }
 
         @Override
-        public void onBindViewHolder(@NonNull SubmissionHolder holder, int position)
+        public void onBindViewHolder(@NonNull PostHolder holder, int position)
         {
-            Submission s = submissions.get(position);
-            holder.bindSubmission(s);
+            Post s = posts.get(position);
+            holder.bindPost(s);
         }
 
         @Override
         public int getItemCount()
         {
-            return submissions.size();
+            return posts.size();
         }
     }
 }

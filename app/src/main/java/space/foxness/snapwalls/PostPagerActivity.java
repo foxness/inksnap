@@ -13,17 +13,17 @@ import android.support.v7.app.AppCompatActivity;
 import java.util.List;
 import java.util.UUID;
 
-public class SubmissionPagerActivity extends AppCompatActivity
+public class PostPagerActivity extends AppCompatActivity
 {
-    private static final String EXTRA_SUBMISSION_ID = "submission_id";
+    private static final String EXTRA_POST_ID = "post_id";
     
     private ViewPager viewPager;
-    private List<Submission> submissions;
+    private List<Post> posts;
     
-    public static Intent newIntent(Context packageContext, UUID submissionId)
+    public static Intent newIntent(Context packageContext, UUID postId)
     {
-        Intent i = new Intent(packageContext, SubmissionPagerActivity.class);
-        i.putExtra(EXTRA_SUBMISSION_ID, submissionId);
+        Intent i = new Intent(packageContext, PostPagerActivity.class);
+        i.putExtra(EXTRA_POST_ID, postId);
         return i;
     }
     
@@ -31,32 +31,32 @@ public class SubmissionPagerActivity extends AppCompatActivity
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_submission_pager);
+        setContentView(R.layout.activity_post_pager);
         
-        UUID submissionId = (UUID)getIntent().getSerializableExtra(EXTRA_SUBMISSION_ID);
+        UUID postId = (UUID)getIntent().getSerializableExtra(EXTRA_POST_ID);
         
-        viewPager = findViewById(R.id.activity_submission_pager_viewpager);
+        viewPager = findViewById(R.id.activity_post_pager_viewpager);
         
-        submissions = Queue.get().getSubmissions();
+        posts = Queue.get().getPosts();
         FragmentManager fm = getSupportFragmentManager();
         viewPager.setAdapter(new FragmentStatePagerAdapter(fm)
         {
             @Override
             public Fragment getItem(int position)
             {
-                Submission s = submissions.get(position);
-                return SubmissionFragment.newInstance(s.getId());
+                Post s = posts.get(position);
+                return PostFragment.newInstance(s.getId());
             }
 
             @Override
             public int getCount()
             {
-                return submissions.size();
+                return posts.size();
             }
         });
         
-        for (int i = 0; i < submissions.size(); ++i)
-            if (submissions.get(i).getId().equals(submissionId))
+        for (int i = 0; i < posts.size(); ++i)
+            if (posts.get(i).getId().equals(postId))
             {
                 viewPager.setCurrentItem(i);
                 break;

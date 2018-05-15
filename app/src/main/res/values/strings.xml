@@ -1,14 +1,13 @@
 <resources>
     <string name="app_name">Snapwalls</string>
-    <string name="submit_text">Submit</string>
     <string name="shared_preferences">reddit_params</string>
     <string name="title_label">Title</string>
-    <string name="title_hint">Enter a title for the submission</string>
+    <string name="title_hint">Enter a title for the post</string>
     <string name="type_label">Link?</string>
     <string name="content_label">Content</string>
-    <string name="content_hint">Enter the content of the submission</string>
+    <string name="content_hint">Enter the content of the post</string>
     <string name="subreddit_label">Subreddit</string>
     <string name="subreddit_hint">Enter the name of the subreddit</string>
     <string name="menu_signin">Sign In</string>
-    <string name="menu_add">Add submission</string>
+    <string name="menu_add">Add post</string>
 </resources>

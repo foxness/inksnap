@@ -20,7 +20,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".SubmissionPagerActivity"
+            android:name=".PostPagerActivity"
             android:parentActivityName=".QueueActivity"/>
     </application>
 

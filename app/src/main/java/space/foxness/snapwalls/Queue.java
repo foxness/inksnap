@@ -8,7 +8,7 @@ public class Queue // todo: use Room to store the queue
 {
     private static Queue queueInstance;
     
-    private List<Submission> submissions;
+    private List<Post> posts;
     
     public static Queue get()
     {
@@ -20,22 +20,22 @@ public class Queue // todo: use Room to store the queue
     
     private Queue()
     {
-        submissions = new ArrayList<>();
+        posts = new ArrayList<>();
     }
     
-    public void addSubmission(Submission s)
+    public void addPost(Post s)
     {
-        submissions.add(s);
+        posts.add(s);
     }
     
-    public List<Submission> getSubmissions()
+    public List<Post> getPosts()
     {
-        return submissions;
+        return posts;
     }
     
-    public Submission getSubmission(UUID id)
+    public Post getPost(UUID id)
     {
-        for (Submission s : submissions)
+        for (Post s : posts)
             if (s.getId().equals(id))
                 return s;
         
