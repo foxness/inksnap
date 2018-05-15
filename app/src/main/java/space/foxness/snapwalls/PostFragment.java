@@ -27,7 +27,14 @@ public class PostFragment extends Fragment
         super.onCreate(savedInstanceState);
         
         UUID postId = (UUID)getArguments().getSerializable(ARG_POST_ID);
-        post = Queue.get().getPost(postId);
+        post = Queue.get(getActivity()).getPost(postId);
+    }
+
+    @Override
+    public void onPause()
+    {
+        super.onPause();
+        Queue.get(getActivity()).updatePost(post);
     }
 
     @Nullable

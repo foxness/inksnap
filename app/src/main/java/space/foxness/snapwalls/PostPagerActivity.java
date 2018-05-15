@@ -37,7 +37,7 @@ public class PostPagerActivity extends AppCompatActivity
         
         viewPager = findViewById(R.id.activity_post_pager_viewpager);
         
-        posts = Queue.get().getPosts();
+        posts = Queue.get(this).getPosts();
         FragmentManager fm = getSupportFragmentManager();
         viewPager.setAdapter(new FragmentStatePagerAdapter(fm)
         {

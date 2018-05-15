@@ -1,44 +1,59 @@
 package space.foxness.snapwalls;
 
-import java.util.ArrayList;
+import android.arch.persistence.room.Room;
+import android.content.Context;
+
 import java.util.List;
 import java.util.UUID;
 
-public class Queue // todo: use Room to store the queue
+import space.foxness.snapwalls.database.AppDatabase;
+
+public class Queue
 {
+    private static final String databaseName = "queue";
+    
     private static Queue queueInstance;
     
-    private List<Post> posts;
+    private AppDatabase db;
     
-    public static Queue get()
+    public static Queue get(Context context)
     {
         if (queueInstance == null)
-            queueInstance = new Queue();
+        {
+            queueInstance = new Queue(context);
+        }
         
         return queueInstance;
     }
     
-    private Queue()
+    private Queue(Context context)
     {
-        posts = new ArrayList<>();
+        db = Room.databaseBuilder(context.getApplicationContext(), AppDatabase.class, databaseName).allowMainThreadQueries().build();
+        // allowMainThreadQueries() is a dirty hack
+        // I shouldn't do database I/O on the main thread
+        // but since Java doesn't have native async/await,
+        // I'm not familiar with any Java async libraries,
+        // and this app isn't in Kotlin
+        // I have to use dirty hacks ._.
     }
     
-    public void addPost(Post s)
+    public void addPost(Post post)
     {
-        posts.add(s);
+        db.postDao().addPost(post);
     }
     
     public List<Post> getPosts()
     {
-        return posts;
+        return db.postDao().getPosts();
     }
     
     public Post getPost(UUID id)
     {
-        for (Post s : posts)
-            if (s.getId().equals(id))
-                return s;
-        
-        return null;
+        return db.postDao().getPostById(id);
+    }
+    
+    public void updatePost(Post post)
+    {
+        db.postDao().updatePost(post);
     }
 }

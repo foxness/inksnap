@@ -73,7 +73,7 @@ public class QueueFragment extends Fragment implements Reddit.Callbacks
 
     private void updateUI()
     {
-        Queue queue = Queue.get();
+        Queue queue = Queue.get(getActivity());
         List<Post> posts = queue.getPosts();
 
         if (adapter == null)
@@ -83,6 +83,7 @@ public class QueueFragment extends Fragment implements Reddit.Callbacks
         }
         else
         {
+            adapter.setPosts(posts);
             adapter.notifyDataSetChanged();
         }
     }
@@ -98,15 +99,15 @@ public class QueueFragment extends Fragment implements Reddit.Callbacks
         updateMenu();
     }
 
-    private void AddNewPost()
+    private void addNewPost()
     {
         Post s = new Post();
         s.setSubreddit("test"); // todo: change this
-        Queue.get().addPost(s);
+        Queue.get(getActivity()).addPost(s);
         startActivity(PostPagerActivity.newIntent(getActivity(), s.getId()));
     }
     
-    private void ShowSigninDialog()
+    private void showSigninDialog()
     {
         signinMenuItem.setEnabled(false);
         // we need ^ this because there's a token doesn't arrive immediately after the dialog is dismissed
@@ -141,8 +142,8 @@ public class QueueFragment extends Fragment implements Reddit.Callbacks
     {
         switch (item.getItemId())
         {
-            case R.id.menu_queue_add: AddNewPost(); return true;
-            case R.id.menu_queue_signin: ShowSigninDialog(); return true;
+            case R.id.menu_queue_add: addNewPost(); return true;
+            case R.id.menu_queue_signin: showSigninDialog(); return true;
             default: return super.onOptionsItemSelected(item);
         }
     }
@@ -271,6 +272,11 @@ public class QueueFragment extends Fragment implements Reddit.Callbacks
         {
             Post s = posts.get(position);
             holder.bindPost(s);
+        }
+        
+        public void setPosts(List<Post> posts_)
+        {
+            posts = posts_;
         }
 
         @Override
