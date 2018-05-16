@@ -21,7 +21,7 @@ class PostFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         val postId = arguments!!.getSerializable(ARG_POST_ID) as UUID
-        post = Queue.getInstance(activity!!.applicationContext).getPost(postId)
+        post = Queue.getInstance(activity!!).getPost(postId)
     }
 
     override fun onPause() {
@@ -39,7 +39,7 @@ class PostFragment : Fragment() {
 
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
                 post.title = s.toString()
-                updateIsPostValid()
+                updateIsValidPost()
             }
 
             override fun afterTextChanged(s: Editable) { }
@@ -52,7 +52,7 @@ class PostFragment : Fragment() {
 
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
                 post.content = s.toString()
-                updateIsPostValid()
+                updateIsValidPost()
             }
 
             override fun afterTextChanged(s: Editable) { }
@@ -67,7 +67,7 @@ class PostFragment : Fragment() {
 
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
                 post.subreddit = s.toString()
-                updateIsPostValid()
+                updateIsValidPost()
             }
 
             override fun afterTextChanged(s: Editable) {
@@ -82,7 +82,7 @@ class PostFragment : Fragment() {
         return v
     }
 
-    private fun updateIsPostValid() {
+    private fun updateIsValidPost() {
         val validTitle = !post.title.isEmpty()
         val validContent = !post.content.isEmpty()
         val validSubreddit = !post.subreddit.isEmpty()

@@ -24,6 +24,12 @@ class Reddit(private val callbacks: Callbacks) {
     private var accessTokenExpirationDate: Date? = null
     private var lastSubmissionDate: Date? = null
 
+    val isSignedIn get() = refreshToken != null
+
+    val isRestrictedByRatelimit get() = lastSubmissionDate != null && Date().time < lastSubmissionDate!!.time + RATELIMIT
+
+    val canSubmitRightNow get() = isSignedIn && !isRestrictedByRatelimit
+    
     var params: Params
         get() {
             val p = Params()
@@ -41,10 +47,6 @@ class Reddit(private val callbacks: Callbacks) {
             lastSubmissionDate = params.lastSubmissionDate
         }
 
-    val isSignedIn = refreshToken != null
-
-    val isRestrictedByRatelimit = lastSubmissionDate != null && Date().time < lastSubmissionDate!!.time + RATELIMIT
-
     val authorizationUrl: String
         get() {
             authState = randomState()
@@ -58,22 +60,19 @@ class Reddit(private val callbacks: Callbacks) {
                     .build().toString()
         }
 
-    val canSubmitRightNow = isSignedIn && !isRestrictedByRatelimit
-
-    class Params {
+    class Params { // todo: change to data class?
         var accessToken: String? = null
         var refreshToken: String? = null
         var accessTokenExpirationDate: Date? = null
         var lastSubmissionDate: Date? = null
     }
 
-    interface Callbacks {
+    interface Callbacks { // todo: pass functions directly as callbacks instead
         fun onTokenFetchFinish()
         fun onNewParams()
         fun onSubmit(link: String)
     }
 
-    @JvmOverloads
     fun submit(post: Post, resubmit: Boolean = true, sendReplies: Boolean = true) {
         val validTitle = !post.title.isEmpty()
         val validContent = !post.content.isEmpty()
@@ -82,80 +81,79 @@ class Reddit(private val callbacks: Callbacks) {
         if (!validTitle || !validContent || !validSubreddit)
             throw RuntimeException("Bad post")
 
-        ensureValidAccessToken(// success callback
-                {
-                    val ahc = AsyncHttpClient()
-                    ahc.setUserAgent(USER_AGENT)
-                    ahc.addHeader("Authorization", "bearer " + accessToken!!)
-
-                    val params = RequestParams()
-                    params.add("api_type", "json")
-                    params.add("kind", if (post.type) "link" else "self")
-                    params.add("resubmit", if (resubmit) "true" else "false")
-                    params.add("sendreplies", if (sendReplies) "true" else "false")
-                    params.add("sr", post.subreddit)
-                    params.add(if (post.type) "url" else "text", post.content)
-                    params.add("title", post.title)
-
-                    ahc.post(SUBMIT_ENDPOINT, params, object : JsonHttpResponseHandler() {
-                        
-                        override fun onSuccess(statusCode: Int, headers: Array<Header>?, response: JSONObject?) {
-                            super.onSuccess(statusCode, headers, response)
-
-                            val json = response!!.optJSONObject("json")
-                            val errors = json!!.optJSONArray("errors")
-
-                            if (errors.length() == 0) {
-                                lastSubmissionDate = Date()
-                                callbacks.onNewParams()
-                                callbacks.onSubmit(json.optJSONObject("data").optString("url"))
-                            } else {
-                                val errorString = StringBuilder("You got ${errors.length()} errors: ")
-                                for (i in 0 until errors.length()) {
-                                    val error = errors.optJSONArray(i)
-                                    val name = error.optString(0)
-                                    val description = error.optString(1)
-
-                                    when (name) {
-                                        "RATELIMIT", "NO_URL" -> errorString.append(name).append(" ").append(description).append("\n")
-                                        else -> throw RuntimeException("I FOUND AN UNKNOWN ERROR:\nNAME: $name\nDESCRIPTION: $description")
-                                    }
-                                }
-
-                                callbacks.onSubmit(errorString.toString())
+        ensureValidAccessToken({ // success callback
+            val ahc = AsyncHttpClient()
+            ahc.setUserAgent(USER_AGENT)
+            ahc.addHeader("Authorization", "bearer " + accessToken!!)
+    
+            val params = RequestParams()
+            params.add("api_type", "json")
+            params.add("kind", if (post.type) "link" else "self")
+            params.add("resubmit", if (resubmit) "true" else "false")
+            params.add("sendreplies", if (sendReplies) "true" else "false")
+            params.add("sr", post.subreddit)
+            params.add(if (post.type) "url" else "text", post.content)
+            params.add("title", post.title)
+            
+            ahc.post(SUBMIT_ENDPOINT, params, object : JsonHttpResponseHandler() {
+                
+                override fun onSuccess(statusCode: Int, headers: Array<Header>?, response: JSONObject?) {
+                    super.onSuccess(statusCode, headers, response)
+    
+                    val json = response!!.optJSONObject("json")
+                    val errors = json!!.optJSONArray("errors")
+    
+                    if (errors.length() == 0) {
+                        lastSubmissionDate = Date()
+                        callbacks.onNewParams()
+                        callbacks.onSubmit(json.optJSONObject("data").optString("url"))
+                    } else {
+                        val errorString = StringBuilder("You got ${errors.length()} errors: ")
+                        for (i in 0 until errors.length()) {
+                            val error = errors.optJSONArray(i)
+                            val name = error.optString(0)
+                            val description = error.optString(1)
+    
+                            when (name) {
+                                "RATELIMIT", "NO_URL" -> errorString.append(name).append(" ").append(description).append("\n")
+                                else -> throw RuntimeException("I FOUND AN UNKNOWN ERROR:\nNAME: $name\nDESCRIPTION: $description")
                             }
                         }
-
-                        override fun onFailure(statusCode: Int, headers: Array<Header>?, throwable: Throwable, errorResponse: JSONObject?) {
-                            super.onFailure(statusCode, headers, throwable, errorResponse)
-
-                            // todo: handle this
-                            throw RuntimeException(throwable)
-                        }
-
-                        override fun onSuccess(statusCode: Int, headers: Array<Header>?, responseString: String?) {
-                            super.onSuccess(statusCode, headers, responseString)
-
-                            // todo: handle this
-                            throw RuntimeException("RESPONSE STRING ONSUCCESS")
-                        }
-
-                        override fun onFailure(statusCode: Int, headers: Array<Header>?, responseString: String?, throwable: Throwable) {
-                            super.onFailure(statusCode, headers, responseString, throwable)
-
-                            // todo: handle this
-                            throw RuntimeException(throwable)
-                        }
-                    })
-
-                }, // error callback, happens when you couldn't get a good access token
-                {
+    
+                        callbacks.onSubmit(errorString.toString())
+                    }
+                }
+    
+                override fun onFailure(statusCode: Int, headers: Array<Header>?, throwable: Throwable, errorResponse: JSONObject?) {
+                    super.onFailure(statusCode, headers, throwable, errorResponse)
+    
                     // todo: handle this
-                    throw RuntimeException()
-                })
+                    throw RuntimeException(throwable)
+                }
+    
+                override fun onSuccess(statusCode: Int, headers: Array<Header>?, responseString: String?) {
+                    super.onSuccess(statusCode, headers, responseString)
+    
+                    // todo: handle this
+                    throw RuntimeException("RESPONSE STRING ONSUCCESS")
+                }
+    
+                override fun onFailure(statusCode: Int, headers: Array<Header>?, responseString: String?, throwable: Throwable) {
+                    super.onFailure(statusCode, headers, responseString, throwable)
+    
+                    // todo: handle this
+                    throw RuntimeException(throwable)
+                }
+            })
+    
+        }, // error callback, happens when you couldn't get a good access token
+        {
+            // todo: handle this
+            throw RuntimeException()
+        })
     }
 
-    private fun ensureValidAccessToken(successCallback: () -> RequestHandle, @Suppress("UNUSED_PARAMETER") errorCallback: () -> Unit) {
+    private fun ensureValidAccessToken(successCallback: () -> Unit, @Suppress("UNUSED_PARAMETER") errorCallback: () -> Unit) {
         if (accessToken != null && accessTokenExpirationDate!!.after(Date())) {
             successCallback()
             return
@@ -276,8 +274,7 @@ class Reddit(private val callbacks: Callbacks) {
 
         private const val RATELIMIT = 10 * 60 * 1000 // in milliseconds, also 10 minutes
 
-        private// TODO: implement this method
-        fun randomState(): String {
+        private fun randomState(): String { // TODO: implement this method
             return "testy"
         }
     }
