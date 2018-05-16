@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "55c311baa9163e3f2b72373e5659bca1",
+    "identityHash": "a2c22be8503415ea8b96511e11a7dfd2",
     "entities": [
       {
         "tableName": "queue",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `title` TEXT, `subreddit` TEXT, `content` TEXT, `type` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `subreddit` TEXT NOT NULL, `content` TEXT NOT NULL, `type` INTEGER NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -18,19 +18,19 @@
             "fieldPath": "title",
             "columnName": "title",
             "affinity": "TEXT",
-            "notNull": false
+            "notNull": true
           },
           {
             "fieldPath": "subreddit",
             "columnName": "subreddit",
             "affinity": "TEXT",
-            "notNull": false
+            "notNull": true
           },
           {
             "fieldPath": "content",
             "columnName": "content",
             "affinity": "TEXT",
-            "notNull": false
+            "notNull": true
           },
           {
             "fieldPath": "type",
@@ -51,7 +51,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"55c311baa9163e3f2b72373e5659bca1\")"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"a2c22be8503415ea8b96511e11a7dfd2\")"
     ]
   }
 }
