@@ -34,7 +34,8 @@
                                   <option name="values">
                                     <map>
                                       <entry key="outputName" value="menu_add" />
-                                      <entry key="theme" value="HOLO_DARK" />
+                                      <entry key="theme" value="CUSTOM" />
+                                      <entry key="themeColor" value="ffffff" />
                                     </map>
                                   </option>
                                 </PersistentState>
