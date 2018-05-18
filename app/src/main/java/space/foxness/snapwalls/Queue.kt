@@ -28,6 +28,8 @@ class Queue private constructor(context: Context) {
     fun getPost(id: UUID): Post = db.postDao().getPostById(id)
     
     fun updatePost(post: Post) = db.postDao().updatePost(post)
+    
+    fun deletePost(id: UUID) = db.postDao().deletePostbyId(id)
 
     companion object {
         private const val databaseName = "queue"

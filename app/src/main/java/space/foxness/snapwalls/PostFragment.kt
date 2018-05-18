@@ -4,9 +4,7 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.EditText
 import android.widget.Switch
 
@@ -19,9 +17,30 @@ class PostFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
 
         val postId = arguments!!.getSerializable(ARG_POST_ID) as UUID
         post = Queue.getInstance(activity!!).getPost(postId)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater!!.inflate(R.menu.menu_post, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        return when (item!!.itemId) {
+            R.id.menu_post_delete -> {
+                deletePost()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun deletePost() {
+        Queue.getInstance(activity!!).deletePost(post.id)
+        activity?.finish()
     }
 
     override fun onPause() {

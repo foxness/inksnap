@@ -23,6 +23,9 @@ interface PostDao {
     @Update
     fun updatePost(post: Post)
 
-    @Delete
-    fun deletePost(post: Post)
+//    @Delete
+//    fun deletePost(post: Post)
+
+    @Query("DELETE FROM queue WHERE id = :id")
+    fun deletePostbyId(id: UUID)
 }
