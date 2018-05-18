@@ -7,7 +7,14 @@
     <item
         android:id="@+id/menu_queue_add"
         android:title="@string/menu_add"
-        android:icon="@android:drawable/ic_menu_add"
+        android:icon="@drawable/menu_add"
+        app:showAsAction="ifRoom|withText"
+        />
+
+    <item
+        android:id="@+id/menu_queue_submit"
+        android:title="@string/menu_submit"
+        android:icon="@android:drawable/stat_sys_upload"
         app:showAsAction="ifRoom|withText"
         />
     

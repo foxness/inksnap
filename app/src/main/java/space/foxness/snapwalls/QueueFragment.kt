@@ -105,8 +105,23 @@ class QueueFragment : Fragment(), Reddit.Callbacks {
                 showSigninDialog()
                 true
             }
+            R.id.menu_queue_submit -> {
+                submitTopPost()
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+    
+    private fun submitTopPost() {
+        val posts = Queue.getInstance(activity!!).posts
+        if (posts.isEmpty())
+        {
+            Toast.makeText(activity, "No post to submit", Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        submit(posts.first())
     }
 
     private fun submit(s: Post) {
