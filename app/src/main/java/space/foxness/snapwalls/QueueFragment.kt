@@ -86,7 +86,14 @@ class QueueFragment : Fragment(), Reddit.Callbacks {
 
                 if (reddit.tryExtractCode(url)) {
                     authDialog.dismiss()
-                    reddit.fetchAuthTokens()
+                    reddit.fetchAuthTokens(
+                    { error ->
+                        if (error != null)
+                            throw error
+
+                        Toast.makeText(activity, "fetched tokens, can submit? " + reddit.canSubmitRightNow, Toast.LENGTH_SHORT).show()
+                        updateMenu()
+                    })
                 }
             }
         }
@@ -120,22 +127,18 @@ class QueueFragment : Fragment(), Reddit.Callbacks {
             Toast.makeText(activity, "No post to submit", Toast.LENGTH_SHORT).show()
             return
         }
-        
-        submit(posts.first())
-    }
 
-    private fun submit(s: Post) {
         if (!reddit.canSubmitRightNow) {
             Toast.makeText(activity, "Can't submit right now", Toast.LENGTH_SHORT).show()
             return
         }
-        
-        reddit.submit(s)
-    }
 
-    override fun onTokenFetchFinish() {
-        Toast.makeText(activity, "fetched tokens, can post? " + reddit.canSubmitRightNow, Toast.LENGTH_SHORT).show()
-        updateMenu()
+        reddit.submit(posts.first(), { error, link ->
+            if (error != null)
+                throw error
+
+            Toast.makeText(activity, "GOT LINK: $link", Toast.LENGTH_SHORT).show()
+        }, true, true)
     }
 
     private fun updateMenu() {
@@ -145,10 +148,6 @@ class QueueFragment : Fragment(), Reddit.Callbacks {
     override fun onNewParams() {
         saveConfig()
         Toast.makeText(activity, "SAVED THE CONFIG", Toast.LENGTH_SHORT).show()
-    }
-
-    override fun onSubmit(link: String) {
-        Toast.makeText(activity, "GOT LINK: $link", Toast.LENGTH_SHORT).show()
     }
 
     private fun saveConfig() {

@@ -4,7 +4,6 @@ import android.net.Uri
 
 import com.loopj.android.http.AsyncHttpClient
 import com.loopj.android.http.JsonHttpResponseHandler
-import com.loopj.android.http.RequestHandle
 import com.loopj.android.http.RequestParams
 
 import org.json.JSONException
@@ -68,20 +67,24 @@ class Reddit(private val callbacks: Callbacks) {
     }
 
     interface Callbacks { // todo: pass functions directly as callbacks instead
-        fun onTokenFetchFinish()
         fun onNewParams()
-        fun onSubmit(link: String)
     }
 
-    fun submit(post: Post, resubmit: Boolean = true, sendReplies: Boolean = true) {
-        val validTitle = !post.title.isEmpty()
-        val validContent = !post.content.isEmpty()
-        val validSubreddit = !post.subreddit.isEmpty()
+    fun submit(post: Post, callback: (Throwable?, String?) -> Unit, resubmit: Boolean = true, sendReplies: Boolean = true) {
+        
+        if (post.title.isEmpty() || post.content.isEmpty() || post.subreddit.isEmpty())
+        {
+            callback(RuntimeException("Bad post"), null)
+            return
+        }
 
-        if (!validTitle || !validContent || !validSubreddit)
-            throw RuntimeException("Bad post")
-
-        ensureValidAccessToken({ // success callback
+        ensureValidAccessToken({
+            if (it != null)
+            {
+                callback(it, null)
+                return@ensureValidAccessToken
+            }
+            
             val ahc = AsyncHttpClient()
             ahc.setUserAgent(USER_AGENT)
             ahc.addHeader("Authorization", "bearer " + accessToken!!)
@@ -106,7 +109,7 @@ class Reddit(private val callbacks: Callbacks) {
                     if (errors.length() == 0) {
                         lastSubmissionDate = Date()
                         callbacks.onNewParams()
-                        callbacks.onSubmit(json.optJSONObject("data").optString("url"))
+                        callback(null, json.optJSONObject("data").optString("url"))
                     } else {
                         val errorString = StringBuilder("You got ${errors.length()} errors: ")
                         for (i in 0 until errors.length()) {
@@ -116,52 +119,49 @@ class Reddit(private val callbacks: Callbacks) {
     
                             when (name) {
                                 "RATELIMIT", "NO_URL" -> errorString.append(name).append(" ").append(description).append("\n")
-                                else -> throw RuntimeException("I FOUND AN UNKNOWN ERROR:\nNAME: $name\nDESCRIPTION: $description")
+                                else -> {
+                                    callback(RuntimeException("I FOUND AN UNKNOWN ERROR:\nNAME: $name\nDESCRIPTION: $description"), null)
+                                    return
+                                }
                             }
                         }
-    
-                        callbacks.onSubmit(errorString.toString())
+                        
+                        callback(RuntimeException(errorString.toString()), null)
                     }
                 }
     
                 override fun onFailure(statusCode: Int, headers: Array<Header>?, throwable: Throwable, errorResponse: JSONObject?) {
                     super.onFailure(statusCode, headers, throwable, errorResponse)
-    
-                    // todo: handle this
-                    throw RuntimeException(throwable)
+                    
+                    callback(throwable, null)
                 }
     
                 override fun onSuccess(statusCode: Int, headers: Array<Header>?, responseString: String?) {
                     super.onSuccess(statusCode, headers, responseString)
-    
-                    // todo: handle this
-                    throw RuntimeException("RESPONSE STRING ONSUCCESS")
+                    
+                    callback(RuntimeException("RESPONSE STRING ONSUCCESS"), null)
                 }
     
                 override fun onFailure(statusCode: Int, headers: Array<Header>?, responseString: String?, throwable: Throwable) {
                     super.onFailure(statusCode, headers, responseString, throwable)
-    
-                    // todo: handle this
-                    throw RuntimeException(throwable)
+
+                    callback(throwable, null)
                 }
             })
-    
-        }, // error callback, happens when you couldn't get a good access token
-        {
-            // todo: handle this
-            throw RuntimeException()
         })
     }
 
-    private fun ensureValidAccessToken(successCallback: () -> Unit, @Suppress("UNUSED_PARAMETER") errorCallback: () -> Unit) {
+    private fun ensureValidAccessToken(callback: (Throwable?) -> Unit) {
         if (accessToken != null && accessTokenExpirationDate!!.after(Date())) {
-            successCallback()
+            callback(null)
             return
         }
-
-        // access token is null or expired
-
-        assert(refreshToken != null)
+        
+        if (refreshToken == null)
+        {
+            callback(RuntimeException("Can't update access token without refresh token"))
+            return
+        }
 
         val ahc = AsyncHttpClient()
         ahc.setUserAgent(USER_AGENT)
@@ -178,33 +178,37 @@ class Reddit(private val callbacks: Callbacks) {
                 try {
                     // TODO: compare received scope with intended scope?
                     updateAccessToken(response!!.getString("access_token"), response.getInt("expires_in"))
-                } catch (e: JSONException) {
-                    // TODO: handle this
-                    throw RuntimeException(e)
+                } catch (e: Exception) {
+                    callback(e)
+                    return
                 }
 
                 callbacks.onNewParams()
-                successCallback()
+                callback(null)
             }
 
             override fun onFailure(statusCode: Int, headers: Array<Header>?, throwable: Throwable, errorResponse: JSONObject?) {
                 super.onFailure(statusCode, headers, throwable, errorResponse)
-
-                // todo: handle this
-                throw RuntimeException(throwable)
+                
+                callback(throwable)
+                return
             }
         })
     }
 
-    private fun updateAccessToken(accessToken_: String, expiresIn: Int) {
-        accessToken = accessToken_
+    private fun updateAccessToken(newAccessToken: String, expiresIn: Int) {
+        accessToken = newAccessToken
         val date = Calendar.getInstance() // current time
         date.add(Calendar.SECOND, expiresIn) // expiresIn == 1 hour
         accessTokenExpirationDate = date.time
     }
 
-    fun fetchAuthTokens() {
-        assert(authCode != null)
+    fun fetchAuthTokens(callback: (Throwable?) -> Unit) {
+        if (authCode == null)
+        {
+            callback(RuntimeException("Can't fetch auth tokens without auth code"))
+            return
+        }
 
         val ahc = AsyncHttpClient()
         ahc.setUserAgent(USER_AGENT)
@@ -222,22 +226,19 @@ class Reddit(private val callbacks: Callbacks) {
                     // TODO: compare received scope with intended scope?
                     refreshToken = response!!.getString("refresh_token")
                     updateAccessToken(response.getString("access_token"), response.getInt("expires_in"))
-                } catch (e: JSONException) {
-                    // TODO: handle this
-                    throw RuntimeException(e)
+                } catch (e: Exception) {
+                    callback(e)
+                    return
                 }
 
                 callbacks.onNewParams()
-                callbacks.onTokenFetchFinish()
+                callback(null)
             }
 
             override fun onFailure(statusCode: Int, headers: Array<Header>?, throwable: Throwable, errorResponse: JSONObject?) {
                 super.onFailure(statusCode, headers, throwable, errorResponse)
 
-                // TODO: handle this
-                throw RuntimeException(throwable)
-
-                //                callbacks.onTokenFetchFinish();
+                callback(throwable)
             }
         })
     }
