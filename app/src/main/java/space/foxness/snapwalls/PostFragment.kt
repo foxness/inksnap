@@ -20,7 +20,7 @@ class PostFragment : Fragment() {
         setHasOptionsMenu(true)
 
         val postId = arguments!!.getSerializable(ARG_POST_ID) as UUID
-        post = Queue.getInstance(activity!!).getPost(postId)
+        post = Queue.getInstance(context!!).getPost(postId)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
@@ -39,13 +39,13 @@ class PostFragment : Fragment() {
     }
 
     private fun deletePost() {
-        Queue.getInstance(activity!!).deletePost(post.id)
+        Queue.getInstance(context!!).deletePost(post.id)
         activity?.finish()
     }
 
     override fun onPause() {
         super.onPause()
-        Queue.getInstance(activity!!.applicationContext).updatePost(post)
+        Queue.getInstance(context!!).updatePost(post)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

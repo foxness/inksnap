@@ -18,33 +18,17 @@ class Reddit(private val callbacks: Callbacks) {
 
     private var authState: String? = null
     private var authCode: String? = null
-    private var accessToken: String? = null
-    private var refreshToken: String? = null
-    private var accessTokenExpirationDate: Date? = null
-    private var lastSubmissionDate: Date? = null
+    
+    var accessToken: String? = null
+    var refreshToken: String? = null
+    var accessTokenExpirationDate: Date? = null
+    var lastSubmissionDate: Date? = null
 
     val isSignedIn get() = refreshToken != null
 
     val isRestrictedByRatelimit get() = lastSubmissionDate != null && Date().time < lastSubmissionDate!!.time + RATELIMIT
 
     val canSubmitRightNow get() = isSignedIn && !isRestrictedByRatelimit
-    
-    var params: Params
-        get() {
-            val p = Params()
-            p.accessToken = accessToken
-            p.refreshToken = refreshToken
-            p.accessTokenExpirationDate = accessTokenExpirationDate
-            p.lastSubmissionDate = lastSubmissionDate
-            return p
-        }
-        
-        set(params) {
-            accessToken = params.accessToken
-            refreshToken = params.refreshToken
-            accessTokenExpirationDate = params.accessTokenExpirationDate
-            lastSubmissionDate = params.lastSubmissionDate
-        }
 
     val authorizationUrl: String
         get() {
@@ -59,15 +43,10 @@ class Reddit(private val callbacks: Callbacks) {
                     .build().toString()
         }
 
-    class Params { // todo: change to data class?
-        var accessToken: String? = null
-        var refreshToken: String? = null
-        var accessTokenExpirationDate: Date? = null
-        var lastSubmissionDate: Date? = null
-    }
-
-    interface Callbacks { // todo: pass functions directly as callbacks instead
-        fun onNewParams()
+    interface Callbacks {
+        fun onNewAccessToken()
+        fun onNewRefreshToken()
+        fun onNewLastSubmissionDate()
     }
 
     fun submit(post: Post, callback: (Throwable?, String?) -> Unit, resubmit: Boolean = true, sendReplies: Boolean = true) {
@@ -108,7 +87,7 @@ class Reddit(private val callbacks: Callbacks) {
     
                     if (errors.length() == 0) {
                         lastSubmissionDate = Date()
-                        callbacks.onNewParams()
+                        callbacks.onNewLastSubmissionDate()
                         callback(null, json.optJSONObject("data").optString("url"))
                     } else {
                         val errorString = StringBuilder("You got ${errors.length()} errors: ")
@@ -183,7 +162,6 @@ class Reddit(private val callbacks: Callbacks) {
                     return
                 }
 
-                callbacks.onNewParams()
                 callback(null)
             }
 
@@ -201,6 +179,8 @@ class Reddit(private val callbacks: Callbacks) {
         val date = Calendar.getInstance() // current time
         date.add(Calendar.SECOND, expiresIn) // expiresIn == 1 hour
         accessTokenExpirationDate = date.time
+        
+        callbacks.onNewAccessToken()
     }
 
     fun fetchAuthTokens(callback: (Throwable?) -> Unit) {
@@ -231,7 +211,7 @@ class Reddit(private val callbacks: Callbacks) {
                     return
                 }
 
-                callbacks.onNewParams()
+                callbacks.onNewRefreshToken()
                 callback(null)
             }
 
@@ -258,8 +238,6 @@ class Reddit(private val callbacks: Callbacks) {
     }
 
     companion object {
-        const val TAG = "!A!"
-
         private const val APP_CLIENT_ID = "hSDlAP9u4cEFFA"
         private const val APP_CLIENT_SECRET = "" // installed apps have no secrets
         private const val APP_REDIRECT_URI = "http://localhost"

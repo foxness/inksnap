@@ -20,22 +20,32 @@ class QueueFragment : Fragment(), Reddit.Callbacks {
     private lateinit var adapter: PostAdapter
     private lateinit var signinMenuItem: MenuItem
 
-    private var reddit = Reddit(this)
+    private lateinit var config: Config
+    
+    private val reddit = Reddit(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
         
+        config = Config(context!!)
         restoreConfig()
+    }
+    
+    private fun restoreConfig() {
+        reddit.accessToken = config.accessToken
+        reddit.refreshToken = config.refreshToken
+        reddit.accessTokenExpirationDate = config.accessTokenExpirationDate
+        reddit.lastSubmissionDate = config.lastSubmissionDate
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val v = inflater.inflate(R.layout.fragment_queue, container, false)
 
         recyclerView = v.findViewById(R.id.queue_recyclerview)
-        recyclerView.layoutManager = LinearLayoutManager(activity)
+        recyclerView.layoutManager = LinearLayoutManager(context)
 
-        val posts = Queue.getInstance(activity!!).posts
+        val posts = Queue.getInstance(context!!).posts
         adapter = PostAdapter(posts)
         recyclerView.adapter = adapter
         
@@ -50,7 +60,7 @@ class QueueFragment : Fragment(), Reddit.Callbacks {
     }
 
     private fun updateUI() {
-        adapter.setPosts(Queue.getInstance(activity!!).posts)
+        adapter.setPosts(Queue.getInstance(context!!).posts)
         adapter.notifyDataSetChanged()
     }
 
@@ -66,8 +76,8 @@ class QueueFragment : Fragment(), Reddit.Callbacks {
     private fun addNewPost() {
         val s = Post()
         s.subreddit = "test" // todo: change this
-        Queue.getInstance(activity!!).addPost(s)
-        startActivity(PostPagerActivity.newIntent(activity!!, s.id))
+        Queue.getInstance(context!!).addPost(s)
+        startActivity(PostPagerActivity.newIntent(context!!, s.id))
     }
 
     private fun showSigninDialog() {
@@ -75,7 +85,7 @@ class QueueFragment : Fragment(), Reddit.Callbacks {
         // we need ^ this because there's a token doesn't arrive immediately after the dialog is dismissed
         // and the user should not be able to press it when the token is being fetched
 
-        val authDialog = Dialog(activity!!)
+        val authDialog = Dialog(context!!)
         authDialog.setContentView(R.layout.dialog_auth)
         authDialog.setOnCancelListener { signinMenuItem.isEnabled = true }
 
@@ -91,7 +101,7 @@ class QueueFragment : Fragment(), Reddit.Callbacks {
                         if (error != null)
                             throw error
 
-                        Toast.makeText(activity, "fetched tokens, can submit? " + reddit.canSubmitRightNow, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "fetched tokens, can submit? " + reddit.canSubmitRightNow, Toast.LENGTH_SHORT).show()
                         updateMenu()
                     })
                 }
@@ -121,15 +131,15 @@ class QueueFragment : Fragment(), Reddit.Callbacks {
     }
     
     private fun submitTopPost() {
-        val posts = Queue.getInstance(activity!!).posts
+        val posts = Queue.getInstance(context!!).posts
         if (posts.isEmpty())
         {
-            Toast.makeText(activity, "No post to submit", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "No post to submit", Toast.LENGTH_SHORT).show()
             return
         }
 
         if (!reddit.canSubmitRightNow) {
-            Toast.makeText(activity, "Can't submit right now", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Can't submit right now", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -137,7 +147,7 @@ class QueueFragment : Fragment(), Reddit.Callbacks {
             if (error != null)
                 throw error
 
-            Toast.makeText(activity, "GOT LINK: $link", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "GOT LINK: $link", Toast.LENGTH_SHORT).show()
         }, true, true)
     }
 
@@ -145,71 +155,53 @@ class QueueFragment : Fragment(), Reddit.Callbacks {
         signinMenuItem.isEnabled = !reddit.isSignedIn
     }
 
-    override fun onNewParams() {
-        saveConfig()
-        Toast.makeText(activity, "SAVED THE CONFIG", Toast.LENGTH_SHORT).show()
+    override fun onNewAccessToken() = saveAccessToken()
+    override fun onNewRefreshToken() = saveRefreshToken()
+    override fun onNewLastSubmissionDate() = saveLastSubmissionDate()
+    
+    private fun saveAccessToken() {
+        config.accessToken = reddit.accessToken
+        config.accessTokenExpirationDate = reddit.accessTokenExpirationDate
     }
 
-    private fun saveConfig() {
-        val rp = reddit.params
-        val expirationDate = if (rp.accessTokenExpirationDate == null) CONFIG_NULL_SUBSTITUTE else rp.accessTokenExpirationDate!!.time
-        val lastSubmissionDate = if (rp.lastSubmissionDate == null) CONFIG_NULL_SUBSTITUTE else rp.lastSubmissionDate!!.time
-
-        val sp = activity!!.getSharedPreferences(getString(R.string.shared_preferences), Context.MODE_PRIVATE)
-        sp.edit()
-                .putString(CONFIG_ACCESS_TOKEN, rp.accessToken)
-                .putString(CONFIG_REFRESH_TOKEN, rp.refreshToken)
-                .putLong(CONFIG_ACCESS_TOKEN_EXPIRATION_DATE, expirationDate)
-                .putLong(CONFIG_LAST_SUBMISSION_DATE, lastSubmissionDate)
-                .apply()
+    private fun saveRefreshToken() {
+        config.refreshToken = reddit.refreshToken
     }
 
-    private fun restoreConfig() {
-        val rp = Reddit.Params()
-
-        val sp = activity!!.getSharedPreferences(getString(R.string.shared_preferences), Context.MODE_PRIVATE)
-        rp.accessToken = sp.getString(CONFIG_ACCESS_TOKEN, null)
-        rp.refreshToken = sp.getString(CONFIG_REFRESH_TOKEN, null)
-
-        var dateInMs: Long? = sp.getLong(CONFIG_ACCESS_TOKEN_EXPIRATION_DATE, CONFIG_NULL_SUBSTITUTE)
-        rp.accessTokenExpirationDate = if (dateInMs == CONFIG_NULL_SUBSTITUTE) null else Date(dateInMs!!)
-
-        dateInMs = sp.getLong(CONFIG_LAST_SUBMISSION_DATE, CONFIG_NULL_SUBSTITUTE)
-        rp.lastSubmissionDate = if (dateInMs == CONFIG_NULL_SUBSTITUTE) null else Date(dateInMs)
-
-        reddit.params = rp
+    private fun saveLastSubmissionDate() {
+        config.lastSubmissionDate = reddit.lastSubmissionDate
     }
 
-    private inner class PostHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val titleTextView: TextView
-        private val contentTextView: TextView
-        private val typeCheckBox: CheckBox
+    private inner class PostAdapter(private var posts: List<Post>) : RecyclerView.Adapter<PostAdapter.PostHolder>() {
 
-        private lateinit var post: Post
+        private inner class PostHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+            private val titleTextView: TextView
+            private val contentTextView: TextView
+            private val typeCheckBox: CheckBox
 
-        init {
-            itemView.setOnClickListener({
-                val i = PostPagerActivity.newIntent(activity!!, post.id)
-                startActivity(i)
-            })
+            private lateinit var post: Post
 
-            titleTextView = itemView.findViewById(R.id.queue_post_title)
-            contentTextView = itemView.findViewById(R.id.queue_post_content)
-            typeCheckBox = itemView.findViewById(R.id.queue_post_type)
+            init {
+                itemView.setOnClickListener({
+                    val i = PostPagerActivity.newIntent(context!!, post.id)
+                    startActivity(i)
+                })
+
+                titleTextView = itemView.findViewById(R.id.queue_post_title)
+                contentTextView = itemView.findViewById(R.id.queue_post_content)
+                typeCheckBox = itemView.findViewById(R.id.queue_post_type)
+            }
+
+            fun bindPost(p: Post) {
+                post = p
+                titleTextView.text = post.title
+                contentTextView.text = post.content
+                typeCheckBox.isChecked = post.type
+            }
         }
-
-        fun bindPost(p: Post) {
-            post = p
-            titleTextView.text = post.title
-            contentTextView.text = post.content
-            typeCheckBox.isChecked = post.type
-        }
-    }
-
-    private inner class PostAdapter(private var posts: List<Post>) : RecyclerView.Adapter<PostHolder>() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostHolder {
-            val inflater = LayoutInflater.from(activity)
+            val inflater = LayoutInflater.from(context)
             val v = inflater.inflate(R.layout.queue_post, parent, false)
             return PostHolder(v)
         }
@@ -224,14 +216,5 @@ class QueueFragment : Fragment(), Reddit.Callbacks {
         }
 
         override fun getItemCount() = posts.size
-    }
-
-    companion object {
-        private const val CONFIG_ACCESS_TOKEN = "accessToken"
-        private const val CONFIG_REFRESH_TOKEN = "refreshToken"
-        private const val CONFIG_ACCESS_TOKEN_EXPIRATION_DATE = "accessTokenExpirationDate"
-        private const val CONFIG_LAST_SUBMISSION_DATE = "lastSubmissionDate"
-
-        private const val CONFIG_NULL_SUBSTITUTE: Long = 0
     }
 }

@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">Snapwalls</string>
-    <string name="shared_preferences">reddit_params</string>
     <string name="title_label">Title</string>
     <string name="title_hint">Enter a title for the post</string>
     <string name="type_label">Link?</string>
