@@ -12,7 +12,7 @@ interface PostDao {
     val posts: List<Post>
 
     @Query("SELECT * FROM queue WHERE id = :id LIMIT 1")
-    fun getPostById(id: Long): Post
+    fun getPostById(id: Long): Post?
 
     @Insert
     fun addPost(post: Post): Long

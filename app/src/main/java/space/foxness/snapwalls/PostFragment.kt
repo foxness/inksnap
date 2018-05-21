@@ -18,7 +18,7 @@ class PostFragment : Fragment() {
         setHasOptionsMenu(true)
 
         val postId = arguments!!.getLong(ARG_POST_ID)
-        post = Queue.getInstance(context!!).getPost(postId)
+        post = Queue.getInstance(context!!).getPost(postId)!!
     }
 
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
@@ -78,18 +78,14 @@ class PostFragment : Fragment() {
         val subredditET = v.findViewById<EditText>(R.id.post_subreddit)
         subredditET.setText(post.subreddit)
         subredditET.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
-
-            }
+            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) { }
 
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
                 post.subreddit = s.toString()
                 updateIsValidPost()
             }
 
-            override fun afterTextChanged(s: Editable) {
-
-            }
+            override fun afterTextChanged(s: Editable) { }
         })
 
         val typeSwitch = v.findViewById<Switch>(R.id.post_type)
@@ -101,7 +97,7 @@ class PostFragment : Fragment() {
 
     private fun updateIsValidPost() {
         val validTitle = !post.title.isEmpty()
-        val validContent = !post.content.isEmpty()
+        val validContent = !(post.type && post.content.isEmpty())
         val validSubreddit = !post.subreddit.isEmpty()
 
         isValidPost = validTitle && validContent && validSubreddit

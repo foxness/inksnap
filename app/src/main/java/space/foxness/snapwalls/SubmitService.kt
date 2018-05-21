@@ -13,11 +13,10 @@ class SubmitService : IntentService(TAG) {
         Log.i(TAG, "I AM SUBMIT, ID TO POST: $postId")
 
         val post = Queue.getInstance(applicationContext).getPost(postId)
-//        if (post == null)
-//        {
-//            Log.i(TAG, "No post to submit")
-//            return
-//        }
+        if (post == null) {
+            Log.i(TAG, "No post to submit")
+            return
+        }
         
         val reddit = Reddit(object: Reddit.Callbacks {
             
@@ -47,8 +46,7 @@ class SubmitService : IntentService(TAG) {
         }
 
         reddit.submit(post, { error, link ->
-            if (error != null)
-            {
+            if (error != null) {
                 Log.i(TAG, "ERROE: ${error.message}")
                 throw error
             }
@@ -62,7 +60,9 @@ class SubmitService : IntentService(TAG) {
         private const val EXTRA_POST_ID = "post_id"
         
         fun newIntent(context: Context, postId: Long): Intent {
-            return Intent(context, SubmitService::class.java).putExtra(EXTRA_POST_ID, postId)
+            val i = Intent(context, SubmitService::class.java)
+            i.putExtra(EXTRA_POST_ID, postId)
+            return i
         }
     }
 }

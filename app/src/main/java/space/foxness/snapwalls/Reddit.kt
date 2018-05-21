@@ -45,15 +45,13 @@ class Reddit(private val callbacks: Callbacks) {
 
     fun submit(post: Post, callback: (Throwable?, String?) -> Unit, resubmit: Boolean = true, sendReplies: Boolean = true) {
         
-        if (post.title.isEmpty() || (post.type && post.content.isEmpty()) || post.subreddit.isEmpty())
-        {
+        if (post.title.isEmpty() || (post.type && post.content.isEmpty()) || post.subreddit.isEmpty()) {
             callback(RuntimeException("Bad post"), null)
             return
         }
 
         ensureValidAccessToken({
-            if (it != null)
-            {
+            if (it != null) {
                 callback(it, null)
                 return@ensureValidAccessToken
             }
@@ -131,8 +129,7 @@ class Reddit(private val callbacks: Callbacks) {
             return
         }
         
-        if (refreshToken == null)
-        {
+        if (refreshToken == null) {
             callback(RuntimeException("Can't update access token without refresh token"))
             return
         }
@@ -179,8 +176,7 @@ class Reddit(private val callbacks: Callbacks) {
     }
 
     fun fetchAuthTokens(callback: (Throwable?) -> Unit) {
-        if (authCode == null)
-        {
+        if (authCode == null) {
             callback(RuntimeException("Can't fetch auth tokens without auth code"))
             return
         }

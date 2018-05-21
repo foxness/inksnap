@@ -55,8 +55,7 @@ class QueueFragment : Fragment(), Reddit.Callbacks {
                 return@setOnCheckedChangeListener
             }
 
-            if (posts.isEmpty())
-            {
+            if (posts.isEmpty()) {
                 Toast.makeText(context, "No posts to submit", Toast.LENGTH_SHORT).show()
                 return@setOnCheckedChangeListener
             }
@@ -126,8 +125,7 @@ class QueueFragment : Fragment(), Reddit.Callbacks {
 
                 if (reddit.tryExtractCode(url)) {
                     authDialog.dismiss()
-                    reddit.fetchAuthTokens(
-                    { error ->
+                    reddit.fetchAuthTokens({ error ->
                         if (error != null)
                             throw error
 
@@ -162,8 +160,7 @@ class QueueFragment : Fragment(), Reddit.Callbacks {
     
     private fun submitTopPost() {
         val posts = Queue.getInstance(context!!).posts
-        if (posts.isEmpty())
-        {
+        if (posts.isEmpty()) {
             Toast.makeText(context, "No post to submit", Toast.LENGTH_SHORT).show()
             return
         }
