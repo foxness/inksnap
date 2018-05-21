@@ -8,8 +8,6 @@ import android.view.*
 import android.widget.EditText
 import android.widget.Switch
 
-import java.util.UUID
-
 class PostFragment : Fragment() {
 
     private lateinit var post: Post
@@ -19,7 +17,7 @@ class PostFragment : Fragment() {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
 
-        val postId = arguments!!.getSerializable(ARG_POST_ID) as UUID
+        val postId = arguments!!.getLong(ARG_POST_ID)
         post = Queue.getInstance(context!!).getPost(postId)
     }
 
@@ -112,9 +110,9 @@ class PostFragment : Fragment() {
     companion object {
         private const val ARG_POST_ID = "post_id"
 
-        fun newInstance(postId: UUID): PostFragment {
+        fun newInstance(postId: Long): PostFragment {
             val args = Bundle()
-            args.putSerializable(ARG_POST_ID, postId)
+            args.putLong(ARG_POST_ID, postId)
 
             val fragment = PostFragment()
             fragment.arguments = args

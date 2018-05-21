@@ -1,12 +1,9 @@
 package space.foxness.snapwalls.database
 
 import android.arch.persistence.room.Dao
-import android.arch.persistence.room.Delete
 import android.arch.persistence.room.Insert
 import android.arch.persistence.room.Query
 import android.arch.persistence.room.Update
-import java.util.UUID
-
 import space.foxness.snapwalls.Post
 
 @Dao
@@ -15,10 +12,10 @@ interface PostDao {
     val posts: List<Post>
 
     @Query("SELECT * FROM queue WHERE id = :id LIMIT 1")
-    fun getPostById(id: UUID): Post
+    fun getPostById(id: Long): Post
 
     @Insert
-    fun addPost(post: Post)
+    fun addPost(post: Post): Long
 
     @Update
     fun updatePost(post: Post)
@@ -27,5 +24,5 @@ interface PostDao {
 //    fun deletePost(post: Post)
 
     @Query("DELETE FROM queue WHERE id = :id")
-    fun deletePostbyId(id: UUID)
+    fun deletePostbyId(id: Long)
 }

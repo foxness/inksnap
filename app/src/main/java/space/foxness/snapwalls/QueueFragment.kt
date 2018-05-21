@@ -1,7 +1,6 @@
 package space.foxness.snapwalls
 
 import android.app.Dialog
-import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
@@ -12,7 +11,7 @@ import android.webkit.WebViewClient
 import android.widget.CheckBox
 import android.widget.TextView
 import android.widget.Toast
-import java.util.*
+import android.widget.ToggleButton
 
 class QueueFragment : Fragment(), Reddit.Callbacks {
 
@@ -42,6 +41,11 @@ class QueueFragment : Fragment(), Reddit.Callbacks {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val v = inflater.inflate(R.layout.fragment_queue, container, false)
 
+        val tb = v.findViewById<ToggleButton>(R.id.queue_toggle)
+        tb.setOnCheckedChangeListener { buttonView, isChecked ->
+            
+        }
+        
         recyclerView = v.findViewById(R.id.queue_recyclerview)
         recyclerView.layoutManager = LinearLayoutManager(context)
 
@@ -74,10 +78,10 @@ class QueueFragment : Fragment(), Reddit.Callbacks {
     }
 
     private fun addNewPost() {
-        val s = Post()
-        s.subreddit = "test" // todo: change this
-        Queue.getInstance(context!!).addPost(s)
-        startActivity(PostPagerActivity.newIntent(context!!, s.id))
+        val p = Post()
+        p.subreddit = "test" // todo: change this
+        p.id = Queue.getInstance(context!!).addPost(p)
+        startActivity(PostPagerActivity.newIntent(context!!, p.id))
     }
 
     private fun showSigninDialog() {

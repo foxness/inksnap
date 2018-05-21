@@ -1,18 +1,12 @@
 package space.foxness.snapwalls
 
 import android.net.Uri
-
 import com.loopj.android.http.AsyncHttpClient
 import com.loopj.android.http.JsonHttpResponseHandler
 import com.loopj.android.http.RequestParams
-
-import org.json.JSONException
-import org.json.JSONObject
-
-import java.util.Calendar
-import java.util.Date
-
 import cz.msebera.android.httpclient.Header
+import org.json.JSONObject
+import java.util.*
 
 class Reddit(private val callbacks: Callbacks) {
 

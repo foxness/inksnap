@@ -2,19 +2,18 @@ package space.foxness.snapwalls
 
 import android.arch.persistence.room.Room
 import android.content.Context
-import java.util.UUID
-
 import space.foxness.snapwalls.database.AppDatabase
+import space.foxness.snapwalls.database.PostDao
 
 class Queue private constructor(context: Context) {
 
-    private val db: AppDatabase
+    private val dbDao: PostDao
 
     val posts: List<Post>
-        get() = db.postDao().posts
+        get() = dbDao.posts
 
     init {
-        db = Room.databaseBuilder<AppDatabase>(context.applicationContext, AppDatabase::class.java, databaseName).allowMainThreadQueries().build()
+        dbDao = Room.databaseBuilder<AppDatabase>(context.applicationContext, AppDatabase::class.java, databaseName).allowMainThreadQueries().build().postDao()
         // allowMainThreadQueries() is a dirty hack
         // I shouldn't do database I/O on the main thread
         // but since Java doesn't have native async/await,
@@ -23,13 +22,13 @@ class Queue private constructor(context: Context) {
         // I have to use dirty hacks ._.
     }
 
-    fun addPost(post: Post) = db.postDao().addPost(post)
+    fun addPost(post: Post) = dbDao.addPost(post)
 
-    fun getPost(id: UUID): Post = db.postDao().getPostById(id)
+    fun getPost(id: Long): Post = dbDao.getPostById(id)
     
-    fun updatePost(post: Post) = db.postDao().updatePost(post)
+    fun updatePost(post: Post) = dbDao.updatePost(post)
     
-    fun deletePost(id: UUID) = db.postDao().deletePostbyId(id)
+    fun deletePost(id: Long) = dbDao.deletePostbyId(id)
 
     companion object {
         private const val databaseName = "queue"
