@@ -22,6 +22,8 @@
         <activity
             android:name=".PostPagerActivity"
             android:parentActivityName=".QueueActivity"/>
+
+        <service android:name=".SubmitService" />
     </application>
 
 </manifest>

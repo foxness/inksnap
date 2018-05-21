@@ -1,7 +1,11 @@
 package space.foxness.snapwalls
 
+import android.app.AlarmManager
 import android.app.Dialog
+import android.app.PendingIntent
+import android.content.Context
 import android.os.Bundle
+import android.os.SystemClock
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -44,6 +48,28 @@ class QueueFragment : Fragment(), Reddit.Callbacks {
         val tb = v.findViewById<ToggleButton>(R.id.queue_toggle)
         tb.setOnCheckedChangeListener { buttonView, isChecked ->
             
+            tb.isEnabled = false
+            val posts = Queue.getInstance(context!!).posts
+            if (!reddit.isSignedIn) {
+                Toast.makeText(context, "You must be signed in to do that", Toast.LENGTH_SHORT).show()
+                return@setOnCheckedChangeListener
+            }
+
+            if (posts.isEmpty())
+            {
+                Toast.makeText(context, "No posts to submit", Toast.LENGTH_SHORT).show()
+                return@setOnCheckedChangeListener
+            }
+            
+            val postId = posts.first().id
+            val intent = SubmitService.newIntent(context!!, postId)
+            val pi = PendingIntent.getService(context!!, postId.toInt(), intent, 0)
+            val am = context!!.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            val time = SystemClock.elapsedRealtime() + 1 * 1000
+            
+            am.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, time, pi)
+            
+            tb.isEnabled = true
         }
         
         recyclerView = v.findViewById(R.id.queue_recyclerview)
@@ -152,7 +178,7 @@ class QueueFragment : Fragment(), Reddit.Callbacks {
                 throw error
 
             Toast.makeText(context, "GOT LINK: $link", Toast.LENGTH_SHORT).show()
-        }, true, true)
+        })
     }
 
     private fun updateMenu() {

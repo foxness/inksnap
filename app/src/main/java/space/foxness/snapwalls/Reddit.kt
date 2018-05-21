@@ -1,9 +1,9 @@
 package space.foxness.snapwalls
 
 import android.net.Uri
-import com.loopj.android.http.AsyncHttpClient
 import com.loopj.android.http.JsonHttpResponseHandler
 import com.loopj.android.http.RequestParams
+import com.loopj.android.http.SyncHttpClient
 import cz.msebera.android.httpclient.Header
 import org.json.JSONObject
 import java.util.*
@@ -45,7 +45,7 @@ class Reddit(private val callbacks: Callbacks) {
 
     fun submit(post: Post, callback: (Throwable?, String?) -> Unit, resubmit: Boolean = true, sendReplies: Boolean = true) {
         
-        if (post.title.isEmpty() || post.content.isEmpty() || post.subreddit.isEmpty())
+        if (post.title.isEmpty() || (post.type && post.content.isEmpty()) || post.subreddit.isEmpty())
         {
             callback(RuntimeException("Bad post"), null)
             return
@@ -57,10 +57,11 @@ class Reddit(private val callbacks: Callbacks) {
                 callback(it, null)
                 return@ensureValidAccessToken
             }
+
+            val shc = SyncHttpClient()
             
-            val ahc = AsyncHttpClient()
-            ahc.setUserAgent(USER_AGENT)
-            ahc.addHeader("Authorization", "bearer " + accessToken!!)
+            shc.setUserAgent(USER_AGENT)
+            shc.addHeader("Authorization", "bearer " + accessToken!!)
     
             val params = RequestParams()
             params.add("api_type", "json")
@@ -71,14 +72,14 @@ class Reddit(private val callbacks: Callbacks) {
             params.add(if (post.type) "url" else "text", post.content)
             params.add("title", post.title)
             
-            ahc.post(SUBMIT_ENDPOINT, params, object : JsonHttpResponseHandler() {
-                
+            shc.post(SUBMIT_ENDPOINT, params, object : JsonHttpResponseHandler() {
+
                 override fun onSuccess(statusCode: Int, headers: Array<Header>?, response: JSONObject?) {
                     super.onSuccess(statusCode, headers, response)
-    
+
                     val json = response!!.optJSONObject("json")
                     val errors = json!!.optJSONArray("errors")
-    
+
                     if (errors.length() == 0) {
                         lastSubmissionDate = Date()
                         callbacks.onNewLastSubmissionDate()
@@ -89,7 +90,7 @@ class Reddit(private val callbacks: Callbacks) {
                             val error = errors.optJSONArray(i)
                             val name = error.optString(0)
                             val description = error.optString(1)
-    
+
                             when (name) {
                                 "RATELIMIT", "NO_URL" -> errorString.append(name).append(" ").append(description).append("\n")
                                 else -> {
@@ -98,23 +99,23 @@ class Reddit(private val callbacks: Callbacks) {
                                 }
                             }
                         }
-                        
+
                         callback(RuntimeException(errorString.toString()), null)
                     }
                 }
-    
+
                 override fun onFailure(statusCode: Int, headers: Array<Header>?, throwable: Throwable, errorResponse: JSONObject?) {
                     super.onFailure(statusCode, headers, throwable, errorResponse)
-                    
+
                     callback(throwable, null)
                 }
-    
+
                 override fun onSuccess(statusCode: Int, headers: Array<Header>?, responseString: String?) {
                     super.onSuccess(statusCode, headers, responseString)
-                    
+
                     callback(RuntimeException("RESPONSE STRING ONSUCCESS"), null)
                 }
-    
+
                 override fun onFailure(statusCode: Int, headers: Array<Header>?, responseString: String?, throwable: Throwable) {
                     super.onFailure(statusCode, headers, responseString, throwable)
 
@@ -136,7 +137,7 @@ class Reddit(private val callbacks: Callbacks) {
             return
         }
 
-        val ahc = AsyncHttpClient()
+        val ahc = SyncHttpClient()
         ahc.setUserAgent(USER_AGENT)
         ahc.setBasicAuth(APP_CLIENT_ID, APP_CLIENT_SECRET)
 
@@ -184,7 +185,7 @@ class Reddit(private val callbacks: Callbacks) {
             return
         }
 
-        val ahc = AsyncHttpClient()
+        val ahc = SyncHttpClient()
         ahc.setUserAgent(USER_AGENT)
         ahc.setBasicAuth(APP_CLIENT_ID, APP_CLIENT_SECRET)
 

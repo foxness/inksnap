@@ -15,16 +15,12 @@ class Queue private constructor(context: Context) {
     init {
         dbDao = Room.databaseBuilder<AppDatabase>(context.applicationContext, AppDatabase::class.java, databaseName).allowMainThreadQueries().build().postDao()
         // allowMainThreadQueries() is a dirty hack
-        // I shouldn't do database I/O on the main thread
-        // but since Java doesn't have native async/await,
-        // I'm not familiar with any Java async libraries,
-        // and this app isn't in Kotlin
-        // I have to use dirty hacks ._.
+        // todo: fix this by going async
     }
 
     fun addPost(post: Post) = dbDao.addPost(post)
 
-    fun getPost(id: Long): Post = dbDao.getPostById(id)
+    fun getPost(id: Long) = dbDao.getPostById(id)
     
     fun updatePost(post: Post) = dbDao.updatePost(post)
     
