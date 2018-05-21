@@ -22,8 +22,6 @@ class QueueFragment : Fragment(), Reddit.Callbacks {
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: PostAdapter
     private lateinit var signinMenuItem: MenuItem
-
-    private lateinit var config: Config
     
     private val reddit = Reddit(this)
 
@@ -31,11 +29,11 @@ class QueueFragment : Fragment(), Reddit.Callbacks {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
         
-        config = Config(context!!)
         restoreConfig()
     }
     
     private fun restoreConfig() {
+        val config = Config.getInstance(context!!)
         reddit.accessToken = config.accessToken
         reddit.refreshToken = config.refreshToken
         reddit.accessTokenExpirationDate = config.accessTokenExpirationDate
@@ -187,15 +185,18 @@ class QueueFragment : Fragment(), Reddit.Callbacks {
     override fun onNewLastSubmissionDate() = saveLastSubmissionDate()
     
     private fun saveAccessToken() {
+        val config = Config.getInstance(context!!)
         config.accessToken = reddit.accessToken
         config.accessTokenExpirationDate = reddit.accessTokenExpirationDate
     }
 
     private fun saveRefreshToken() {
+        val config = Config.getInstance(context!!)
         config.refreshToken = reddit.refreshToken
     }
 
     private fun saveLastSubmissionDate() {
+        val config = Config.getInstance(context!!)
         config.lastSubmissionDate = reddit.lastSubmissionDate
     }
 

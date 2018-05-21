@@ -3,7 +3,7 @@ package space.foxness.snapwalls
 import android.content.Context
 import java.util.*
 
-class Config(context: Context) {
+class Config private constructor(context: Context) {
     
     private val sharedPreferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
 
@@ -38,7 +38,7 @@ class Config(context: Context) {
         sharedPreferences.edit().putLong(field, long).apply()
     }
     
-    companion object {
+    companion object : SingletonHolder<Config, Context>(::Config) {
         private const val SHARED_PREFERENCES_NAME = "config"
         private const val CONFIG_ACCESS_TOKEN = "accessToken"
         private const val CONFIG_REFRESH_TOKEN = "refreshToken"

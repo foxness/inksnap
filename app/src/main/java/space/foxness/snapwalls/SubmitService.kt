@@ -33,7 +33,7 @@ class SubmitService : IntentService(TAG) {
             }
         })
         
-        val config = Config(applicationContext)
+        val config = Config.getInstance(applicationContext)
 
         reddit.accessToken = config.accessToken
         reddit.refreshToken = config.refreshToken
