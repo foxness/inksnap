@@ -1,11 +1,7 @@
 package space.foxness.snapwalls
 
-import android.app.AlarmManager
 import android.app.Dialog
-import android.app.PendingIntent
-import android.content.Context
 import android.os.Bundle
-import android.os.SystemClock
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -16,9 +12,9 @@ import android.widget.CheckBox
 import android.widget.TextView
 import android.widget.Toast
 import android.widget.ToggleButton
-import org.joda.time.DateTime
+import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.uiThread
 import org.joda.time.Duration
-import org.joda.time.Period
 
 class QueueFragment : Fragment() {
 
@@ -118,13 +114,18 @@ class QueueFragment : Fragment() {
 
                 if (reddit.tryExtractCode(url)) {
                     authDialog.dismiss()
-                    reddit.fetchAuthTokens({ error ->
-                        if (error != null)
-                            throw error
 
-                        Toast.makeText(context, "fetched tokens, can submit? " + reddit.canSubmitRightNow, Toast.LENGTH_SHORT).show()
-                        updateMenu()
-                    })
+                    doAsync {
+                        reddit.fetchAuthTokens({ error ->
+                            uiThread {
+                                if (error != null)
+                                    throw error
+
+                                Toast.makeText(context, "fetched tokens, can submit? " + reddit.canSubmitRightNow, Toast.LENGTH_SHORT).show()
+                                updateMenu()
+                            }
+                        })
+                    }
                 }
             }
         }

@@ -8,7 +8,7 @@ import cz.msebera.android.httpclient.Header
 import org.json.JSONObject
 import java.util.*
 
-class Reddit private constructor(private val callbacks: Callbacks) {
+class Reddit private constructor(private val callbacks: Callbacks) { // todo: use async/await
 
     private var authState: String? = null
     private var authCode: String? = null
