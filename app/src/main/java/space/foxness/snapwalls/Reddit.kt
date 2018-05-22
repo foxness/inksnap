@@ -8,7 +8,7 @@ import cz.msebera.android.httpclient.Header
 import org.json.JSONObject
 import java.util.*
 
-class Reddit(private val callbacks: Callbacks) {
+class Reddit private constructor(private val callbacks: Callbacks) {
 
     private var authState: String? = null
     private var authCode: String? = null
@@ -228,7 +228,7 @@ class Reddit(private val callbacks: Callbacks) {
         return authCode != null // 'true' denotes success
     }
 
-    companion object {
+    companion object : SingletonHolder<Reddit, Callbacks>(::Reddit) {
         private const val APP_CLIENT_ID = "hSDlAP9u4cEFFA"
         private const val APP_CLIENT_SECRET = "" // installed apps have no secrets
         private const val APP_REDIRECT_URI = "http://localhost"

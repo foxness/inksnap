@@ -17,27 +17,19 @@ import android.widget.TextView
 import android.widget.Toast
 import android.widget.ToggleButton
 
-class QueueFragment : Fragment(), Reddit.Callbacks {
+class QueueFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: PostAdapter
     private lateinit var signinMenuItem: MenuItem
     
-    private val reddit = Reddit(this)
+    private lateinit var reddit: Reddit
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
         
-        restoreConfig()
-    }
-    
-    private fun restoreConfig() {
-        val config = Config.getInstance(context!!)
-        reddit.accessToken = config.accessToken
-        reddit.refreshToken = config.refreshToken
-        reddit.accessTokenExpirationDate = config.accessTokenExpirationDate
-        reddit.lastSubmissionDate = config.lastSubmissionDate
+        reddit = Autoreddit.getInstance(context!!).reddit
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -178,26 +170,6 @@ class QueueFragment : Fragment(), Reddit.Callbacks {
 
     private fun updateMenu() {
         signinMenuItem.isEnabled = !reddit.isSignedIn
-    }
-
-    override fun onNewAccessToken() = saveAccessToken()
-    override fun onNewRefreshToken() = saveRefreshToken()
-    override fun onNewLastSubmissionDate() = saveLastSubmissionDate()
-    
-    private fun saveAccessToken() {
-        val config = Config.getInstance(context!!)
-        config.accessToken = reddit.accessToken
-        config.accessTokenExpirationDate = reddit.accessTokenExpirationDate
-    }
-
-    private fun saveRefreshToken() {
-        val config = Config.getInstance(context!!)
-        config.refreshToken = reddit.refreshToken
-    }
-
-    private fun saveLastSubmissionDate() {
-        val config = Config.getInstance(context!!)
-        config.lastSubmissionDate = reddit.lastSubmissionDate
     }
 
     private inner class PostAdapter(private var posts: List<Post>) : RecyclerView.Adapter<PostAdapter.PostHolder>() {

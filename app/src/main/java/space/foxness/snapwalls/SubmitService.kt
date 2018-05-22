@@ -18,27 +18,7 @@ class SubmitService : IntentService(TAG) {
             return
         }
         
-        val reddit = Reddit(object: Reddit.Callbacks {
-            
-            override fun onNewAccessToken() {
-//                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-            }
-
-            override fun onNewRefreshToken() {
-//                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-            }
-
-            override fun onNewLastSubmissionDate() {
-                // todo: implement
-            }
-        })
-        
-        val config = Config.getInstance(applicationContext)
-
-        reddit.accessToken = config.accessToken
-        reddit.refreshToken = config.refreshToken
-        reddit.accessTokenExpirationDate = config.accessTokenExpirationDate
-        reddit.lastSubmissionDate = config.lastSubmissionDate
+        val reddit = Autoreddit.getInstance(applicationContext).reddit
         
         if (!reddit.canSubmitRightNow) {
             Log.i(TAG, "Can't submit right now")
