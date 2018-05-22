@@ -3,6 +3,7 @@ package space.foxness.snapwalls
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
+import android.os.Build
 import android.os.SystemClock
 import org.joda.time.Duration
 
@@ -20,8 +21,12 @@ class PostScheduler(context: Context) {
     private fun schedule(postId: Long, millis: Long, rtc: Boolean, wakeup: Boolean = true) {
         
         val intent = SubmitService.newIntent(context, postId)
-        val pi = PendingIntent.getService(context, postId.toInt(), intent, 0)
-        
+        val pi = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            PendingIntent.getForegroundService(context, postId.toInt(), intent, 0)
+        } else {
+            PendingIntent.getService(context, postId.toInt(), intent, 0)
+        }
+
         val type = if (rtc) {
             if (wakeup) 
                 AlarmManager.RTC_WAKEUP 

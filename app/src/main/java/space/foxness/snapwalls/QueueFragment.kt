@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.*
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -23,12 +24,14 @@ class QueueFragment : Fragment() {
     private lateinit var signinMenuItem: MenuItem
     
     private lateinit var reddit: Reddit
+    private lateinit var postScheduler: PostScheduler
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
         
         reddit = Autoreddit.getInstance(context!!).reddit
+        postScheduler = PostScheduler(context!!)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -36,27 +39,8 @@ class QueueFragment : Fragment() {
 
         val tb = v.findViewById<ToggleButton>(R.id.queue_toggle)
         tb.setOnCheckedChangeListener { button, isChecked ->
-            
             button.isEnabled = false
-            
-            if (isChecked) {
-                val posts = Queue.getInstance(context!!).posts
-                if (!reddit.isSignedIn) {
-                    Toast.makeText(context, "You must be signed in to do that", Toast.LENGTH_SHORT).show()
-                    return@setOnCheckedChangeListener
-                }
-
-                if (posts.isEmpty()) {
-                    Toast.makeText(context, "No posts to submit", Toast.LENGTH_SHORT).show()
-                    return@setOnCheckedChangeListener
-                }
-                
-                val ps = PostScheduler(context!!)
-                ps.schedule(posts.first().id, Duration.standardSeconds(5))
-            } else {
-                // todo: cancel scheduled posts
-            }
-
+            toggleAutoSubmission(isChecked)
             button.isEnabled = true
         }
         
@@ -70,6 +54,30 @@ class QueueFragment : Fragment() {
         updateUI()
 
         return v
+    }
+    
+    private fun toast(text: String) {
+        Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
+    }
+    
+    private fun toggleAutoSubmission(on: Boolean) {
+        if (on) {
+            if (!reddit.isSignedIn) {
+                toast("You must be signed in to do that")
+                return
+            }
+
+            val posts = Queue.getInstance(context!!).posts
+            if (posts.isEmpty()) {
+                toast("No posts to submit")
+                return
+            }
+
+            postScheduler.schedule(posts.first().id, Duration.standardSeconds(7))
+            Log.i("Submitboi", "SCHEDULED")
+        } else {
+            // todo: cancel scheduled posts
+        }
     }
 
     override fun onResume() {
@@ -121,7 +129,7 @@ class QueueFragment : Fragment() {
                                 if (error != null)
                                     throw error
 
-                                Toast.makeText(context, "fetched tokens, can submit? " + reddit.canSubmitRightNow, Toast.LENGTH_SHORT).show()
+                                toast("fetched tokens, can submit? " + reddit.canSubmitRightNow)
                                 updateMenu()
                             }
                         })
@@ -155,12 +163,12 @@ class QueueFragment : Fragment() {
     private fun submitTopPost() {
         val posts = Queue.getInstance(context!!).posts
         if (posts.isEmpty()) {
-            Toast.makeText(context, "No post to submit", Toast.LENGTH_SHORT).show()
+            toast("No post to submit")
             return
         }
 
         if (!reddit.canSubmitRightNow) {
-            Toast.makeText(context, "Can't submit right now", Toast.LENGTH_SHORT).show()
+            toast("Can't submit right now")
             return
         }
 
@@ -168,7 +176,7 @@ class QueueFragment : Fragment() {
             if (error != null)
                 throw error
 
-            Toast.makeText(context, "GOT LINK: $link", Toast.LENGTH_SHORT).show()
+            toast("GOT LINK: $link")
         })
     }
 
