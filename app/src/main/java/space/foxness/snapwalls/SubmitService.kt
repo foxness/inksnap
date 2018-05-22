@@ -9,9 +9,12 @@ class SubmitService : IntentService(TAG) {
     
     override fun onHandleIntent(intent: Intent?) {
         
-        val postId = intent?.getLongExtra(EXTRA_POST_ID, -1)!!
-        Log.i(TAG, "I AM SUBMIT, ID TO POST: $postId")
+        val postId = intent!!.getLongExtra(EXTRA_POST_ID, -1)
+        Log.i(TAG, "I AM SUBMIT, ATTEMPTING TO POST ID $postId")
 
+        if (DEBUG)
+            return
+        
         val post = Queue.getInstance(applicationContext).getPost(postId)
         if (post == null) {
             Log.i(TAG, "No post to submit")
@@ -36,6 +39,8 @@ class SubmitService : IntentService(TAG) {
     }
 
     companion object {
+        private const val DEBUG = true
+        
         private const val TAG = "SubmitService"
         private const val EXTRA_POST_ID = "post_id"
         

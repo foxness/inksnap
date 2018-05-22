@@ -45,6 +45,10 @@ dependencies {
     implementation "android.arch.persistence.room:runtime:$room_version"
     kapt "android.arch.persistence.room:compiler:$room_version"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+
+    def kodatime_version = "1.2.2"
+
+    implementation "com.github.debop:koda-time:$kodatime_version"
 }
 repositories {
     mavenCentral()

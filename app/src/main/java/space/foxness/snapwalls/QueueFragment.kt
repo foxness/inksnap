@@ -16,6 +16,9 @@ import android.widget.CheckBox
 import android.widget.TextView
 import android.widget.Toast
 import android.widget.ToggleButton
+import org.joda.time.DateTime
+import org.joda.time.Duration
+import org.joda.time.Period
 
 class QueueFragment : Fragment() {
 
@@ -36,29 +39,29 @@ class QueueFragment : Fragment() {
         val v = inflater.inflate(R.layout.fragment_queue, container, false)
 
         val tb = v.findViewById<ToggleButton>(R.id.queue_toggle)
-        tb.setOnCheckedChangeListener { buttonView, isChecked ->
+        tb.setOnCheckedChangeListener { button, isChecked ->
             
-            tb.isEnabled = false
-            val posts = Queue.getInstance(context!!).posts
-            if (!reddit.isSignedIn) {
-                Toast.makeText(context, "You must be signed in to do that", Toast.LENGTH_SHORT).show()
-                return@setOnCheckedChangeListener
+            button.isEnabled = false
+            
+            if (isChecked) {
+                val posts = Queue.getInstance(context!!).posts
+                if (!reddit.isSignedIn) {
+                    Toast.makeText(context, "You must be signed in to do that", Toast.LENGTH_SHORT).show()
+                    return@setOnCheckedChangeListener
+                }
+
+                if (posts.isEmpty()) {
+                    Toast.makeText(context, "No posts to submit", Toast.LENGTH_SHORT).show()
+                    return@setOnCheckedChangeListener
+                }
+                
+                val ps = PostScheduler(context!!)
+                ps.schedule(posts.first().id, Duration.standardSeconds(5))
+            } else {
+                // todo: cancel scheduled posts
             }
 
-            if (posts.isEmpty()) {
-                Toast.makeText(context, "No posts to submit", Toast.LENGTH_SHORT).show()
-                return@setOnCheckedChangeListener
-            }
-            
-            val postId = posts.first().id
-            val intent = SubmitService.newIntent(context!!, postId)
-            val pi = PendingIntent.getService(context!!, postId.toInt(), intent, 0)
-            val am = context!!.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            val time = SystemClock.elapsedRealtime() + 1 * 1000
-            
-            am.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, time, pi)
-            
-            tb.isEnabled = true
+            button.isEnabled = true
         }
         
         recyclerView = v.findViewById(R.id.queue_recyclerview)
