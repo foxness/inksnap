@@ -1,12 +1,13 @@
 package space.foxness.snapwalls
 
-import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.*
+import android.support.annotation.RequiresApi
+import android.support.v4.app.NotificationCompat
 import android.util.Log
 
 
@@ -28,14 +29,14 @@ class SubmitService : Service() {
                 return
             }
 
-            val post = Queue.getInstance(applicationContext).getPost(postId)
+            val post = Queue.getInstance(this@SubmitService).getPost(postId)
             if (post == null) {
                 Log.i(TAG, "No post to submit")
                 stopSelf(msg.arg1)
                 return
             }
 
-            val reddit = Autoreddit.getInstance(applicationContext).reddit
+            val reddit = Autoreddit.getInstance(this@SubmitService).reddit
 
             if (!reddit.canSubmitRightNow) {
                 Log.i(TAG, "Can't submit right now")
@@ -63,29 +64,32 @@ class SubmitService : Service() {
         mServiceLooper = thread.looper
         mServiceHandler = ServiceHandler(mServiceLooper)
     }
+    
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun createNotificationChannel() {
+        
+        val nc = NotificationChannel(NOTIFICATION_CHANNEL_ID, NOTIFICATION_CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT)
+        
+        val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        
+        nm.createNotificationChannel(nc)
+    }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-
-        val appName = getString(R.string.app_name)
+        
         val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channelId = appName
-            val channelName = appName
-            val nc = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT)
-            val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            nm.createNotificationChannel(nc)
-            
-            Notification.Builder(this, channelId)
+            createNotificationChannel()
+            NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
         } else {
-            Notification.Builder(this)
+            NotificationCompat.Builder(this)
         }
-            
+        
         val notification = builder
-                .setContentTitle(appName)
+                .setContentTitle(getString(R.string.app_name))
                 .setContentText("Submitting...")
                 .setSmallIcon(R.drawable.snapwalls_icon)
                 .build()
-
-        val NOTIFICATION_ID = 1 // must not be 0
+        
         startForeground(NOTIFICATION_ID, notification)
         
         val msg = mServiceHandler.obtainMessage()
@@ -100,8 +104,10 @@ class SubmitService : Service() {
 
     companion object {
         private const val DEBUG = false
-
         private const val TAG = "SubmitService"
+        private const val NOTIFICATION_ID = 1 // must not be 0
+        private const val NOTIFICATION_CHANNEL_NAME = "Main"
+        private const val NOTIFICATION_CHANNEL_ID = NOTIFICATION_CHANNEL_NAME
         private const val EXTRA_POST_ID = "post_id"
 
         fun newIntent(context: Context, postId: Long): Intent {
