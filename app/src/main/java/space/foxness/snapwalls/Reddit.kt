@@ -5,8 +5,9 @@ import com.loopj.android.http.JsonHttpResponseHandler
 import com.loopj.android.http.RequestParams
 import com.loopj.android.http.SyncHttpClient
 import cz.msebera.android.httpclient.Header
+import org.joda.time.Duration
+import org.joda.time.Instant
 import org.json.JSONObject
-import java.util.*
 
 class Reddit private constructor(private val callbacks: Callbacks) { // todo: use async/await
 
@@ -15,12 +16,13 @@ class Reddit private constructor(private val callbacks: Callbacks) { // todo: us
     
     var accessToken: String? = null
     var refreshToken: String? = null
-    var accessTokenExpirationDate: Date? = null
-    var lastSubmissionDate: Date? = null
+    var accessTokenExpirationDate: Instant? = null
+    var lastSubmissionDate: Instant? = null
 
     val isSignedIn get() = refreshToken != null
 
-    val isRestrictedByRatelimit get() = lastSubmissionDate != null && Date().time < lastSubmissionDate!!.time + RATELIMIT
+    val isRestrictedByRatelimit
+        get() = lastSubmissionDate != null && Instant.now() < lastSubmissionDate!! + Duration(RATELIMIT_MS)
 
     val canSubmitRightNow get() = isSignedIn && !isRestrictedByRatelimit
 
@@ -79,7 +81,7 @@ class Reddit private constructor(private val callbacks: Callbacks) { // todo: us
                     val errors = json!!.optJSONArray("errors")
 
                     if (errors.length() == 0) {
-                        lastSubmissionDate = Date()
+                        lastSubmissionDate = Instant.now()
                         callbacks.onNewLastSubmissionDate()
                         callback(null, json.optJSONObject("data").optString("url"))
                     } else {
@@ -124,7 +126,7 @@ class Reddit private constructor(private val callbacks: Callbacks) { // todo: us
     }
 
     private fun ensureValidAccessToken(callback: (Throwable?) -> Unit) {
-        if (accessToken != null && accessTokenExpirationDate!!.after(Date())) {
+        if (accessToken != null && accessTokenExpirationDate!! > Instant.now()) {
             callback(null)
             return
         }
@@ -134,14 +136,14 @@ class Reddit private constructor(private val callbacks: Callbacks) { // todo: us
             return
         }
 
-        val ahc = SyncHttpClient()
-        ahc.setUserAgent(USER_AGENT)
-        ahc.setBasicAuth(APP_CLIENT_ID, APP_CLIENT_SECRET)
+        val shc = SyncHttpClient()
+        shc.setUserAgent(USER_AGENT)
+        shc.setBasicAuth(APP_CLIENT_ID, APP_CLIENT_SECRET)
 
         val params = RequestParams()
         params.add("grant_type", "refresh_token")
         params.add("refresh_token", refreshToken)
-        ahc.post(ACCESS_TOKEN_ENDPOINT, params, object : JsonHttpResponseHandler() {
+        shc.post(ACCESS_TOKEN_ENDPOINT, params, object : JsonHttpResponseHandler() {
             
             override fun onSuccess(statusCode: Int, headers: Array<Header>?, response: JSONObject?) {
                 super.onSuccess(statusCode, headers, response)
@@ -168,9 +170,7 @@ class Reddit private constructor(private val callbacks: Callbacks) { // todo: us
 
     private fun updateAccessToken(newAccessToken: String, expiresIn: Int) {
         accessToken = newAccessToken
-        val date = Calendar.getInstance() // current time
-        date.add(Calendar.SECOND, expiresIn) // expiresIn == 1 hour
-        accessTokenExpirationDate = date.time
+        accessTokenExpirationDate = Instant.now() + Duration.standardSeconds(expiresIn.toLong())
         
         callbacks.onNewAccessToken()
     }
@@ -181,15 +181,15 @@ class Reddit private constructor(private val callbacks: Callbacks) { // todo: us
             return
         }
 
-        val ahc = SyncHttpClient()
-        ahc.setUserAgent(USER_AGENT)
-        ahc.setBasicAuth(APP_CLIENT_ID, APP_CLIENT_SECRET)
+        val shc = SyncHttpClient()
+        shc.setUserAgent(USER_AGENT)
+        shc.setBasicAuth(APP_CLIENT_ID, APP_CLIENT_SECRET)
 
         val params = RequestParams()
         params.add("grant_type", "authorization_code")
         params.add("code", authCode)
         params.add("redirect_uri", APP_REDIRECT_URI)
-        ahc.post(ACCESS_TOKEN_ENDPOINT, params, object : JsonHttpResponseHandler() {
+        shc.post(ACCESS_TOKEN_ENDPOINT, params, object : JsonHttpResponseHandler() {
             override fun onSuccess(statusCode: Int, headers: Array<Header>?, response: JSONObject?) {
                 super.onSuccess(statusCode, headers, response)
 
@@ -242,7 +242,7 @@ class Reddit private constructor(private val callbacks: Callbacks) { // todo: us
         private const val AUTH_RESPONSE_TYPE = "code"
         private const val USER_AGENT = "Snapwalls by /u/foxneZz"
 
-        private const val RATELIMIT = 10 * 60 * 1000 // in milliseconds, also 10 minutes
+        private const val RATELIMIT_MS: Long = 10 * 60 * 1000 // 10 minutes, required to be long
 
         private fun randomState(): String { // TODO: implement this method
             return "testy"

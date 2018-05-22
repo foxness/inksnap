@@ -39,7 +39,7 @@ class SubmitService : IntentService(TAG) {
     }
 
     companion object {
-        private const val DEBUG = true
+        private const val DEBUG = false
         
         private const val TAG = "SubmitService"
         private const val EXTRA_POST_ID = "post_id"
