@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.os.Build
 import android.os.SystemClock
+import org.joda.time.DateTime
 import org.joda.time.Duration
 import org.joda.time.Instant
 
@@ -13,6 +14,17 @@ class PostScheduler(context: Context) {
     private val context = context.applicationContext!!
     
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+    
+    // the post order is determined by the postIds order
+    fun schedulePosts(postIds: List<Long>, schedule: Schedule, wakeup: Boolean = true) {
+        
+        val scheduleTimes = schedule.getScheduleTimes(DateTime.now(), postIds.size)
+        if (postIds.size != scheduleTimes.size)
+            throw RuntimeException("How did this even happen?") // this should never happen
+        
+        for ((index, time) in scheduleTimes.withIndex())
+            schedulePostAtSpecificTime(postIds[index], time.toInstant())
+    }
     
     fun cancelScheduledPosts(postIds: List<Long>) {
         for (postId in postIds)
@@ -28,7 +40,8 @@ class PostScheduler(context: Context) {
         schedulePost(postId, instant.millis, true, wakeup)
     }
     
-    fun isPostScheduled(postId: Long) = getPendingIntent(postId, PendingIntent.FLAG_NO_CREATE) != null
+    fun isPostScheduled(postId: Long)
+            = getPendingIntent(postId, PendingIntent.FLAG_NO_CREATE) != null
     
     fun cancelScheduledPost(postId: Long) {
         val pi = getPendingIntent(postId)!!
