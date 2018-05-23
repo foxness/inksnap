@@ -5,6 +5,7 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
 import android.os.*
 import android.support.annotation.RequiresApi
 import android.support.v4.app.NotificationCompat
@@ -17,44 +18,66 @@ class SubmitService : Service() {
     private lateinit var mServiceHandler: ServiceHandler
 
     private inner class ServiceHandler(looper: Looper) : Handler(looper) {
-        
+
         override fun handleMessage(msg: Message) {
 
-            val intent = msg.obj as Intent
-            val postId = intent.getLongExtra(EXTRA_POST_ID, -1)
-            Log.i(TAG, "I AM SUBMIT, ATTEMPTING TO POST ID $postId")
-
+            Log.i(TAG, "I AM SUBMIT")
+            
             if (DEBUG) {
                 stopSelf(msg.arg1)
                 return
             }
 
+            // todo: add all posts that failed to be submitted to a 'failed' list
+            // todo: add network safeguard to auth
+
+            // BIG NOTE: stopSelf(msg.arg1) MUST BE CALLED BEFORE RETURNING
+            // DON'T RETURN WITHOUT CALLING IT
+
+            // this code is impossible to format to look good with this brace styling :(
+            
+            val intent = msg.obj as Intent
+            val postId = intent.getLongExtra(EXTRA_POST_ID, -1)
             val post = Queue.getInstance(this@SubmitService).getPost(postId)
             if (post == null) {
-                Log.i(TAG, "No post to submit")
-                stopSelf(msg.arg1)
-                return
-            }
 
-            val reddit = Autoreddit.getInstance(this@SubmitService).reddit
+                Log.i(TAG, "POST NOT FOUND")
 
-            if (!reddit.canSubmitRightNow) {
-                Log.i(TAG, "Can't submit right now")
-                stopSelf(msg.arg1)
-                return
-            }
+            } else {
 
-            reddit.submit(post, { error, link ->
-                if (error != null) {
-                    Log.i(TAG, "ERROE: ${error.message}")
-                    throw error
+                val reddit = Autoreddit.getInstance(this@SubmitService).reddit
+                if (!reddit.canSubmitRightNow) {
+
+                    Log.i(TAG, "NOT LOGGED IN OR RATELIMITED")
+
+                } else {
+
+                    if (!isNetworkAvailable()) {
+
+                        Log.i(TAG, "NETWORK NOT AVAILABLE")
+
+                    } else {
+
+                        reddit.submit(post, { error, link ->
+                            if (error != null) {
+                                Log.i(TAG, "ERROE: ${error.message}")
+                                throw error
+                            }
+
+                            Log.i(TAG, "GOT LINK: $link")
+                        })
+                    }
                 }
-
-                Log.i(TAG, "GOT LINK: $link")
-            })
+            }
 
             stopSelf(msg.arg1)
         }
+    }
+
+    private fun isNetworkAvailable(): Boolean {
+        val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val ani = cm.activeNetworkInfo
+        return ani?.isConnected == true // same as (ani?.isConnected ?: false)
     }
 
     override fun onCreate() {
@@ -76,14 +99,11 @@ class SubmitService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        
-        val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             createNotificationChannel()
-            NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
-        } else {
-            NotificationCompat.Builder(this)
-        }
         
+        val builder = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
         val notification = builder
                 .setContentTitle(getString(R.string.app_name))
                 .setContentText("Submitting...")
