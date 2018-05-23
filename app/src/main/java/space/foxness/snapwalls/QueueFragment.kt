@@ -2,6 +2,7 @@ package space.foxness.snapwalls
 
 import android.app.Dialog
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -24,9 +25,13 @@ class QueueFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: PostAdapter
     private lateinit var signinMenuItem: MenuItem
+    private lateinit var timerText: TextView
     
     private lateinit var reddit: Reddit
     private lateinit var postScheduler: PostScheduler
+
+    private val initialDelay = Duration.standardMinutes(10)
+    private val period = Duration.standardHours(3)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,10 +57,32 @@ class QueueFragment : Fragment() {
         val posts = Queue.getInstance(context!!).posts
         adapter = PostAdapter(posts)
         recyclerView.adapter = adapter
+
+        timerText = v.findViewById(R.id.queue_timer)
+        setupTimer()
         
         updateUI()
 
         return v
+    }
+    
+    private fun setupTimer() {
+        if (Config.getInstance(context!!).scheduled) {
+            object: CountDownTimer(
+                    Duration(DateTime.now(), Queue.getInstance(context!!).posts.first().scheduledDate!!).millis,
+                    1000) {
+
+                // todo: something?
+                override fun onFinish() { }
+
+                override fun onTick(millisUntilFinished: Long) {
+                    timerText.text = millisUntilFinished.toString()
+                }
+
+            }.start()
+        } else {
+            timerText.text = 0.toString()
+        }
     }
     
     private fun toast(text: String) {
@@ -76,9 +103,6 @@ class QueueFragment : Fragment() {
                 toast("No posts to submit")
                 return
             }
-
-            val initialDelay = Duration.standardMinutes(10)
-            val period = Duration.standardHours(3)
             
             val postDelays = HashMap(posts
                     .mapIndexed { i, post -> post.id to initialDelay + period * i.toLong() }
@@ -106,6 +130,8 @@ class QueueFragment : Fragment() {
             postScheduler.cancelScheduledPosts(posts.map { it.id })
             Log.i("Submitboi", "CANCELED")
         }
+
+        setupTimer()
     }
 
     override fun onResume() {

@@ -4,6 +4,7 @@
     android:layout_height="match_parent"
     android:layout_width="match_parent"
     android:orientation="vertical"
+    xmlns:tools="http://schemas.android.com/tools"
     >
 
     <android.support.v7.widget.RecyclerView
@@ -24,8 +25,20 @@
             android:id="@+id/queue_toggle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
+            android:layout_marginStart="40dp"
             android:layout_centerVertical="true"
+            />
+        
+        <TextView
+            android:id="@+id/queue_timer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/queue_toggle"
+            android:layout_marginStart="40dp"
+            android:textSize="32sp"
+            android:fontFamily="monospace"
+            android:layout_centerVertical="true"
+            tools:text="00:00:00"
             />
         
     </RelativeLayout>
