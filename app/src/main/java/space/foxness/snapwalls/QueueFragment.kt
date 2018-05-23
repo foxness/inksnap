@@ -73,7 +73,7 @@ class QueueFragment : Fragment() {
                 return
             }
 
-            postScheduler.schedule(posts.first().id, Duration.standardSeconds(7))
+            postScheduler.scheduleDelayedPost(posts.first().id, Duration.standardSeconds(7))
             Log.i("Submitboi", "SCHEDULED")
         } else {
             // todo: cancel scheduled posts
