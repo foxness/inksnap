@@ -20,9 +20,8 @@ class PostScheduler(context: Context) { // todo: throw exception if schedule tim
                               initialDelay: Duration,
                               wakeup: Boolean = true) {
 
-        val firstDate = Duration(SystemClock.elapsedRealtime()) + initialDelay
         val postDelays = HashMap(postIds
-                .mapIndexed { i, postId -> postId to firstDate + period * i.toLong() }
+                .mapIndexed { i, postId -> postId to initialDelay + period * i.toLong() }
                 .toMap())
         
         scheduleDelayedPosts(postDelays, wakeup)
@@ -32,7 +31,7 @@ class PostScheduler(context: Context) { // todo: throw exception if schedule tim
             = postDelays.forEach { postId, delay -> scheduleDelayedPost(postId, delay, wakeup) }
     
     // the post order is determined by the postIds order
-    fun schedulePosts(postIds: List<Long>, schedule: Schedule, wakeup: Boolean = true) {
+    fun scheduleTimelyPosts(postIds: List<Long>, schedule: Schedule, wakeup: Boolean = true) {
         
         val scheduleTimes = schedule.getScheduleTimes(DateTime.now(), postIds.size)
         if (postIds.size != scheduleTimes.size)
@@ -41,12 +40,12 @@ class PostScheduler(context: Context) { // todo: throw exception if schedule tim
         val postTimes = HashMap<Long, DateTime>()
         for ((index, time) in scheduleTimes.withIndex())
             postTimes[postIds[index]] = time
-        
-        schedulePosts(postTimes, wakeup)
+
+        scheduleTimelyPosts(postTimes, wakeup)
     }
 
-    fun schedulePosts(postTimes: HashMap<Long, DateTime>, wakeup: Boolean = true) 
-            = postTimes.forEach { postId, dateTime -> schedulePostAtSpecificTime(postId, dateTime, wakeup) }
+    fun scheduleTimelyPosts(postTimes: HashMap<Long, DateTime>, wakeup: Boolean = true) 
+            = postTimes.forEach { postId, dateTime -> scheduleTimelyPost(postId, dateTime, wakeup) }
     
     fun cancelScheduledPosts(postIds: List<Long>)
             = postIds.forEach { cancelScheduledPost(it) }
@@ -56,7 +55,7 @@ class PostScheduler(context: Context) { // todo: throw exception if schedule tim
         schedulePost(postId, datetime.millis, false, wakeup)
     }
     
-    fun schedulePostAtSpecificTime(postId: Long, datetime: DateTime, wakeup: Boolean = true)
+    fun scheduleTimelyPost(postId: Long, datetime: DateTime, wakeup: Boolean = true)
             = schedulePost(postId, datetime.millis, true, wakeup)
     
     fun isPostScheduled(postId: Long)

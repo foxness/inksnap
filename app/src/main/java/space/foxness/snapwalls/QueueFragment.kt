@@ -13,8 +13,10 @@ import android.widget.CheckBox
 import android.widget.TextView
 import android.widget.Toast
 import android.widget.ToggleButton
+import com.github.debop.kodatimes.times
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
+import org.joda.time.DateTime
 import org.joda.time.Duration
 
 class QueueFragment : Fragment() {
@@ -61,22 +63,48 @@ class QueueFragment : Fragment() {
     }
     
     private fun toggleAutoSubmission(on: Boolean) {
+        val queue = Queue.getInstance(context!!)
+        val config = Config.getInstance(context!!)
+        val posts = queue.posts
         if (on) {
             if (!reddit.isSignedIn) {
                 toast("You must be signed in to do that")
                 return
             }
 
-            val posts = Queue.getInstance(context!!).posts
             if (posts.isEmpty()) {
                 toast("No posts to submit")
                 return
             }
 
-            postScheduler.scheduleDelayedPost(posts.first().id, Duration.standardSeconds(7))
+            val initialDelay = Duration.standardMinutes(10)
+            val period = Duration.standardHours(3)
+            
+            val postDelays = HashMap(posts
+                    .mapIndexed { i, post -> post.id to initialDelay + period * i.toLong() }
+                    .toMap())
+
+            val now = DateTime.now()
+            posts.forEach {
+                it.scheduledDate = now + postDelays[it.id]
+                queue.updatePost(it)
+            }
+            
+            config.scheduled = true
+            
+            postScheduler.scheduleDelayedPosts(postDelays)
             Log.i("Submitboi", "SCHEDULED")
+            
         } else {
-            // todo: cancel scheduled posts
+            posts.forEach {
+                it.scheduledDate = null
+                queue.updatePost(it)
+            }
+
+            config.scheduled = false
+            
+            postScheduler.cancelScheduledPosts(posts.map { it.id })
+            Log.i("Submitboi", "CANCELED")
         }
     }
 
@@ -100,6 +128,9 @@ class QueueFragment : Fragment() {
     }
 
     private fun addNewPost() {
+
+        // todo: schedule new posts automatically if autosubmit is on
+        
         val p = Post()
         p.subreddit = "test" // todo: change this
         p.id = Queue.getInstance(context!!).addPost(p)
