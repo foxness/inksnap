@@ -5,14 +5,31 @@ import android.app.PendingIntent
 import android.content.Context
 import android.os.Build
 import android.os.SystemClock
+import com.github.debop.kodatimes.times
 import org.joda.time.DateTime
 import org.joda.time.Duration
 
-class PostScheduler(context: Context) {
+class PostScheduler(context: Context) { // todo: throw exception if schedule time is in the past
 
     private val context = context.applicationContext!!
     
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+    
+    fun schedulePeriodicPosts(postIds: List<Long>,
+                              period: Duration,
+                              initialDelay: Duration,
+                              wakeup: Boolean = true) {
+
+        val firstDate = Duration(SystemClock.elapsedRealtime()) + initialDelay
+        val postDelays = HashMap(postIds
+                .mapIndexed { i, postId -> postId to firstDate + period * i.toLong() }
+                .toMap())
+        
+        scheduleDelayedPosts(postDelays, wakeup)
+    }
+    
+    fun scheduleDelayedPosts(postDelays: HashMap<Long, Duration>, wakeup: Boolean = true) 
+            = postDelays.forEach { postId, delay -> scheduleDelayedPost(postId, delay, wakeup) }
     
     // the post order is determined by the postIds order
     fun schedulePosts(postIds: List<Long>, schedule: Schedule, wakeup: Boolean = true) {
@@ -35,7 +52,7 @@ class PostScheduler(context: Context) {
             = postIds.forEach { cancelScheduledPost(it) }
     
     fun scheduleDelayedPost(postId: Long, delay: Duration, wakeup: Boolean = true) {
-        val datetime = (Duration(SystemClock.elapsedRealtime()) + delay)!!
+        val datetime = (Duration(SystemClock.elapsedRealtime()) + delay)
         schedulePost(postId, datetime.millis, false, wakeup)
     }
     
