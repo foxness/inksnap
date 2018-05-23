@@ -1,7 +1,7 @@
 package space.foxness.snapwalls
 
 import android.content.Context
-import org.joda.time.Instant
+import org.joda.time.DateTime
 
 class Config private constructor(context: Context) {
     
@@ -16,24 +16,24 @@ class Config private constructor(context: Context) {
         set(value) = setString(CONFIG_REFRESH_TOKEN, value)
 
     var accessTokenExpirationDate
-        get() = getInstant(CONFIG_ACCESS_TOKEN_EXPIRATION_DATE)
-        set(value) = setInstant(CONFIG_ACCESS_TOKEN_EXPIRATION_DATE, value)
+        get() = getDateTime(CONFIG_ACCESS_TOKEN_EXPIRATION_DATE)
+        set(value) = setDateTime(CONFIG_ACCESS_TOKEN_EXPIRATION_DATE, value)
 
     var lastSubmissionDate
-        get() = getInstant(CONFIG_LAST_SUBMISSION_DATE)
-        set(value) = setInstant(CONFIG_LAST_SUBMISSION_DATE, value)
+        get() = getDateTime(CONFIG_LAST_SUBMISSION_DATE)
+        set(value) = setDateTime(CONFIG_LAST_SUBMISSION_DATE, value)
 
 
     private fun getString(field: String) = sharedPreferences.getString(field, null)
     
     private fun setString(field: String, value: String?) = sharedPreferences.edit().putString(field, value).apply()
     
-    private fun getInstant(field: String): Instant? {
+    private fun getDateTime(field: String): DateTime? {
         val dateInMs = sharedPreferences.getLong(field, CONFIG_NULL_SUBSTITUTE)
-        return if (dateInMs == CONFIG_NULL_SUBSTITUTE) null else Instant(dateInMs)
+        return if (dateInMs == CONFIG_NULL_SUBSTITUTE) null else DateTime(dateInMs)
     }
 
-    private fun setInstant(field: String, value: Instant?) {
+    private fun setDateTime(field: String, value: DateTime?) {
         val long = value?.millis ?: CONFIG_NULL_SUBSTITUTE
         sharedPreferences.edit().putLong(field, long).apply()
     }

@@ -7,7 +7,6 @@ import android.os.Build
 import android.os.SystemClock
 import org.joda.time.DateTime
 import org.joda.time.Duration
-import org.joda.time.Instant
 
 class PostScheduler(context: Context) {
 
@@ -21,24 +20,27 @@ class PostScheduler(context: Context) {
         val scheduleTimes = schedule.getScheduleTimes(DateTime.now(), postIds.size)
         if (postIds.size != scheduleTimes.size)
             throw RuntimeException("How did this even happen?") // this should never happen
-        
+
+        val postTimes = HashMap<Long, DateTime>()
         for ((index, time) in scheduleTimes.withIndex())
-            schedulePostAtSpecificTime(postIds[index], time.toInstant())
+            postTimes[postIds[index]] = time
+        
+        schedulePosts(postTimes, wakeup)
     }
+
+    fun schedulePosts(postTimes: HashMap<Long, DateTime>, wakeup: Boolean = true) 
+            = postTimes.forEach { postId, dateTime -> schedulePostAtSpecificTime(postId, dateTime, wakeup) }
     
-    fun cancelScheduledPosts(postIds: List<Long>) {
-        for (postId in postIds)
-            cancelScheduledPost(postId)
-    }
+    fun cancelScheduledPosts(postIds: List<Long>)
+            = postIds.forEach { cancelScheduledPost(it) }
     
     fun scheduleDelayedPost(postId: Long, delay: Duration, wakeup: Boolean = true) {
         val datetime = (Duration(SystemClock.elapsedRealtime()) + delay)!!
         schedulePost(postId, datetime.millis, false, wakeup)
     }
     
-    fun schedulePostAtSpecificTime(postId: Long, instant: Instant, wakeup: Boolean = true) {
-        schedulePost(postId, instant.millis, true, wakeup)
-    }
+    fun schedulePostAtSpecificTime(postId: Long, datetime: DateTime, wakeup: Boolean = true)
+            = schedulePost(postId, datetime.millis, true, wakeup)
     
     fun isPostScheduled(postId: Long)
             = getPendingIntent(postId, PendingIntent.FLAG_NO_CREATE) != null

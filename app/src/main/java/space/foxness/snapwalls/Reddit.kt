@@ -5,8 +5,8 @@ import com.loopj.android.http.JsonHttpResponseHandler
 import com.loopj.android.http.RequestParams
 import com.loopj.android.http.SyncHttpClient
 import cz.msebera.android.httpclient.Header
+import org.joda.time.DateTime
 import org.joda.time.Duration
-import org.joda.time.Instant
 import org.json.JSONObject
 
 class Reddit private constructor(private val callbacks: Callbacks) { // todo: use async/await
@@ -16,13 +16,13 @@ class Reddit private constructor(private val callbacks: Callbacks) { // todo: us
     
     var accessToken: String? = null
     var refreshToken: String? = null
-    var accessTokenExpirationDate: Instant? = null
-    var lastSubmissionDate: Instant? = null
+    var accessTokenExpirationDate: DateTime? = null
+    var lastSubmissionDate: DateTime? = null
 
     val isSignedIn get() = refreshToken != null
 
     val isRestrictedByRatelimit
-        get() = lastSubmissionDate != null && Instant.now() < lastSubmissionDate!! + Duration(RATELIMIT_MS)
+        get() = lastSubmissionDate != null && DateTime.now() < lastSubmissionDate!! + Duration(RATELIMIT_MS)
 
     val canSubmitRightNow get() = isSignedIn && !isRestrictedByRatelimit
 
@@ -81,7 +81,7 @@ class Reddit private constructor(private val callbacks: Callbacks) { // todo: us
                     val errors = json!!.optJSONArray("errors")
 
                     if (errors.length() == 0) {
-                        lastSubmissionDate = Instant.now()
+                        lastSubmissionDate = DateTime.now()
                         callbacks.onNewLastSubmissionDate()
                         callback(null, json.optJSONObject("data").optString("url"))
                     } else {
@@ -126,7 +126,7 @@ class Reddit private constructor(private val callbacks: Callbacks) { // todo: us
     }
 
     private fun ensureValidAccessToken(callback: (Throwable?) -> Unit) {
-        if (accessToken != null && accessTokenExpirationDate!! > Instant.now()) {
+        if (accessToken != null && accessTokenExpirationDate!! > DateTime.now()) {
             callback(null)
             return
         }
@@ -170,7 +170,7 @@ class Reddit private constructor(private val callbacks: Callbacks) { // todo: us
 
     private fun updateAccessToken(newAccessToken: String, expiresIn: Int) {
         accessToken = newAccessToken
-        accessTokenExpirationDate = Instant.now() + Duration.standardSeconds(expiresIn.toLong())
+        accessTokenExpirationDate = DateTime.now() + Duration.standardSeconds(expiresIn.toLong())
         
         callbacks.onNewAccessToken()
     }
