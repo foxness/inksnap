@@ -19,6 +19,7 @@ import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 import org.joda.time.DateTime
 import org.joda.time.Duration
+import space.foxness.snapwalls.Util.toNice
 
 class QueueFragment : Fragment() {
 
@@ -30,7 +31,7 @@ class QueueFragment : Fragment() {
     private lateinit var reddit: Reddit
     private lateinit var postScheduler: PostScheduler
 
-    private val initialDelay = Duration.standardMinutes(10)
+    private val initialDelay = Duration.standardSeconds(37)
     private val period = Duration.standardHours(3)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,6 +68,9 @@ class QueueFragment : Fragment() {
     }
     
     private fun setupTimer() {
+        
+        val updateTimer: (Duration) -> Unit = { timerText.text = it.toNice() }
+        
         if (Config.getInstance(context!!).scheduled) {
             object: CountDownTimer(
                     Duration(DateTime.now(), Queue.getInstance(context!!).posts.first().scheduledDate!!).millis,
@@ -76,12 +80,12 @@ class QueueFragment : Fragment() {
                 override fun onFinish() { }
 
                 override fun onTick(millisUntilFinished: Long) {
-                    timerText.text = millisUntilFinished.toString()
+                    updateTimer(Duration(millisUntilFinished))
                 }
 
             }.start()
         } else {
-            timerText.text = 0.toString()
+            updateTimer(initialDelay)
         }
     }
     
