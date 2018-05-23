@@ -28,6 +28,8 @@ class QueueFragment : Fragment() {
     private lateinit var signinMenuItem: MenuItem
     private lateinit var timerText: TextView
     
+    private var timerCountdown: CountDownTimer? = null
+    
     private lateinit var reddit: Reddit
     private lateinit var postScheduler: PostScheduler
 
@@ -72,8 +74,8 @@ class QueueFragment : Fragment() {
         val updateTimer: (Duration) -> Unit = { timerText.text = it.toNice() }
         
         if (Config.getInstance(context!!).scheduled) {
-            object: CountDownTimer(
-                    Duration(DateTime.now(), Queue.getInstance(context!!).posts.first().scheduledDate!!).millis,
+            timerCountdown = object: CountDownTimer(Duration(DateTime.now(), 
+                    Queue.getInstance(context!!).posts.first().scheduledDate!!).millis, 
                     1000) {
 
                 // todo: something?
@@ -82,9 +84,11 @@ class QueueFragment : Fragment() {
                 override fun onTick(millisUntilFinished: Long) {
                     updateTimer(Duration(millisUntilFinished))
                 }
-
-            }.start()
+            }
+            
+            timerCountdown!!.start()
         } else {
+            timerCountdown?.cancel()
             updateTimer(initialDelay)
         }
     }
