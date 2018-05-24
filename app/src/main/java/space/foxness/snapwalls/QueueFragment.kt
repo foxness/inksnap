@@ -9,9 +9,9 @@ import android.support.v7.widget.RecyclerView
 import android.view.*
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.Button
 import android.widget.CheckBox
 import android.widget.TextView
-import android.widget.ToggleButton
 import com.github.debop.kodatimes.times
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
@@ -27,6 +27,7 @@ class QueueFragment : Fragment() {
     private lateinit var adapter: PostAdapter
     private lateinit var signinMenuItem: MenuItem
     private lateinit var timerText: TextView
+    private lateinit var timerToggle: Button
     
     private lateinit var timerObject: CountDownTimer
 
@@ -62,13 +63,14 @@ class QueueFragment : Fragment() {
 
         updatePostList()
         
-        // TOGGLE BUTTON ------------------------------
-        
-        val tb = v.findViewById<ToggleButton>(R.id.queue_toggle)
-        tb.isChecked = autosubmitEnabled
-        tb.setOnCheckedChangeListener { button, isChecked ->
+        // TIMER TOGGLE -------------------------------
+
+        timerToggle = v.findViewById(R.id.queue_toggle)
+        updateTimerToggleText(!autosubmitEnabled)
+        timerToggle.setOnClickListener { button ->
             button.isEnabled = false
-            toggleAutosubmit(isChecked)
+            val autosubmitOn = Config.getInstance(context!!).autosubmitEnabled
+            toggleAutosubmit(!autosubmitOn)
             button.isEnabled = true
         }
         
@@ -86,10 +88,14 @@ class QueueFragment : Fragment() {
 
         return v
     }
+    
+    private fun updateTimerToggleText(turnOn: Boolean) {
+        timerToggle.text = if (turnOn) "Turn on" else "Turn off"
+    }
 
     // todo: properties for config & queue?
     private fun toggleAutosubmit(on: Boolean) {
-
+        
         // autosubmit behavior:
         // can't turn it on if there are no posts to submit
         // it turns off when all scheduled posts are submitted todo
@@ -147,6 +153,8 @@ class QueueFragment : Fragment() {
 
             log("Canceled ${posts.size} scheduled post(s)")
         }
+
+        updateTimerToggleText(!on)
     }
     
     private fun getTimerObject(timeLeft: Duration): CountDownTimer {
@@ -155,7 +163,7 @@ class QueueFragment : Fragment() {
             override fun onFinish() {}
 
             override fun onTick(millisUntilFinished: Long) {
-                log("TICK")
+//                log("TICK")
                 updateTimerText(Duration(millisUntilFinished))
             }
         }
@@ -165,6 +173,8 @@ class QueueFragment : Fragment() {
         timerText.text = timeLeft.toNice()
     }
 
+    // todo: onPause (NOT ONRESUME) stop the timer ticking because the timer is not being seen
+    // todo: resume ticking in onResume
     override fun onResume() {
         super.onResume()
         updatePostList()
