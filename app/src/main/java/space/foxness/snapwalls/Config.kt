@@ -23,9 +23,9 @@ class Config private constructor(context: Context) {
         get() = getDateTime(CONFIG_LAST_SUBMISSION_DATE)
         set(value) = setDateTime(CONFIG_LAST_SUBMISSION_DATE, value)
     
-    var scheduled
-        get() = getBool(CONFIG_SCHEDULED)
-        set(value) = setBool(CONFIG_SCHEDULED, value)
+    var autosubmitEnabled
+        get() = getBool(CONFIG_AUTOSUBMIT_ENABLED)
+        set(value) = setBool(CONFIG_AUTOSUBMIT_ENABLED, value)
 
     private fun getString(key: String) = sharedPreferences.getString(key, null)
     
@@ -51,7 +51,7 @@ class Config private constructor(context: Context) {
         private const val CONFIG_REFRESH_TOKEN = "refreshToken"
         private const val CONFIG_ACCESS_TOKEN_EXPIRATION_DATE = "accessTokenExpirationDate"
         private const val CONFIG_LAST_SUBMISSION_DATE = "lastSubmissionDate"
-        private const val CONFIG_SCHEDULED = "scheduled"
+        private const val CONFIG_AUTOSUBMIT_ENABLED = "autosubmitEnabled"
 
         private const val CONFIG_NULL_SUBSTITUTE: Long = 0
     }

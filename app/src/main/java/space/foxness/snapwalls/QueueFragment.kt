@@ -28,13 +28,15 @@ class QueueFragment : Fragment() {
     private lateinit var signinMenuItem: MenuItem
     private lateinit var timerText: TextView
     
-    private var timerCountdown: CountDownTimer? = null
-    
-    private lateinit var reddit: Reddit
-    private lateinit var postScheduler: PostScheduler
+    private lateinit var timerObject: CountDownTimer
 
     private val initialDelay = Duration.standardSeconds(37)
     private val period = Duration.standardHours(3)
+    
+    private lateinit var reddit: Reddit
+    private lateinit var postScheduler: PostScheduler
+    
+    private var timeLeft: Duration = initialDelay
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,103 +49,128 @@ class QueueFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val v = inflater.inflate(R.layout.fragment_queue, container, false)
 
-        val tb = v.findViewById<ToggleButton>(R.id.queue_toggle)
-        tb.setOnCheckedChangeListener { button, isChecked ->
-            button.isEnabled = false
-            toggleAutoSubmission(isChecked)
-            button.isEnabled = true
-        }
-        
+        val autosubmitEnabled = Config.getInstance(context!!).autosubmitEnabled
+        val posts = Queue.getInstance(context!!).posts
+
+        // RECYCLER VIEW ------------------------------
+
         recyclerView = v.findViewById(R.id.queue_recyclerview)
         recyclerView.layoutManager = LinearLayoutManager(context)
 
-        val posts = Queue.getInstance(context!!).posts
         adapter = PostAdapter(posts)
         recyclerView.adapter = adapter
 
-        timerText = v.findViewById(R.id.queue_timer)
-        setupTimer()
+        updatePostList()
         
-        updateUI()
+        // TOGGLE BUTTON ------------------------------
+        
+        val tb = v.findViewById<ToggleButton>(R.id.queue_toggle)
+        tb.isChecked = autosubmitEnabled
+        tb.setOnCheckedChangeListener { button, isChecked ->
+            button.isEnabled = false
+            toggleAutosubmit(isChecked)
+            button.isEnabled = true
+        }
+        
+        // TIMER --------------------------------------
+
+        timerText = v.findViewById(R.id.queue_timer)
+        
+        if (autosubmitEnabled) {
+            val unpausedTimeLeft = Duration(DateTime.now(), posts.first().scheduledDate!!)
+            timerObject = getTimerObject(unpausedTimeLeft)
+            timerObject.start()
+        } else {
+            updateTimerText(timeLeft)
+        }
 
         return v
     }
-    
-    private fun setupTimer() {
-        
-        val updateTimer: (Duration) -> Unit = { timerText.text = it.toNice() }
-        
-        if (Config.getInstance(context!!).scheduled) {
-            timerCountdown = object: CountDownTimer(Duration(DateTime.now(), 
-                    Queue.getInstance(context!!).posts.first().scheduledDate!!).millis, 
-                    1000) {
 
-                // todo: something?
-                override fun onFinish() { }
+    // todo: properties for config & queue?
+    private fun toggleAutosubmit(on: Boolean) {
 
-                override fun onTick(millisUntilFinished: Long) {
-                    updateTimer(Duration(millisUntilFinished))
-                }
-            }
-            
-            timerCountdown!!.start()
-        } else {
-            timerCountdown?.cancel()
-            updateTimer(initialDelay)
-        }
-    }
-    
-    private fun toggleAutoSubmission(on: Boolean) {
+        // autosubmit behavior:
+        // can't turn it on if there are no posts to submit
+        // it turns off when all scheduled posts are submitted todo
+        
         val queue = Queue.getInstance(context!!)
         val config = Config.getInstance(context!!)
         val posts = queue.posts
+        
+        if (on == config.autosubmitEnabled) // this should never happen
+            throw RuntimeException("Can't change autosubmit to state it's already in")
+        
         if (on) {
             if (!reddit.isSignedIn) {
-                toast("You must be signed in to do that")
+                toast("You must be signed in to autosubmit")
                 return
             }
 
             if (posts.isEmpty()) {
-                toast("No posts to submit")
+                toast("No posts to autosubmit")
                 return
             }
             
             val postDelays = HashMap(posts
-                    .mapIndexed { i, post -> post.id to initialDelay + period * i.toLong() }
+                    .mapIndexed { i, post -> post.id to timeLeft + period * i.toLong() }
                     .toMap())
+            
+            timerObject = getTimerObject(timeLeft)
+            timerObject.start()
+            
+            postScheduler.scheduleDelayedPosts(postDelays)
 
             val now = DateTime.now()
             posts.forEach {
                 it.scheduledDate = now + postDelays[it.id]
                 queue.updatePost(it)
             }
+
+            config.autosubmitEnabled = true
             
-            config.scheduled = true
-            
-            postScheduler.scheduleDelayedPosts(postDelays)
-            log("SCHEDULED")
+            log("Scheduled ${posts.size} post(s)")
             
         } else {
+            timerObject.cancel()
+            timeLeft = Duration(DateTime.now(), posts.first().scheduledDate!!)
+            updateTimerText(timeLeft) // a potentially useless statement because of the timer's last update...
+            
+            postScheduler.cancelScheduledPosts(posts.map { it.id })
+            
             posts.forEach {
                 it.scheduledDate = null
                 queue.updatePost(it)
             }
 
-            config.scheduled = false
-            
-            postScheduler.cancelScheduledPosts(posts.map { it.id })
-            log("CANCELED")
-        }
+            config.autosubmitEnabled = false
 
-        setupTimer()
+            log("Canceled ${posts.size} scheduled post(s)")
+        }
+    }
+    
+    private fun getTimerObject(timeLeft: Duration): CountDownTimer {
+        return object : CountDownTimer(timeLeft.millis, TIMER_UPDATE_INTERVAL_MS) {
+            // todo: something?
+            override fun onFinish() {}
+
+            override fun onTick(millisUntilFinished: Long) {
+                log("TICK")
+                updateTimerText(Duration(millisUntilFinished))
+            }
+        }
+    }
+    
+    private fun updateTimerText(timeLeft: Duration) {
+        timerText.text = timeLeft.toNice()
     }
 
     override fun onResume() {
         super.onResume()
-        updateUI()
+        updatePostList()
     }
 
-    private fun updateUI() {
+    private fun updatePostList() {
         adapter.setPosts(Queue.getInstance(context!!).posts)
         adapter.notifyDataSetChanged()
     }
@@ -159,7 +186,7 @@ class QueueFragment : Fragment() {
 
     private fun addNewPost() {
 
-        // todo: schedule new posts automatically if autosubmit is on
+        // todo: schedule new posts automatically if autosubmitEnabled is on
         
         val p = Post()
         p.subreddit = "test" // todo: change this
@@ -289,5 +316,9 @@ class QueueFragment : Fragment() {
         }
 
         override fun getItemCount() = posts.size
+    }
+    
+    companion object {
+        private const val TIMER_UPDATE_INTERVAL_MS: Long = 1000 // 1 second
     }
 }

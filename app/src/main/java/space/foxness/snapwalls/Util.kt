@@ -21,7 +21,13 @@ object Util {
     
     fun Fragment.toast(text: String) = Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
     
-    fun Any.log(text: String) = Log.d("$APPNAME.${this::class.java.simpleName}", text)
+    fun Any.log(text: String) {
+        var className = this::class.java.simpleName
+        if (className.isEmpty())
+            className = "Anonymous"
+        
+        Log.d("$APPNAME.$className", text)
+    }
 
     fun Duration.toNice(): String = periodformatter.print(toPeriod())
 }

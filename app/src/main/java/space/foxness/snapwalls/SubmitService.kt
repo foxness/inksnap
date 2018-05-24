@@ -115,7 +115,7 @@ class SubmitService : Service() {
     override fun onBind(intent: Intent): IBinder? = null
 
     companion object {
-        private const val DEBUG_DONT_POST = false
+        private const val DEBUG_DONT_POST = true
         private const val NOTIFICATION_ID = 1 // must not be 0
         private const val NOTIFICATION_CHANNEL_NAME = "Main"
         private const val NOTIFICATION_CHANNEL_ID = NOTIFICATION_CHANNEL_NAME
