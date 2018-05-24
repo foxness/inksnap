@@ -3,7 +3,7 @@ package space.foxness.snapwalls
 import org.joda.time.DateTime
 import org.joda.time.LocalTime
 
-class Schedule(private val schedule: HashMap<DayOfWeek, List<LocalTime>>) {
+class WeekSchedule(private val schedule: HashMap<DayOfWeek, List<LocalTime>>) {
     
     enum class DayOfWeek { 
         Mon, Tue, Wed, Thu, Fri, Sat, Sun;
@@ -73,7 +73,7 @@ class Schedule(private val schedule: HashMap<DayOfWeek, List<LocalTime>>) {
     
     companion object {
         fun everyDay(dayTimes: List<LocalTime>) 
-                = Schedule(HashMap(DayOfWeek.values().map { it to dayTimes }.toMap()))
+                = WeekSchedule(HashMap(DayOfWeek.values().map { it to dayTimes }.toMap()))
         
         fun everyDayBestTimes() 
                 = everyDay(listOf(LocalTime(17, 0)))

@@ -31,7 +31,7 @@ class PostScheduler(context: Context) { // todo: throw exception if schedule tim
             = postDelays.forEach { postId, delay -> scheduleDelayedPost(postId, delay, wakeup) }
     
     // the post order is determined by the postIds order
-    fun scheduleTimelyPosts(postIds: List<Long>, schedule: Schedule, wakeup: Boolean = true) {
+    fun scheduleTimelyPosts(postIds: List<Long>, schedule: WeekSchedule, wakeup: Boolean = true) {
         
         val scheduleTimes = schedule.getScheduleTimes(DateTime.now(), postIds.size)
         if (postIds.size != scheduleTimes.size)
