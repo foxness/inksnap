@@ -6,20 +6,20 @@ import android.os.CountDownTimer
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.*
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.CheckBox
 import android.widget.TextView
-import android.widget.Toast
 import android.widget.ToggleButton
 import com.github.debop.kodatimes.times
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 import org.joda.time.DateTime
 import org.joda.time.Duration
+import space.foxness.snapwalls.Util.log
 import space.foxness.snapwalls.Util.toNice
+import space.foxness.snapwalls.Util.toast
 
 class QueueFragment : Fragment() {
 
@@ -93,10 +93,6 @@ class QueueFragment : Fragment() {
         }
     }
     
-    private fun toast(text: String) {
-        Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
-    }
-    
     private fun toggleAutoSubmission(on: Boolean) {
         val queue = Queue.getInstance(context!!)
         val config = Config.getInstance(context!!)
@@ -125,7 +121,7 @@ class QueueFragment : Fragment() {
             config.scheduled = true
             
             postScheduler.scheduleDelayedPosts(postDelays)
-            Log.i("Submitboi", "SCHEDULED")
+            log("SCHEDULED")
             
         } else {
             posts.forEach {
@@ -136,7 +132,7 @@ class QueueFragment : Fragment() {
             config.scheduled = false
             
             postScheduler.cancelScheduledPosts(posts.map { it.id })
-            Log.i("Submitboi", "CANCELED")
+            log("CANCELED")
         }
 
         setupTimer()
@@ -194,7 +190,7 @@ class QueueFragment : Fragment() {
                                 if (error != null)
                                     throw error
 
-                                toast("fetched tokens, can submit? " + reddit.canSubmitRightNow)
+                                toast(if (reddit.canSubmitRightNow) "Success" else "Fail")
                                 updateMenu()
                             }
                         })

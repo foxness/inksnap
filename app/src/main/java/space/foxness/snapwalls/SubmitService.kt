@@ -9,7 +9,7 @@ import android.net.ConnectivityManager
 import android.os.*
 import android.support.annotation.RequiresApi
 import android.support.v4.app.NotificationCompat
-import android.util.Log
+import space.foxness.snapwalls.Util.log
 
 
 class SubmitService : Service() {
@@ -21,12 +21,7 @@ class SubmitService : Service() {
 
         override fun handleMessage(msg: Message) {
 
-            Log.i(TAG, "I AM SUBMIT")
-            
-            if (DEBUG) {
-                stopSelf(msg.arg1)
-                return
-            }
+            log("I AM SUBMIT")
 
             // todo: add all posts that failed to be submitted to a 'failed' list
             // todo: add network safeguard to auth
@@ -41,31 +36,33 @@ class SubmitService : Service() {
             val post = Queue.getInstance(this@SubmitService).getPost(postId)
             if (post == null) {
 
-                Log.i(TAG, "POST NOT FOUND")
+                log("POST NOT FOUND")
 
             } else {
 
                 val reddit = Autoreddit.getInstance(this@SubmitService).reddit
                 if (!reddit.canSubmitRightNow) {
 
-                    Log.i(TAG, "NOT LOGGED IN OR RATELIMITED")
+                    log("NOT LOGGED IN OR RATELIMITED")
 
                 } else {
 
                     if (!isNetworkAvailable()) {
 
-                        Log.i(TAG, "NETWORK NOT AVAILABLE")
+                        log("NETWORK NOT AVAILABLE")
 
                     } else {
 
-                        reddit.submit(post, { error, link ->
-                            if (error != null) {
-                                Log.i(TAG, "ERROE: ${error.message}")
-                                throw error
-                            }
+                        if (!DEBUG_DONT_POST) {
+                            reddit.submit(post, { error, link ->
+                                if (error != null) {
+                                    log("ERROE: ${error.message}")
+                                    throw error
+                                }
 
-                            Log.i(TAG, "GOT LINK: $link")
-                        })
+                                log("GOT LINK: $link")
+                            })
+                        }
                     }
                 }
             }
@@ -123,8 +120,7 @@ class SubmitService : Service() {
     override fun onBind(intent: Intent): IBinder? = null
 
     companion object {
-        private const val DEBUG = false
-        private const val TAG = "SubmitService"
+        private const val DEBUG_DONT_POST = true
         private const val NOTIFICATION_ID = 1 // must not be 0
         private const val NOTIFICATION_CHANNEL_NAME = "Main"
         private const val NOTIFICATION_CHANNEL_ID = NOTIFICATION_CHANNEL_NAME
