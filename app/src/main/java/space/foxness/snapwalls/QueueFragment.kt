@@ -34,6 +34,8 @@ class QueueFragment : Fragment() {
     private val initialDelay = Duration.standardSeconds(37)
     private val period = Duration.standardHours(3)
     
+    private lateinit var config: Config
+    private lateinit var queue: Queue
     private lateinit var reddit: Reddit
     private lateinit var postScheduler: PostScheduler
     
@@ -43,22 +45,22 @@ class QueueFragment : Fragment() {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
         
-        reddit = Autoreddit.getInstance(context!!).reddit
-        postScheduler = PostScheduler(context!!)
+        val ctx = context!!
+        config = Config.getInstance(ctx)
+        queue = Queue.getInstance(ctx)
+        reddit = Autoreddit.getInstance(ctx).reddit
+        postScheduler = PostScheduler(ctx)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val v = inflater.inflate(R.layout.fragment_queue, container, false)
-
-        val autosubmitEnabled = Config.getInstance(context!!).autosubmitEnabled
-        val posts = Queue.getInstance(context!!).posts
 
         // RECYCLER VIEW ------------------------------
 
         recyclerView = v.findViewById(R.id.queue_recyclerview)
         recyclerView.layoutManager = LinearLayoutManager(context)
 
-        adapter = PostAdapter(posts)
+        adapter = PostAdapter(queue.posts)
         recyclerView.adapter = adapter
 
         updatePostList()
@@ -66,11 +68,10 @@ class QueueFragment : Fragment() {
         // TIMER TOGGLE -------------------------------
 
         timerToggle = v.findViewById(R.id.queue_toggle)
-        updateTimerToggleText(!autosubmitEnabled)
+        updateTimerToggleText(!config.autosubmitEnabled)
         timerToggle.setOnClickListener { button ->
             button.isEnabled = false
-            val autosubmitOn = Config.getInstance(context!!).autosubmitEnabled
-            toggleAutosubmit(!autosubmitOn)
+            toggleAutosubmit(!config.autosubmitEnabled)
             button.isEnabled = true
         }
         
@@ -78,8 +79,8 @@ class QueueFragment : Fragment() {
 
         timerText = v.findViewById(R.id.queue_timer)
         
-        if (autosubmitEnabled) {
-            val unpausedTimeLeft = Duration(DateTime.now(), posts.first().scheduledDate!!)
+        if (config.autosubmitEnabled) {
+            val unpausedTimeLeft = Duration(DateTime.now(), queue.posts.first().scheduledDate!!)
             timerObject = getTimerObject(unpausedTimeLeft)
             timerObject.start()
         } else {
@@ -93,16 +94,11 @@ class QueueFragment : Fragment() {
         timerToggle.text = if (turnOn) "Turn on" else "Turn off"
     }
 
-    // todo: properties for config & queue?
     private fun toggleAutosubmit(on: Boolean) {
         
         // autosubmit behavior:
         // can't turn it on if there are no posts to submit
         // it turns off when all scheduled posts are submitted todo
-        
-        val queue = Queue.getInstance(context!!)
-        val config = Config.getInstance(context!!)
-        val posts = queue.posts
         
         if (on == config.autosubmitEnabled) // this should never happen
             throw RuntimeException("Can't change autosubmit to state it's already in")
@@ -113,12 +109,12 @@ class QueueFragment : Fragment() {
                 return
             }
 
-            if (posts.isEmpty()) {
+            if (queue.posts.isEmpty()) {
                 toast("No posts to autosubmit")
                 return
             }
             
-            val postDelays = HashMap(posts
+            val postDelays = HashMap(queue.posts
                     .mapIndexed { i, post -> post.id to timeLeft + period * i.toLong() }
                     .toMap())
             
@@ -128,30 +124,30 @@ class QueueFragment : Fragment() {
             postScheduler.scheduleDelayedPosts(postDelays)
 
             val now = DateTime.now()
-            posts.forEach {
+            queue.posts.forEach {
                 it.scheduledDate = now + postDelays[it.id]
                 queue.updatePost(it)
             }
 
             config.autosubmitEnabled = true
             
-            log("Scheduled ${posts.size} post(s)")
+            log("Scheduled ${queue.posts.size} post(s)")
             
         } else {
             timerObject.cancel()
-            timeLeft = Duration(DateTime.now(), posts.first().scheduledDate!!)
+            timeLeft = Duration(DateTime.now(), queue.posts.first().scheduledDate!!)
             updateTimerText(timeLeft) // a potentially useless statement because of the timer's last update...
             
-            postScheduler.cancelScheduledPosts(posts.map { it.id })
-            
-            posts.forEach {
+            postScheduler.cancelScheduledPosts(queue.posts.map { it.id })
+
+            queue.posts.forEach {
                 it.scheduledDate = null
                 queue.updatePost(it)
             }
 
             config.autosubmitEnabled = false
 
-            log("Canceled ${posts.size} scheduled post(s)")
+            log("Canceled ${queue.posts.size} scheduled post(s)")
         }
 
         updateTimerToggleText(!on)
@@ -181,7 +177,7 @@ class QueueFragment : Fragment() {
     }
 
     private fun updatePostList() {
-        adapter.setPosts(Queue.getInstance(context!!).posts)
+        adapter.setPosts(queue.posts)
         adapter.notifyDataSetChanged()
     }
 
@@ -200,7 +196,7 @@ class QueueFragment : Fragment() {
         
         val p = Post()
         p.subreddit = "test" // todo: change this
-        p.id = Queue.getInstance(context!!).addPost(p)
+        p.id = queue.addPost(p)
         startActivity(PostPagerActivity.newIntent(context!!, p.id))
     }
 
@@ -259,8 +255,7 @@ class QueueFragment : Fragment() {
     }
     
     private fun submitTopPost() {
-        val posts = Queue.getInstance(context!!).posts
-        if (posts.isEmpty()) {
+        if (queue.posts.isEmpty()) {
             toast("No post to submit")
             return
         }
@@ -270,7 +265,7 @@ class QueueFragment : Fragment() {
             return
         }
 
-        reddit.submit(posts.first(), { error, link ->
+        reddit.submit(queue.posts.first(), { error, link ->
             if (error != null)
                 throw error
 

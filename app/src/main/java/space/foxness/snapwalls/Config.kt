@@ -36,12 +36,12 @@ class Config private constructor(context: Context) {
     private fun setBool(key: String, value: Boolean) = sharedPreferences.edit().putBoolean(key, value).apply()
     
     private fun getDateTime(key: String): DateTime? {
-        val dateInMs = sharedPreferences.getLong(key, CONFIG_NULL_SUBSTITUTE)
-        return if (dateInMs == CONFIG_NULL_SUBSTITUTE) null else DateTime(dateInMs)
+        val dateInMs = sharedPreferences.getLong(key, LONG_NULL_SUBSTITUTE)
+        return if (dateInMs == LONG_NULL_SUBSTITUTE) null else DateTime(dateInMs)
     }
 
     private fun setDateTime(key: String, value: DateTime?) {
-        val long = value?.millis ?: CONFIG_NULL_SUBSTITUTE
+        val long = value?.millis ?: LONG_NULL_SUBSTITUTE
         sharedPreferences.edit().putLong(key, long).apply()
     }
     
@@ -53,6 +53,6 @@ class Config private constructor(context: Context) {
         private const val CONFIG_LAST_SUBMISSION_DATE = "lastSubmissionDate"
         private const val CONFIG_AUTOSUBMIT_ENABLED = "autosubmitEnabled"
 
-        private const val CONFIG_NULL_SUBSTITUTE: Long = 0
+        private const val LONG_NULL_SUBSTITUTE: Long = Long.MIN_VALUE
     }
 }
