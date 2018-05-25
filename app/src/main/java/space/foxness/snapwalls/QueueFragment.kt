@@ -13,6 +13,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Button
 import android.widget.CheckBox
+import android.widget.SeekBar
 import android.widget.TextView
 import com.github.debop.kodatimes.times
 import org.jetbrains.anko.doAsync
@@ -22,6 +23,7 @@ import org.joda.time.Duration
 import space.foxness.snapwalls.Util.log
 import space.foxness.snapwalls.Util.toNice
 import space.foxness.snapwalls.Util.toast
+import java.util.*
 
 class QueueFragment : Fragment() {
 
@@ -30,10 +32,10 @@ class QueueFragment : Fragment() {
     private lateinit var signinMenuItem: MenuItem
     private lateinit var timerText: TextView
     private lateinit var timerToggle: Button
+    private lateinit var seekBar: SeekBar
     
     private lateinit var timerObject: CountDownTimer
 
-    private val initialDelay = Duration.standardSeconds(37)
     private val period = Duration.standardHours(3)
     
     private lateinit var config: Config
@@ -57,7 +59,7 @@ class QueueFragment : Fragment() {
         
         if (queue.posts.isEmpty() && config.autosubmitEnabled) {
             config.autosubmitEnabled = false
-            config.timeLeft = initialDelay
+            config.timeLeft = period
         }
     }
 
@@ -77,32 +79,68 @@ class QueueFragment : Fragment() {
         // TIMER TOGGLE -------------------------------
 
         timerToggle = v.findViewById(R.id.queue_toggle)
-        updateTimerToggleText(!config.autosubmitEnabled)
         timerToggle.setOnClickListener { button ->
             button.isEnabled = false
             toggleAutosubmit(!config.autosubmitEnabled)
             button.isEnabled = true
         }
         
+        // SEEKBAR ------------------------------------
+        
+        seekBar = v.findViewById(R.id.queue_seekbar)
+        seekBar.max = SEEKBAR_MAX_VALUE
+        
+        if (!config.autosubmitEnabled) {
+            if (config.timeLeft == null)
+                config.timeLeft = period
+            
+            updateSeekbarProgress(config.timeLeft!!)
+        }
+        
+        seekBar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
+            
+            private var timeLeft: Duration = Duration.ZERO
+            
+            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+                if (fromUser) {
+                    val percentage = 1 - progress.toDouble() / SEEKBAR_MAX_VALUE
+                    val millis = period.millis * percentage
+                    val rounded = Math.round(millis)
+                    timeLeft = Duration(rounded)
+                    updateTimerText(timeLeft)
+                }
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar) {
+                log("onStartTrackingTouch")
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar) {
+                config.timeLeft = timeLeft
+                log("onStopTrackingTouch")
+            }
+        })
+
         // TIMER --------------------------------------
 
         timerText = v.findViewById(R.id.queue_timer)
-        
+
         if (config.autosubmitEnabled) {
             val unpausedTimeLeft = Duration(DateTime.now(), queue.posts.first().scheduledDate!!)
             timerObject = getTimerObject(unpausedTimeLeft)
             timerObject.start()
         } else {
-            if (config.timeLeft == null)
-                config.timeLeft = initialDelay
             updateTimerText(config.timeLeft!!)
         }
+
+        updateToggleViews(config.autosubmitEnabled)
 
         return v
     }
     
-    private fun updateTimerToggleText(turnOn: Boolean) {
-        timerToggle.text = if (turnOn) "Turn on" else "Turn off"
+    private fun updateToggleViews(autosubmitEnabled: Boolean) {
+        timerToggle.text = if (autosubmitEnabled) "Turn off" else "Turn on"
+        seekBar.isEnabled = !autosubmitEnabled
     }
 
     private fun toggleAutosubmit(on: Boolean) {
@@ -157,7 +195,7 @@ class QueueFragment : Fragment() {
             log("Canceled ${queue.posts.size} scheduled post(s)")
         }
 
-        updateTimerToggleText(!on)
+        updateToggleViews(on)
     }
     
     private fun getTimerObject(timeLeft: Duration): CountDownTimer {
@@ -167,13 +205,23 @@ class QueueFragment : Fragment() {
 
             override fun onTick(millisUntilFinished: Long) {
 //                log("TICK")
-                updateTimerText(Duration(millisUntilFinished))
+                val timeUntilFinished = Duration(millisUntilFinished)
+                updateTimerText(timeUntilFinished)
+                updateSeekbarProgress(timeUntilFinished)
             }
         }
     }
     
+    private fun updateSeekbarProgress(timeLeft: Duration) {
+        val millis = timeLeft.millis
+        val percentage = 1 - millis.toFloat() / period.millis
+        val rounded = Math.round(percentage * SEEKBAR_MAX_VALUE)
+        seekBar.progress = rounded
+    }
+    
     private fun updateTimerText(timeLeft: Duration) {
         timerText.text = timeLeft.toNice()
+//        seekBar.progress 
     }
 
     // todo: onPause (NOT ONRESUME) stop the timer ticking because the timer is not being seen
@@ -365,6 +413,7 @@ class QueueFragment : Fragment() {
     
     companion object {
         private const val TIMER_UPDATE_INTERVAL_MS: Long = 1000 // 1 second
+        private const val SEEKBAR_MAX_VALUE = 1000
         private const val REQUEST_CODE_NEW_POST = 0
     }
 }

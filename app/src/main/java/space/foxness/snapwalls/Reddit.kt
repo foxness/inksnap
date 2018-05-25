@@ -234,7 +234,7 @@ class Reddit private constructor(private val callbacks: Callbacks) { // todo: us
     }
 
     companion object : SingletonHolder<Reddit, Callbacks>(::Reddit) {
-        private const val DEBUG_DONT_POST = true
+        private const val DEBUG_DONT_POST = false
         
         private const val APP_CLIENT_ID = "hSDlAP9u4cEFFA"
         private const val APP_CLIENT_SECRET = "" // installed apps have no secrets
