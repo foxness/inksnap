@@ -107,10 +107,6 @@ class QueueFragment : Fragment() {
 
     private fun toggleAutosubmit(on: Boolean) {
         
-        // autosubmit behavior:
-        // can't turn it on if there are no posts to submit
-        // it turns off when all scheduled posts are submitted todo
-        
         if (on == config.autosubmitEnabled) // this should never happen
             throw RuntimeException("Can't change autosubmit to state it's already in")
         
@@ -189,7 +185,6 @@ class QueueFragment : Fragment() {
 
     private fun updatePostList() {
         adapter.setPosts(queue.posts)
-        adapter.notifyDataSetChanged()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
@@ -241,8 +236,6 @@ class QueueFragment : Fragment() {
             
             if (config.autosubmitEnabled)
                 scheduleAllUnscheduledPostsPeriodic()
-            
-            updatePostList()
         }
     }
 
@@ -358,12 +351,13 @@ class QueueFragment : Fragment() {
         }
 
         override fun onBindViewHolder(holder: PostHolder, position: Int) {
-            val s = posts[position]
-            holder.bindPost(s)
+            val post = posts[position]
+            holder.bindPost(post)
         }
 
         fun setPosts(posts_: List<Post>) {
             posts = posts_
+            notifyDataSetChanged()
         }
 
         override fun getItemCount() = posts.size
