@@ -38,12 +38,14 @@ class QueueFragment : Fragment() {
     private lateinit var queue: Queue
     private lateinit var reddit: Reddit
     private lateinit var postScheduler: PostScheduler
-    
-    private var timeLeft: Duration = initialDelay
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
+        
+        // todo: to be more efficient don't write to config on every change
+        // write like in onPause or something
+        // im talking mostly about config.timeLeft and config.autosubmitEnabled
         
         val ctx = context!!
         config = Config.getInstance(ctx)
@@ -84,7 +86,9 @@ class QueueFragment : Fragment() {
             timerObject = getTimerObject(unpausedTimeLeft)
             timerObject.start()
         } else {
-            updateTimerText(timeLeft)
+            if (config.timeLeft == null)
+                config.timeLeft = initialDelay
+            updateTimerText(config.timeLeft!!)
         }
 
         return v
@@ -115,10 +119,10 @@ class QueueFragment : Fragment() {
             }
             
             val postDelays = HashMap(queue.posts
-                    .mapIndexed { i, post -> post.id to timeLeft + period * i.toLong() }
+                    .mapIndexed { i, post -> post.id to config.timeLeft!! + period * i.toLong() }
                     .toMap())
             
-            timerObject = getTimerObject(timeLeft)
+            timerObject = getTimerObject(config.timeLeft!!)
             timerObject.start()
             
             postScheduler.scheduleDelayedPosts(postDelays)
@@ -135,8 +139,8 @@ class QueueFragment : Fragment() {
             
         } else {
             timerObject.cancel()
-            timeLeft = Duration(DateTime.now(), queue.posts.first().scheduledDate!!)
-            updateTimerText(timeLeft) // a potentially useless statement because of the timer's last update...
+            config.timeLeft = Duration(DateTime.now(), queue.posts.first().scheduledDate!!)
+            updateTimerText(config.timeLeft!!) // a potentially useless statement because of the timer's last update...
             
             postScheduler.cancelScheduledPosts(queue.posts.map { it.id })
 
