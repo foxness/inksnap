@@ -83,8 +83,21 @@ class QueueFragment : Fragment() {
         
         if (config.autosubmitEnabled) {
             val unpausedTimeLeft = Duration(DateTime.now(), queue.posts.first().scheduledDate!!)
-            timerObject = getTimerObject(unpausedTimeLeft)
-            timerObject.start()
+            
+            if (unpausedTimeLeft < Duration.ZERO) {
+                // this means that the first post was submitted (scheduledDate is in the past)
+                // we wouldnt see this post if we were moving submitted posts to another list
+                // but that feature isnt available yet so here's a quick workaround
+
+                config.autosubmitEnabled = false // basically just pretending that it was false all along
+                config.timeLeft = initialDelay
+                updateTimerText(config.timeLeft!!)
+                updateTimerToggleText(!config.autosubmitEnabled)
+                
+            } else { // THE USUAL BEHAVIOR, restore to this when you fix that workaround ^
+                timerObject = getTimerObject(unpausedTimeLeft)
+                timerObject.start()
+            }
         } else {
             if (config.timeLeft == null)
                 config.timeLeft = initialDelay
@@ -258,7 +271,7 @@ class QueueFragment : Fragment() {
         }
     }
     
-    private fun submitTopPost() {
+    private fun submitTopPost() { // todo: remove
         if (queue.posts.isEmpty()) {
             toast("No post to submit")
             return

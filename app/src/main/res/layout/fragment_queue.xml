@@ -7,40 +7,54 @@
     xmlns:tools="http://schemas.android.com/tools"
     >
 
-    <android.support.v7.widget.RecyclerView
-        xmlns:android="http://schemas.android.com/apk/res/android"
+    <android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/queue_recyclerview"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="85"
+        android:layout_weight="78"
         />
-    
-    <RelativeLayout
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="15"
+        android:layout_weight="22"
+        android:gravity="center"
+        android:orientation="vertical"
         >
-        
-        <Button
-            android:id="@+id/queue_toggle"
+
+        <SeekBar
+            android:id="@+id/queue_seekbar"
+            android:layout_width="320dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="13dp"
+            />
+
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="40dp"
-            android:layout_centerVertical="true"
-            />
-        
-        <TextView
-            android:id="@+id/queue_timer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toEndOf="@id/queue_toggle"
-            android:layout_marginStart="40dp"
-            android:textSize="32sp"
-            android:fontFamily="monospace"
-            android:layout_centerVertical="true"
-            tools:text="00:00:00"
-            />
-        
-    </RelativeLayout>
+            android:layout_marginBottom="4dp"
+            android:gravity="center"
+            >
+
+            <Button
+                android:id="@+id/queue_toggle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="40dp"
+                tools:text="Turn on"
+                />
+
+            <TextView
+                android:id="@+id/queue_timer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:textSize="32sp"
+                tools:text="12:00:05"
+                />
+
+        </LinearLayout>
+
+    </LinearLayout>
     
 </LinearLayout>
