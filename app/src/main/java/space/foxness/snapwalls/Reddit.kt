@@ -52,6 +52,11 @@ class Reddit private constructor(private val callbacks: Callbacks) { // todo: us
             return
         }
 
+        if (DEBUG_DONT_POST) {
+            callback(null, "DEBUG: POST NOT SUBMITTED")
+            return
+        }
+
         ensureValidAccessToken({
             if (it != null) {
                 callback(it, null)
@@ -229,6 +234,8 @@ class Reddit private constructor(private val callbacks: Callbacks) { // todo: us
     }
 
     companion object : SingletonHolder<Reddit, Callbacks>(::Reddit) {
+        private const val DEBUG_DONT_POST = true
+        
         private const val APP_CLIENT_ID = "hSDlAP9u4cEFFA"
         private const val APP_CLIENT_SECRET = "" // installed apps have no secrets
         private const val APP_REDIRECT_URI = "http://localhost"

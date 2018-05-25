@@ -10,15 +10,21 @@ import android.widget.Switch
 
 class PostFragment : Fragment() {
 
+    private lateinit var queue: Queue
     private lateinit var post: Post
     private var isValidPost: Boolean = false // todo: don't let user create invalid posts
 
+    // todo: account for submitservice
+    // example: submit service submits and deletes a post while you're editing it
+    // bad stuff will happen then
+    // this also applies to all other activities/fragments
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
 
         val postId = arguments!!.getLong(ARG_POST_ID)
-        post = Queue.getInstance(context!!).getPost(postId)!!
+        post = queue.getPost(postId)!!
     }
 
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
@@ -37,20 +43,23 @@ class PostFragment : Fragment() {
     }
 
     private fun deletePost() {
-        Queue.getInstance(context!!).deletePost(post.id)
+        queue.deletePost(post.id)
         activity?.finish()
     }
 
     override fun onPause() {
         super.onPause()
-        Queue.getInstance(context!!).updatePost(post)
+        queue.updatePost(post)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val v = inflater.inflate(R.layout.fragment_post, container, false)
 
         val titleET = v.findViewById<EditText>(R.id.post_title)
-        titleET.setText(post.title)
+        
+//        titleET.setText(post.title)
+        titleET.setText(if (post.title.isEmpty()) "testy" else post.title) // TODO: remove on production
+        
         titleET.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) { }
 
@@ -63,7 +72,10 @@ class PostFragment : Fragment() {
         })
 
         val contentET = v.findViewById<EditText>(R.id.post_content)
-        contentET.setText(post.content)
+        
+//        contentET.setText(post.content)
+        contentET.setText(if (post.content.isEmpty()) "besty" else post.content) // TODO: remove on production
+        
         contentET.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) { }
 

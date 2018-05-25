@@ -27,10 +27,12 @@ class SubmitService : Service() {
 
             // BIG NOTE: stopSelf(msg.arg1) MUST BE CALLED BEFORE RETURNING
             // DON'T RETURN WITHOUT CALLING IT
+            
+            val queue = Queue.getInstance(this@SubmitService)
 
             val intent = msg.obj as Intent
             val postId = intent.getLongExtra(EXTRA_POST_ID, -1)
-            val post = Queue.getInstance(this@SubmitService).getPost(postId)
+            val post = queue.getPost(postId)
             val goodPost = post != null
 
             val reddit =  Autoreddit.getInstance(this@SubmitService).reddit
@@ -38,13 +40,11 @@ class SubmitService : Service() {
             val notRatelimited = !reddit.isRestrictedByRatelimit
             
             val networkAvailable = isNetworkAvailable()
-            val notDebugging = !DEBUG_DONT_POST
             
             val everythingGood = goodPost 
                     && signedIn 
                     && notRatelimited 
-                    && networkAvailable 
-                    && notDebugging
+                    && networkAvailable
             
             // todo: make reddit.submit() async !!
             if (everythingGood) {
@@ -55,9 +55,12 @@ class SubmitService : Service() {
                     }
 
                     log("Successfully submitted a post. Link: $link")
+                    
+                    queue.deletePost(post.id) // todo: move to archive or something
+                    log("Deleted the submitted post from the database")
                 })
             } else {
-                log(constructErrorMessage(post, goodPost, signedIn, notRatelimited, networkAvailable, notDebugging))
+                log(constructErrorMessage(post, goodPost, signedIn, notRatelimited, networkAvailable))
             }
 
             stopSelf(msg.arg1)
@@ -115,7 +118,6 @@ class SubmitService : Service() {
     override fun onBind(intent: Intent): IBinder? = null
 
     companion object {
-        private const val DEBUG_DONT_POST = true
         private const val NOTIFICATION_ID = 1 // must not be 0
         private const val NOTIFICATION_CHANNEL_NAME = "Main"
         private const val NOTIFICATION_CHANNEL_ID = NOTIFICATION_CHANNEL_NAME
@@ -132,8 +134,7 @@ class SubmitService : Service() {
                                           goodPost: Boolean,
                                           signedIn: Boolean,
                                           notRatelimited: Boolean,
-                                          networkAvailable: Boolean,
-                                          notDebugging: Boolean): String {
+                                          networkAvailable: Boolean): String {
 
             val reasonsDidntPost = mutableListOf<String>()
 
@@ -141,13 +142,11 @@ class SubmitService : Service() {
             val notSignedInReason = "wasn't signed in"
             val ratelimitedReason = "was ratelimited"
             val networkNotAvailableReason = "network wasn't available"
-            val debuggingReason = "was debugging"
 
             if (!goodPost) reasonsDidntPost.add(postNotFoundReason)
             if (!signedIn) reasonsDidntPost.add(notSignedInReason)
             if (!notRatelimited) reasonsDidntPost.add(ratelimitedReason)
             if (!networkAvailable) reasonsDidntPost.add(networkNotAvailableReason)
-            if (!notDebugging) reasonsDidntPost.add(debuggingReason)
 
             val postString = if (goodPost)
                 "the post titled '${post!!.title}' with ID ${post.id}"
