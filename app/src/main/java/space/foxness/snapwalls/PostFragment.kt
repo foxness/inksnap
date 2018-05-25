@@ -58,8 +58,12 @@ class PostFragment : Fragment() {
     }
 
     private fun deletePost() { // todo: clear activity result if newpost
-        if (!newPost)
+        if (newPost) {
+            clearResult()
+        } else {
             queue.deletePost(post.id)
+        }
+            
         activity!!.finish()
     }
 
@@ -135,6 +139,10 @@ class PostFragment : Fragment() {
         val data = Intent()
         data.putExtra(RESULT_NEW_POST, post)
         activity!!.setResult(Activity.RESULT_OK, data)
+    }
+    
+    private fun clearResult() {
+        activity!!.setResult(Activity.RESULT_CANCELED)
     }
 
     private fun updateIsValidPost() {
