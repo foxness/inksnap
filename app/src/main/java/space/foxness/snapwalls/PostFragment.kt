@@ -24,6 +24,7 @@ class PostFragment : Fragment() {
         setHasOptionsMenu(true)
 
         val postId = arguments!!.getLong(ARG_POST_ID)
+        queue = Queue.getInstance(context!!)
         post = queue.getPost(postId)!!
     }
 
@@ -57,8 +58,13 @@ class PostFragment : Fragment() {
 
         val titleET = v.findViewById<EditText>(R.id.post_title)
         
-//        titleET.setText(post.title)
-        titleET.setText(if (post.title.isEmpty()) "testy" else post.title) // TODO: remove on production
+        titleET.setText(post.title)
+        
+        // TODO: REMOVE ON PRODUCTION ---------------
+        val title = if (post.title.isEmpty()) "testy" else post.title
+        post.title = title
+        titleET.setText(title)
+        // ------------------------------------------
         
         titleET.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) { }
@@ -73,8 +79,13 @@ class PostFragment : Fragment() {
 
         val contentET = v.findViewById<EditText>(R.id.post_content)
         
-//        contentET.setText(post.content)
-        contentET.setText(if (post.content.isEmpty()) "besty" else post.content) // TODO: remove on production
+        contentET.setText(post.content)
+
+        // TODO: REMOVE ON PRODUCTION ---------------
+        val content = if (post.content.isEmpty()) "besty" else post.content
+        post.content = content
+        contentET.setText(content)
+        // ------------------------------------------
         
         contentET.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) { }

@@ -52,6 +52,11 @@ class QueueFragment : Fragment() {
         queue = Queue.getInstance(ctx)
         reddit = Autoreddit.getInstance(ctx).reddit
         postScheduler = PostScheduler(ctx)
+        
+        if (queue.posts.isEmpty() && config.autosubmitEnabled) {
+            config.autosubmitEnabled = false
+            config.timeLeft = initialDelay
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -83,21 +88,8 @@ class QueueFragment : Fragment() {
         
         if (config.autosubmitEnabled) {
             val unpausedTimeLeft = Duration(DateTime.now(), queue.posts.first().scheduledDate!!)
-            
-            if (unpausedTimeLeft < Duration.ZERO) {
-                // this means that the first post was submitted (scheduledDate is in the past)
-                // we wouldnt see this post if we were moving submitted posts to another list
-                // but that feature isnt available yet so here's a quick workaround
-
-                config.autosubmitEnabled = false // basically just pretending that it was false all along
-                config.timeLeft = initialDelay
-                updateTimerText(config.timeLeft!!)
-                updateTimerToggleText(!config.autosubmitEnabled)
-                
-            } else { // THE USUAL BEHAVIOR, restore to this when you fix that workaround ^
-                timerObject = getTimerObject(unpausedTimeLeft)
-                timerObject.start()
-            }
+            timerObject = getTimerObject(unpausedTimeLeft)
+            timerObject.start()
         } else {
             if (config.timeLeft == null)
                 config.timeLeft = initialDelay
