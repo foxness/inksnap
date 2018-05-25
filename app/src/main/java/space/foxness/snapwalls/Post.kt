@@ -4,9 +4,10 @@ import android.arch.persistence.room.ColumnInfo
 import android.arch.persistence.room.Entity
 import android.arch.persistence.room.PrimaryKey
 import org.joda.time.DateTime
+import java.io.Serializable
 
 @Entity(tableName = "queue")
-class Post {
+class Post : Serializable {
     @PrimaryKey(autoGenerate = true)
     var id: Long = 0
     

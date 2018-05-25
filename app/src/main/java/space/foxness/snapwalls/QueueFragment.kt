@@ -1,6 +1,8 @@
 package space.foxness.snapwalls
 
+import android.app.Activity
 import android.app.Dialog
+import android.content.Intent
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.support.v4.app.Fragment
@@ -199,14 +201,49 @@ class QueueFragment : Fragment() {
         updateMenu()
     }
 
-    private fun addNewPost() {
-
-        // todo: schedule new posts automatically if autosubmitEnabled is on
+    private fun createNewPost() {
+        val i = NewPostActivity.newIntent(context!!)
+        startActivityForResult(i, REQUEST_CODE_NEW_POST)
+    }
+    
+    // this method expects the queue to be divided into 2 segments
+    // the first segment is the scheduled segment at the beginning
+    // the last segment is the segment that will be scheduled
+    private fun scheduleAllUnscheduledPostsPeriodic() {
+        val posts = queue.posts
         
-        val p = Post()
-        p.subreddit = "test" // todo: change this
-        p.id = queue.addPost(p)
-        startActivity(PostPagerActivity.newIntent(context!!, p.id))
+        if (posts.size < 2)
+            throw Exception("Need at least 2 posts")
+        
+        if (posts.first().scheduledDate == null)
+            throw Exception("Can't infer the periodic schedule")
+        
+        var onlyNullsNow = false
+        for (i in 1 until posts.size) {
+            if (posts[i].scheduledDate == null) {
+                posts[i].scheduledDate = posts[i - 1].scheduledDate!! + period
+                queue.updatePost(posts[i])
+                onlyNullsNow = true
+            } else if (onlyNullsNow) {
+                throw Exception("You can't switch from nulls to non-nulls")
+            }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (resultCode != Activity.RESULT_OK)
+            return
+        
+        if (requestCode == REQUEST_CODE_NEW_POST) {
+            val newPost = PostFragment.getNewPostFromResult(data!!)!!
+
+            queue.addPost(newPost)
+            
+            if (config.autosubmitEnabled)
+                scheduleAllUnscheduledPostsPeriodic()
+            
+            updatePostList()
+        }
     }
 
     private fun showSigninDialog() {
@@ -248,7 +285,7 @@ class QueueFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         return when (item!!.itemId) {
             R.id.menu_queue_add -> {
-                addNewPost()
+                createNewPost()
                 true
             }
             R.id.menu_queue_signin -> {
@@ -334,5 +371,6 @@ class QueueFragment : Fragment() {
     
     companion object {
         private const val TIMER_UPDATE_INTERVAL_MS: Long = 1000 // 1 second
+        private const val REQUEST_CODE_NEW_POST = 0
     }
 }

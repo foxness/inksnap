@@ -11,7 +11,7 @@ import android.support.v7.app.AppCompatActivity
 class PostPagerActivity : AppCompatActivity() {
 
     private lateinit var viewPager: ViewPager
-    private var posts: List<Post> = emptyList()
+    private lateinit var posts: List<Post>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
