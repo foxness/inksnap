@@ -22,4 +22,10 @@
         android:id="@+id/menu_queue_signin"
         android:title="@string/menu_signin"
         />
+
+    <item
+        android:id="@+id/menu_queue_settings"
+        android:title="@string/menu_settings"
+        />
+    
 </menu>

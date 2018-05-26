@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.support.v4.app.Fragment
+import android.support.v7.preference.PreferenceManager
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -62,6 +63,8 @@ class QueueFragment : Fragment() {
             config.autosubmitEnabled = false
             config.timeLeft = period
         }
+
+        PreferenceManager.setDefaultValues(context!!, R.xml.preferences, false);
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -324,6 +327,11 @@ class QueueFragment : Fragment() {
         authWebview.loadUrl(reddit.authorizationUrl)
         authDialog.show()
     }
+    
+    private fun openSettings() {
+        val i = SettingsActivity.newIntent(context!!)
+        startActivity(i)
+    }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         return when (item!!.itemId) {
@@ -337,6 +345,10 @@ class QueueFragment : Fragment() {
             }
             R.id.menu_queue_submit -> {
                 submitTopPost()
+                true
+            }
+            R.id.menu_queue_settings -> {
+                openSettings()
                 true
             }
             else -> super.onOptionsItemSelected(item)
