@@ -38,6 +38,7 @@ class QueueFragment : Fragment() {
     
     private lateinit var timerObject: CountDownTimer
 
+    // todo: use value from settings
     private val period = Duration.standardHours(3)
     
     private lateinit var config: Config
@@ -58,54 +59,45 @@ class QueueFragment : Fragment() {
         queue = Queue.getInstance(ctx)
         reddit = Autoreddit.getInstance(ctx).reddit
         postScheduler = PostScheduler(ctx)
+
+        PreferenceManager.setDefaultValues(context!!, R.xml.preferences, false)
         
-        if (queue.posts.isEmpty() && config.autosubmitEnabled) {
-            config.autosubmitEnabled = false
-            config.timeLeft = period
-        }
-
-        PreferenceManager.setDefaultValues(context!!, R.xml.preferences, false);
+        init()
     }
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val v = inflater.inflate(R.layout.fragment_queue, container, false)
-
+    
+    private fun init() {
+        if (config.timeLeft == null)
+            config.timeLeft = period
+        
+        if (queue.posts.isEmpty() && config.autosubmitEnabled)
+            config.autosubmitEnabled = false
+    }
+    
+    private fun initUi() {
+        
         // RECYCLER VIEW ------------------------------
 
-        recyclerView = v.findViewById(R.id.queue_recyclerview)
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.addItemDecoration(DividerItemDecoration(recyclerView.context, DividerItemDecoration.VERTICAL))
 
         adapter = PostAdapter(queue.posts)
         recyclerView.adapter = adapter
 
-        updatePostList()
-        
         // TIMER TOGGLE -------------------------------
 
-        timerToggle = v.findViewById(R.id.queue_toggle)
         timerToggle.setOnClickListener { button ->
             button.isEnabled = false
             toggleAutosubmit(!config.autosubmitEnabled)
             button.isEnabled = true
         }
-        
+
         // SEEKBAR ------------------------------------
-        
-        seekBar = v.findViewById(R.id.queue_seekbar)
+
         seekBar.max = SEEKBAR_MAX_VALUE
-        
-        if (!config.autosubmitEnabled) {
-            if (config.timeLeft == null)
-                config.timeLeft = period
-            
-            updateSeekbarProgress(config.timeLeft!!)
-        }
-        
         seekBar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
-            
+
             private var timeLeft: Duration = Duration.ZERO
-            
+
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
                     val percentage = 1 - progress.toDouble() / SEEKBAR_MAX_VALUE
@@ -128,8 +120,6 @@ class QueueFragment : Fragment() {
 
         // TIMER --------------------------------------
 
-        timerText = v.findViewById(R.id.queue_timer)
-
         if (config.autosubmitEnabled) {
             val unpausedTimeLeft = Duration(DateTime.now(), queue.posts.first().scheduledDate!!)
             timerObject = getTimerObject(unpausedTimeLeft)
@@ -137,9 +127,25 @@ class QueueFragment : Fragment() {
         } else {
             updateTimerText(config.timeLeft!!)
         }
+        
+        // --------------------------------------------
+
+        if (!config.autosubmitEnabled)
+            updateSeekbarProgress(config.timeLeft!!)
 
         updateToggleViews(config.autosubmitEnabled)
+    }
 
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val v = inflater.inflate(R.layout.fragment_queue, container, false)
+
+        recyclerView = v.findViewById(R.id.queue_recyclerview)
+        timerToggle = v.findViewById(R.id.queue_toggle)
+        seekBar = v.findViewById(R.id.queue_seekbar)
+        timerText = v.findViewById(R.id.queue_timer)
+
+        initUi()
+        
         return v
     }
     
