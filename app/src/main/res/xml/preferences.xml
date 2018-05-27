@@ -2,19 +2,13 @@
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android"
     >
-    
-    <CheckBoxPreference
-        android:key="pref_iamdev"
-        android:title="I am a developer"
-        android:summary="haha"
-        android:defaultValue="true"
-        />
-    
+
+    <!--suppress AndroidElementNotAllowed -->
     <space.foxness.snapwalls.MinutesPreference
         android:key="random_key"
         android:title="Minutes Preference"
         android:summary="Minutes Summary"
-        android:defaultValue="90"
+        android:defaultValue="180"
         />
     
 </PreferenceScreen>

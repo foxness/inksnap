@@ -15,10 +15,10 @@ class MinutesPreference(context: Context, attrs: AttributeSet?) : DialogPreferen
             _minutes = value
             persistInt(value)
         }
-
-    override fun getDialogLayoutResource() = R.layout.dialog_minutespicker
     
     init {
+        dialogLayoutResource = R.layout.dialog_minutespicker
+        
         setPositiveButtonText(android.R.string.ok)
         setNegativeButtonText(android.R.string.cancel)
     }
