@@ -10,4 +10,11 @@
         android:defaultValue="true"
         />
     
+    <space.foxness.snapwalls.MinutesPreference
+        android:key="random_key"
+        android:title="Minutes Preference"
+        android:summary="Minutes Summary"
+        android:defaultValue="90"
+        />
+    
 </PreferenceScreen>
