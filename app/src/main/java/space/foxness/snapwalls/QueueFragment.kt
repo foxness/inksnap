@@ -40,7 +40,7 @@ class QueueFragment : Fragment() {
     private lateinit var timerObject: CountDownTimer
 
     // todo: use value from settings
-    private val period = Duration.standardHours(3)
+    private val period = Duration.standardMinutes(5)
     
     private lateinit var config: Config
     private lateinit var queue: Queue
@@ -118,14 +118,6 @@ class QueueFragment : Fragment() {
                 log("onStopTrackingTouch")
             }
         })
-
-        // TIMER --------------------------------------
-
-        if (config.autosubmitEnabled) {
-            val unpausedTimeLeft = Duration(DateTime.now(), queue.posts.first().scheduledDate!!)
-            timerObject = getTimerObject(unpausedTimeLeft)
-            timerObject.start()
-        }
         
         // --------------------------------------------
 
@@ -221,11 +213,12 @@ class QueueFragment : Fragment() {
     
     private fun getTimerObject(timeLeft: Duration): CountDownTimer {
         return object : CountDownTimer(timeLeft.millis, TIMER_UPDATE_INTERVAL_MS) {
-            // todo: something?
-            override fun onFinish() {}
+            
+            override fun onFinish() {
+                // todo: remove the submitted item from post list
+            }
 
             override fun onTick(millisUntilFinished: Long) {
-//                log("TICK")
                 val timeUntilFinished = Duration(millisUntilFinished)
                 updateTimerViews(timeUntilFinished)
             }
@@ -242,12 +235,30 @@ class QueueFragment : Fragment() {
     private fun updateTimerText(timeLeft: Duration) {
         timerText.text = timeLeft.toNice()
     }
-
-    // todo: onPause (NOT ONRESUME) stop the timer ticking because the timer is not being seen
-    // todo: resume ticking in onResume
+    
     override fun onResume() {
         super.onResume()
+        
+        if (config.autosubmitEnabled) {
+            if (queue.posts.isEmpty()) {
+                config.autosubmitEnabled = false
+                config.timeLeft = period
+                updateToggleViews(false)
+            } else {
+                val unpausedTimeLeft = Duration(DateTime.now(), queue.posts.first().scheduledDate!!)
+                timerObject = getTimerObject(unpausedTimeLeft)
+                timerObject.start()
+            }
+        }
+        
         updatePostList()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        
+        if (config.autosubmitEnabled)
+            timerObject.cancel()
     }
 
     private fun updatePostList() {

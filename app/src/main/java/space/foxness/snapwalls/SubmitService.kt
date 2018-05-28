@@ -37,7 +37,7 @@ class SubmitService : Service() {
 
             val reddit =  Autoreddit.getInstance(this@SubmitService).reddit
             val signedIn = reddit.isSignedIn
-            val notRatelimited = !reddit.isRestrictedByRatelimit
+            val notRatelimited = Reddit.DEBUG_DONT_POST || !reddit.isRestrictedByRatelimit // todo: remove the reddit part on production
             
             val networkAvailable = isNetworkAvailable()
             
