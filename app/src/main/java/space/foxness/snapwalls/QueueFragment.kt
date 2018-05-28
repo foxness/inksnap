@@ -78,7 +78,7 @@ class QueueFragment : Fragment() {
         
         // RECYCLER VIEW ------------------------------
 
-        recyclerView.layoutManager = LinearLayoutManager(context)
+        recyclerView.layoutManager = LinearLayoutManager(context!!)
         recyclerView.addItemDecoration(DividerItemDecoration(recyclerView.context, DividerItemDecoration.VERTICAL))
 
         adapter = PostAdapter(queue.posts)
@@ -154,9 +154,14 @@ class QueueFragment : Fragment() {
         } else {
             timerToggle.text = "Turn on"
             seekBar.isEnabled = true
-            updateSeekbarProgress(config.timeLeft!!)
-            updateTimerText(config.timeLeft!!)
         }
+
+        updateTimerViews(config.timeLeft!!)
+    }
+    
+    private fun updateTimerViews(timeLeft: Duration) {
+        updateSeekbarProgress(timeLeft)
+        updateTimerText(timeLeft)
     }
 
     private fun toggleAutosubmit(on: Boolean) {
@@ -222,8 +227,7 @@ class QueueFragment : Fragment() {
             override fun onTick(millisUntilFinished: Long) {
 //                log("TICK")
                 val timeUntilFinished = Duration(millisUntilFinished)
-                updateTimerText(timeUntilFinished)
-                updateSeekbarProgress(timeUntilFinished)
+                updateTimerViews(timeUntilFinished)
             }
         }
     }
@@ -436,7 +440,7 @@ class QueueFragment : Fragment() {
     }
     
     companion object {
-        private const val TIMER_UPDATE_INTERVAL_MS: Long = 1000 // 1 second
+        private const val TIMER_UPDATE_INTERVAL_MS: Long = 100 // 0.1 seconds
         private const val SEEKBAR_MAX_VALUE = 1000
         private const val REQUEST_CODE_NEW_POST = 0
     }

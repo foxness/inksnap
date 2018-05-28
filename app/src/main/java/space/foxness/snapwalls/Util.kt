@@ -16,7 +16,7 @@ object Util {
             .appendSeparator(":")
             .appendMinutes()
             .appendSeparator(":")
-            .appendSeconds()
+            .appendSecondsWithMillis()
             .toFormatter()
     
     fun Fragment.toast(text: String) = Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
@@ -29,5 +29,5 @@ object Util {
         Log.d("$APPNAME.$className", text)
     }
 
-    fun Duration.toNice(): String = periodformatter.print(toPeriod())
+    fun Duration.toNice(): String = periodformatter.print(toPeriod()).dropLast(2)
 }
