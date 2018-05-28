@@ -39,8 +39,7 @@ class QueueFragment : Fragment() {
     
     private lateinit var timerObject: CountDownTimer
 
-    // todo: use value from settings
-    private val period = Duration.standardMinutes(5)
+    private lateinit var period: Duration
     
     private lateinit var config: Config
     private lateinit var queue: Queue
@@ -66,7 +65,20 @@ class QueueFragment : Fragment() {
         init()
     }
     
+    private fun retrievePeriod(): Duration {
+        val preferences = PreferenceManager.getDefaultSharedPreferences(context!!)
+        val minutes = preferences.getInt(SettingsFragment.PREF_PERIOD_MINUTES, -1)
+        
+        if (minutes == -1)
+            throw Exception("Default value wasn't set")
+        
+        val millisInMinute: Long = 60 * 1000
+        return Duration(minutes * millisInMinute)
+    }
+    
     private fun init() {
+        period = retrievePeriod()
+        
         if (config.timeLeft == null)
             config.timeLeft = period
         
@@ -238,6 +250,11 @@ class QueueFragment : Fragment() {
     
     override fun onResume() {
         super.onResume()
+
+        // assume period never changes while autosubmit is enabled
+        // todo: actually prohibit period changing while autosubmit is on
+        
+        period = retrievePeriod()
         
         if (config.autosubmitEnabled) {
             if (queue.posts.isEmpty()) {
@@ -249,6 +266,13 @@ class QueueFragment : Fragment() {
                 timerObject = getTimerObject(unpausedTimeLeft)
                 timerObject.start()
             }
+        } else {
+            if (config.timeLeft!! > period) {
+                config.timeLeft = period
+                updateTimerText(config.timeLeft!!)
+            }
+            
+            updateSeekbarProgress(config.timeLeft!!)
         }
         
         updatePostList()
