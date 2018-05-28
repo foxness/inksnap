@@ -1,5 +1,6 @@
 package space.foxness.snapwalls
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Dialog
 import android.content.Intent
@@ -60,7 +61,7 @@ class QueueFragment : Fragment() {
         reddit = Autoreddit.getInstance(ctx).reddit
         postScheduler = PostScheduler(ctx)
 
-        PreferenceManager.setDefaultValues(context!!, R.xml.preferences, false)
+        PreferenceManager.setDefaultValues(ctx, R.xml.preferences, false)
         
         init()
     }
@@ -124,14 +125,9 @@ class QueueFragment : Fragment() {
             val unpausedTimeLeft = Duration(DateTime.now(), queue.posts.first().scheduledDate!!)
             timerObject = getTimerObject(unpausedTimeLeft)
             timerObject.start()
-        } else {
-            updateTimerText(config.timeLeft!!)
         }
         
         // --------------------------------------------
-
-        if (!config.autosubmitEnabled)
-            updateSeekbarProgress(config.timeLeft!!)
 
         updateToggleViews(config.autosubmitEnabled)
     }
@@ -149,9 +145,18 @@ class QueueFragment : Fragment() {
         return v
     }
     
+    @SuppressLint("SetTextI18n") // todo: deal with this
     private fun updateToggleViews(autosubmitEnabled: Boolean) {
-        timerToggle.text = if (autosubmitEnabled) "Turn off" else "Turn on"
-        seekBar.isEnabled = !autosubmitEnabled
+        
+        if (autosubmitEnabled) {
+            timerToggle.text = "Turn off"
+            seekBar.isEnabled = false
+        } else {
+            timerToggle.text = "Turn on"
+            seekBar.isEnabled = true
+            updateSeekbarProgress(config.timeLeft!!)
+            updateTimerText(config.timeLeft!!)
+        }
     }
 
     private fun toggleAutosubmit(on: Boolean) {
@@ -232,7 +237,6 @@ class QueueFragment : Fragment() {
     
     private fun updateTimerText(timeLeft: Duration) {
         timerText.text = timeLeft.toNice()
-//        seekBar.progress 
     }
 
     // todo: onPause (NOT ONRESUME) stop the timer ticking because the timer is not being seen
