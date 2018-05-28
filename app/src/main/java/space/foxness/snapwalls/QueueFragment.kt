@@ -267,10 +267,12 @@ class QueueFragment : Fragment() {
                 timerObject.start()
             }
         } else {
-            if (config.timeLeft!! > period)
+            if (config.timeLeft!! > period) {
                 config.timeLeft = period
+                updateTimerText(config.timeLeft!!)
+            }
             
-            updateTimerViews(config.timeLeft!!)
+            updateSeekbarProgress(config.timeLeft!!)
         }
         
         updatePostList()
