@@ -121,13 +121,10 @@ class QueueFragment : Fragment() {
                 }
             }
 
-            override fun onStartTrackingTouch(seekBar: SeekBar) {
-                log("onStartTrackingTouch")
-            }
+            override fun onStartTrackingTouch(seekBar: SeekBar) { }
 
             override fun onStopTrackingTouch(seekBar: SeekBar) {
                 config.timeLeft = timeLeft
-                log("onStopTrackingTouch")
             }
         })
         
