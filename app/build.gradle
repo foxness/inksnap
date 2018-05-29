@@ -37,6 +37,7 @@ dependencies {
     def kodatime_version = "1.2.2"
     def anko_version = "0.10.5"
     def async_version = "1.4.9"
+    def khttp_version = "0.1.0"
     
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     testImplementation 'junit:junit:4.12'
@@ -56,6 +57,9 @@ dependencies {
     implementation "com.github.debop:koda-time:$kodatime_version"
     
     implementation "org.jetbrains.anko:anko-commons:$anko_version"
+//    implementation "org.jetbrains.anko:anko-coroutines:$anko_version"
+
+    implementation "khttp:khttp:$khttp_version"
 }
 repositories {
     mavenCentral()

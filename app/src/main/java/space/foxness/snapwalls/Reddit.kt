@@ -5,6 +5,7 @@ import com.loopj.android.http.JsonHttpResponseHandler
 import com.loopj.android.http.RequestParams
 import com.loopj.android.http.SyncHttpClient
 import cz.msebera.android.httpclient.Header
+import khttp.structures.authorization.BasicAuthorization
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import org.json.JSONObject
@@ -173,6 +174,42 @@ class Reddit private constructor(private val callbacks: Callbacks) { // todo: us
         })
     }
 
+//    private fun ensureValidAccessTokenTEST(callback: (Throwable?) -> Unit) {
+////        if (accessToken != null && accessTokenExpirationDate!! > DateTime.now()) {
+////            callback(null)
+////            return
+////        }
+//
+//        if (refreshToken == null) {
+//            callback(RuntimeException("Can't update access token without refresh token"))
+//            return
+//        }
+//
+//        val headers = mapOf("User-Agent" to USER_AGENT)
+//
+//        val data = mapOf(
+//                "grant_type" to "refresh_token",
+//                "refresh_token" to refreshToken!!)
+//
+//        val auth = BasicAuthorization(APP_CLIENT_ID, APP_CLIENT_SECRET)
+//
+//        val response = khttp.post(url = ACCESS_TOKEN_ENDPOINT, headers = headers, data = data, auth = auth)
+//
+//        if (response.statusCode != 200) {
+//            callback(Exception("Response code: ${response.statusCode}, response: ${response}"))
+//            return
+//        }
+//
+//        val json = response.jsonObject
+//
+//        try {
+//            // TODO: compare received scope with intended scope?
+//            updateAccessToken(json.getString("access_token"), json.getInt("expires_in"))
+//        } catch (e: Exception) {
+//            callback(e)
+//        }
+//    }
+
     private fun updateAccessToken(newAccessToken: String, expiresIn: Int) {
         accessToken = newAccessToken
         accessTokenExpirationDate = DateTime.now() + Duration.standardSeconds(expiresIn.toLong())
@@ -186,38 +223,75 @@ class Reddit private constructor(private val callbacks: Callbacks) { // todo: us
             return
         }
 
-        val shc = SyncHttpClient()
-        shc.setUserAgent(USER_AGENT)
-        shc.setBasicAuth(APP_CLIENT_ID, APP_CLIENT_SECRET)
+        val headers = mapOf("User-Agent" to USER_AGENT)
 
-        val params = RequestParams()
-        params.add("grant_type", "authorization_code")
-        params.add("code", authCode)
-        params.add("redirect_uri", APP_REDIRECT_URI)
-        shc.post(ACCESS_TOKEN_ENDPOINT, params, object : JsonHttpResponseHandler() {
-            override fun onSuccess(statusCode: Int, headers: Array<Header>?, response: JSONObject?) {
-                super.onSuccess(statusCode, headers, response)
+        val data = mapOf(
+                "grant_type" to "authorization_code",
+                "code" to authCode,
+                "redirect_uri" to APP_REDIRECT_URI)
 
-                try {
-                    // TODO: compare received scope with intended scope?
-                    refreshToken = response!!.getString("refresh_token")
-                    updateAccessToken(response.getString("access_token"), response.getInt("expires_in"))
-                } catch (e: Exception) {
-                    callback(e)
-                    return
-                }
+        val auth = BasicAuthorization(APP_CLIENT_ID, APP_CLIENT_SECRET)
+        
+        val response = khttp.post(url = ACCESS_TOKEN_ENDPOINT, headers = headers, data = data, auth = auth)
 
-                callbacks.onNewRefreshToken()
-                callback(null)
-            }
+        if (response.statusCode != 200) {
+            callback(Exception("Response code: ${response.statusCode}, response: ${response}"))
+            return
+        }
+        
+        val json = response.jsonObject
 
-            override fun onFailure(statusCode: Int, headers: Array<Header>?, throwable: Throwable, errorResponse: JSONObject?) {
-                super.onFailure(statusCode, headers, throwable, errorResponse)
+        try {
+            // TODO: compare received scope with intended scope?
+            refreshToken = json.getString("refresh_token")
+            updateAccessToken(json.getString("access_token"), json.getInt("expires_in"))
+        } catch (e: Exception) {
+            callback(e)
+            return
+        }
 
-                callback(throwable)
-            }
-        })
+        callbacks.onNewRefreshToken()
+        callback(null)
     }
+
+//    fun fetchAuthTokensOLD(callback: (Throwable?) -> Unit) {
+//        if (authCode == null) {
+//            callback(RuntimeException("Can't fetch auth tokens without auth code"))
+//            return
+//        }
+//
+//        val shc = SyncHttpClient()
+//        shc.setUserAgent(USER_AGENT)
+//        shc.setBasicAuth(APP_CLIENT_ID, APP_CLIENT_SECRET)
+//
+//        val params = RequestParams()
+//        params.add("grant_type", "authorization_code")
+//        params.add("code", authCode)
+//        params.add("redirect_uri", APP_REDIRECT_URI)
+//        shc.post(ACCESS_TOKEN_ENDPOINT, params, object : JsonHttpResponseHandler() {
+//            override fun onSuccess(statusCode: Int, headers: Array<Header>?, response: JSONObject?) {
+//                super.onSuccess(statusCode, headers, response)
+//
+//                try {
+//                    // TODO: compare received scope with intended scope?
+//                    refreshToken = response!!.getString("refresh_token")
+//                    updateAccessToken(response.getString("access_token"), response.getInt("expires_in"))
+//                } catch (e: Exception) {
+//                    callback(e)
+//                    return
+//                }
+//
+//                callbacks.onNewRefreshToken()
+//                callback(null)
+//            }
+//
+//            override fun onFailure(statusCode: Int, headers: Array<Header>?, throwable: Throwable, errorResponse: JSONObject?) {
+//                super.onFailure(statusCode, headers, throwable, errorResponse)
+//
+//                callback(throwable)
+//            }
+//        })
+//    }
 
     fun tryExtractCode(url: String): Boolean {
         if (!url.startsWith(APP_REDIRECT_URI) || authState == null)
