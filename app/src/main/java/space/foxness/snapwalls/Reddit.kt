@@ -45,14 +45,14 @@ class Reddit private constructor(private val callbacks: Callbacks) { // todo: us
         fun onNewLastSubmissionDate()
     }
 
-    fun submit(post: Post, callback: (Throwable?, String?) -> Unit, resubmit: Boolean = true, sendReplies: Boolean = true) {
+    fun submit(post: Post, callback: (Throwable?, String?) -> Unit, debugDontPost: Boolean = false, resubmit: Boolean = true, sendReplies: Boolean = true) {
         
         if (post.title.isEmpty() || (post.type && post.content.isEmpty()) || post.subreddit.isEmpty()) {
             callback(RuntimeException("Bad post"), null)
             return
         }
 
-        if (DEBUG_DONT_POST) {
+        if (debugDontPost) {
             callback(null, "DEBUG: POST NOT SUBMITTED")
             return
         }
@@ -234,7 +234,6 @@ class Reddit private constructor(private val callbacks: Callbacks) { // todo: us
     }
 
     companion object : SingletonHolder<Reddit, Callbacks>(::Reddit) {
-        const val DEBUG_DONT_POST = true
         
         private const val APP_CLIENT_ID = "hSDlAP9u4cEFFA"
         private const val APP_CLIENT_SECRET = "" // installed apps have no secrets

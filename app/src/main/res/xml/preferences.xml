@@ -11,4 +11,11 @@
         android:defaultValue="180"
         />
     
+    <SwitchPreference
+        android:key="debug_dont_post"
+        android:title="[DEBUG] Don't post"
+        android:summary="Only pretend to submit the posts"
+        android:defaultValue="false"
+        />
+    
 </PreferenceScreen>

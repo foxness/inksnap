@@ -9,6 +9,7 @@ import android.net.ConnectivityManager
 import android.os.*
 import android.support.annotation.RequiresApi
 import android.support.v4.app.NotificationCompat
+import android.support.v7.preference.PreferenceManager
 import space.foxness.snapwalls.Util.log
 
 class SubmitService : Service() {
@@ -37,7 +38,7 @@ class SubmitService : Service() {
 
             val reddit =  Autoreddit.getInstance(this@SubmitService).reddit
             val signedIn = reddit.isSignedIn
-            val notRatelimited = Reddit.DEBUG_DONT_POST || !reddit.isRestrictedByRatelimit // todo: remove the reddit part on production
+            val notRatelimited = !reddit.isRestrictedByRatelimit // todo: remove the reddit part on production
             
             val networkAvailable = isNetworkAvailable()
             
@@ -48,6 +49,9 @@ class SubmitService : Service() {
             
             // todo: make reddit.submit() async !!
             if (everythingGood) {
+                
+                val debugDontPost = retrieveDebugDontPost()
+                
                 reddit.submit(post!!, { error, link ->
                     if (error != null) {
                         log("ERROR DURING SUBMISSION: ${error.message}")
@@ -58,13 +62,18 @@ class SubmitService : Service() {
                     
                     queue.deletePost(post.id) // todo: move to archive or something
                     log("Deleted the submitted post from the database")
-                })
+                }, debugDontPost, RESUBMIT, SEND_REPLIES)
             } else {
                 log(constructErrorMessage(post, goodPost, signedIn, notRatelimited, networkAvailable))
             }
 
             stopSelf(msg.arg1)
         }
+    }
+
+    private fun retrieveDebugDontPost(): Boolean {
+        val preferences = PreferenceManager.getDefaultSharedPreferences(this)
+        return preferences.getBoolean(SettingsFragment.PREF_DEBUG_DONT_POST, false)
     }
 
     private fun isNetworkAvailable(): Boolean {
@@ -118,6 +127,9 @@ class SubmitService : Service() {
     override fun onBind(intent: Intent): IBinder? = null
 
     companion object {
+        private const val SEND_REPLIES = true
+        private const val RESUBMIT = true
+        
         private const val NOTIFICATION_ID = 1 // must not be 0
         private const val NOTIFICATION_CHANNEL_NAME = "Main"
         private const val NOTIFICATION_CHANNEL_ID = NOTIFICATION_CHANNEL_NAME

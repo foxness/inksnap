@@ -29,6 +29,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
     
     companion object {
         private const val REQUEST_CODE = 0
+        
         const val PREF_PERIOD_MINUTES = "period_minutes"
+        const val PREF_DEBUG_DONT_POST = "debug_dont_post"
     }
 }

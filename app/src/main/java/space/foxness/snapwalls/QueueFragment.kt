@@ -206,7 +206,6 @@ class QueueFragment : Fragment() {
         } else {
             timerObject.cancel()
             config.timeLeft = Duration(DateTime.now(), queue.posts.first().scheduledDate!!)
-            updateTimerText(config.timeLeft!!) // a potentially useless statement because of the timer's last update...
             
             postScheduler.cancelScheduledPosts(queue.posts.map { it.id })
 
