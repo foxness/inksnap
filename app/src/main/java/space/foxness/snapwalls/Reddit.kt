@@ -59,6 +59,7 @@ class Reddit private constructor(private val callbacks: Callbacks) { // todo: us
         }
 
         ensureValidAccessToken({
+            
             if (it != null) {
                 callback(it, null)
                 return@ensureValidAccessToken
@@ -131,84 +132,88 @@ class Reddit private constructor(private val callbacks: Callbacks) { // todo: us
         })
     }
 
-    private fun ensureValidAccessToken(callback: (Throwable?) -> Unit) {
-        if (accessToken != null && accessTokenExpirationDate!! > DateTime.now()) {
-            callback(null)
-            return
-        }
-        
-        if (refreshToken == null) {
-            callback(RuntimeException("Can't update access token without refresh token"))
-            return
-        }
-
-        val shc = SyncHttpClient()
-        shc.setUserAgent(USER_AGENT)
-        shc.setBasicAuth(APP_CLIENT_ID, APP_CLIENT_SECRET)
-
-        val params = RequestParams()
-        params.add("grant_type", "refresh_token")
-        params.add("refresh_token", refreshToken)
-        shc.post(ACCESS_TOKEN_ENDPOINT, params, object : JsonHttpResponseHandler() {
-            
-            override fun onSuccess(statusCode: Int, headers: Array<Header>?, response: JSONObject?) {
-                super.onSuccess(statusCode, headers, response)
-
-                try {
-                    // TODO: compare received scope with intended scope?
-                    updateAccessToken(response!!.getString("access_token"), response.getInt("expires_in"))
-                } catch (e: Exception) {
-                    callback(e)
-                    return
-                }
-
-                callback(null)
-            }
-
-            override fun onFailure(statusCode: Int, headers: Array<Header>?, throwable: Throwable, errorResponse: JSONObject?) {
-                super.onFailure(statusCode, headers, throwable, errorResponse)
-                
-                callback(throwable)
-                return
-            }
-        })
-    }
-
-//    private fun ensureValidAccessTokenTEST(callback: (Throwable?) -> Unit) {
-////        if (accessToken != null && accessTokenExpirationDate!! > DateTime.now()) {
-////            callback(null)
-////            return
-////        }
-//
+//    private fun ensureValidAccessTokenOLD(callback: (Throwable?) -> Unit) {
+//        if (accessToken != null && accessTokenExpirationDate!! > DateTime.now()) {
+//            callback(null)
+//            return
+//        }
+//        
 //        if (refreshToken == null) {
 //            callback(RuntimeException("Can't update access token without refresh token"))
 //            return
 //        }
 //
-//        val headers = mapOf("User-Agent" to USER_AGENT)
+//        val shc = SyncHttpClient()
+//        shc.setUserAgent(USER_AGENT)
+//        shc.setBasicAuth(APP_CLIENT_ID, APP_CLIENT_SECRET)
 //
-//        val data = mapOf(
-//                "grant_type" to "refresh_token",
-//                "refresh_token" to refreshToken!!)
+//        val params = RequestParams()
+//        params.add("grant_type", "refresh_token")
+//        params.add("refresh_token", refreshToken)
+//        shc.post(ACCESS_TOKEN_ENDPOINT, params, object : JsonHttpResponseHandler() {
+//            
+//            override fun onSuccess(statusCode: Int, headers: Array<Header>?, response: JSONObject?) {
+//                super.onSuccess(statusCode, headers, response)
 //
-//        val auth = BasicAuthorization(APP_CLIENT_ID, APP_CLIENT_SECRET)
+//                try {
+//                    // TODO: compare received scope with intended scope?
+//                    updateAccessToken(response!!.getString("access_token"), response.getInt("expires_in"))
+//                } catch (e: Exception) {
+//                    callback(e)
+//                    return
+//                }
 //
-//        val response = khttp.post(url = ACCESS_TOKEN_ENDPOINT, headers = headers, data = data, auth = auth)
+//                callback(null)
+//            }
 //
-//        if (response.statusCode != 200) {
-//            callback(Exception("Response code: ${response.statusCode}, response: ${response}"))
-//            return
-//        }
-//
-//        val json = response.jsonObject
-//
-//        try {
-//            // TODO: compare received scope with intended scope?
-//            updateAccessToken(json.getString("access_token"), json.getInt("expires_in"))
-//        } catch (e: Exception) {
-//            callback(e)
-//        }
+//            override fun onFailure(statusCode: Int, headers: Array<Header>?, throwable: Throwable, errorResponse: JSONObject?) {
+//                super.onFailure(statusCode, headers, throwable, errorResponse)
+//                
+//                callback(throwable)
+//                return
+//            }
+//        })
 //    }
+
+    private fun ensureValidAccessToken(callback: (Throwable?) -> Unit) {
+        
+        if (accessToken != null && accessTokenExpirationDate!! > DateTime.now()) {
+            callback(null)
+            return
+        }
+
+        if (refreshToken == null) {
+            callback(RuntimeException("Can't update access token without refresh token"))
+            return
+        }
+
+        val headers = mapOf("User-Agent" to USER_AGENT)
+
+        val data = mapOf(
+                "grant_type" to "refresh_token",
+                "refresh_token" to refreshToken!!)
+
+        val auth = BasicAuthorization(APP_CLIENT_ID, APP_CLIENT_SECRET)
+
+        val response = khttp.post(url = ACCESS_TOKEN_ENDPOINT, headers = headers, data = data, auth = auth)
+
+        if (response.statusCode != 200) {
+            callback(Exception("Response code: ${response.statusCode}, response: ${response}"))
+            return
+        }
+
+        val json = response.jsonObject
+
+        try {
+            // TODO: compare received scope with intended scope?
+            updateAccessToken(json.getString("access_token"), json.getInt("expires_in"))
+        } catch (e: Exception) {
+            callback(e)
+            return
+        }
+
+        callback(null)
+    }
 
     private fun updateAccessToken(newAccessToken: String, expiresIn: Int) {
         accessToken = newAccessToken
