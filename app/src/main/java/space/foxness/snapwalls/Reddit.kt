@@ -1,14 +1,9 @@
 package space.foxness.snapwalls
 
 import android.net.Uri
-import com.loopj.android.http.JsonHttpResponseHandler
-import com.loopj.android.http.RequestParams
-import com.loopj.android.http.SyncHttpClient
-import cz.msebera.android.httpclient.Header
 import khttp.structures.authorization.BasicAuthorization
 import org.joda.time.DateTime
 import org.joda.time.Duration
-import org.json.JSONObject
 
 class Reddit private constructor(private val callbacks: Callbacks) { // todo: use async/await
 
@@ -48,6 +43,7 @@ class Reddit private constructor(private val callbacks: Callbacks) { // todo: us
 
     fun submit(post: Post, callback: (Throwable?, String?) -> Unit, debugDontPost: Boolean = false, resubmit: Boolean = true, sendReplies: Boolean = true) {
         
+        // todo: use postfragment's definition of bad post
         if (post.title.isEmpty() || (post.type && post.content.isEmpty()) || post.subreddit.isEmpty()) {
             callback(RuntimeException("Bad post"), null)
             return
@@ -65,115 +61,56 @@ class Reddit private constructor(private val callbacks: Callbacks) { // todo: us
                 return@ensureValidAccessToken
             }
 
-            val shc = SyncHttpClient()
-            
-            shc.setUserAgent(USER_AGENT)
-            shc.addHeader("Authorization", "bearer " + accessToken!!)
-    
-            val params = RequestParams()
-            params.add("api_type", "json")
-            params.add("kind", if (post.type) "link" else "self")
-            params.add("resubmit", if (resubmit) "true" else "false")
-            params.add("sendreplies", if (sendReplies) "true" else "false")
-            params.add("sr", post.subreddit)
-            params.add(if (post.type) "url" else "text", post.content)
-            params.add("title", post.title)
-            
-            shc.post(SUBMIT_ENDPOINT, params, object : JsonHttpResponseHandler() {
+            val headers = mapOf(
+                    "User-Agent" to USER_AGENT,
+                    "Authorization" to "bearer " + accessToken!!)
 
-                override fun onSuccess(statusCode: Int, headers: Array<Header>?, response: JSONObject?) {
-                    super.onSuccess(statusCode, headers, response)
+            val data = mapOf(
+                    "api_type" to "json",
+                    "kind" to if (post.type) "link" else "self",
+                    "resubmit" to if (resubmit) "true" else "false",
+                    "sendreplies" to if (sendReplies) "true" else "false",
+                    "sr" to post.subreddit,
+                    (if (post.type) "url" else "text") to post.content,
+                    "title" to post.title)
 
-                    val json = response!!.optJSONObject("json")
-                    val errors = json!!.optJSONArray("errors")
+            val response = khttp.post(url = SUBMIT_ENDPOINT, headers = headers, data = data)
 
-                    if (errors.length() == 0) {
-                        lastSubmissionDate = DateTime.now()
-                        callbacks.onNewLastSubmissionDate()
-                        callback(null, json.optJSONObject("data").optString("url"))
-                    } else {
-                        val errorString = StringBuilder("You got ${errors.length()} errors: ")
-                        for (i in 0 until errors.length()) {
-                            val error = errors.optJSONArray(i)
-                            val name = error.optString(0)
-                            val description = error.optString(1)
+            if (response.statusCode != 200) {
+                callback(Exception("Response code: ${response.statusCode}, response: ${response}"), null)
+                return@ensureValidAccessToken
+            }
 
-                            when (name) {
-                                "RATELIMIT", "NO_URL" -> errorString.append(name).append(" ").append(description).append("\n")
-                                else -> {
-                                    callback(RuntimeException("I FOUND AN UNKNOWN ERROR:\nNAME: $name\nDESCRIPTION: $description"), null)
-                                    return
-                                }
-                            }
+            val json = response.jsonObject.optJSONObject("json")!!
+            val errors = json.optJSONArray("errors")!!
+
+            if (errors.length() == 0) {
+                
+                lastSubmissionDate = DateTime.now()
+                callbacks.onNewLastSubmissionDate()
+                callback(null, json.optJSONObject("data")?.optString("url")!!)
+                
+            } else {
+                
+                val errorString = StringBuilder("You got ${errors.length()} errors: ")
+                for (i in 0 until errors.length()) {
+                    val error = errors.optJSONArray(i)!!
+                    val name = error.optString(0)!!
+                    val description = error.optString(1)!!
+
+                    when (name) {
+                        "RATELIMIT", "NO_URL" -> errorString.append(name).append(" ").append(description).append("\n")
+                        else -> {
+                            callback(RuntimeException("I FOUND AN UNKNOWN ERROR:\nNAME: $name\nDESCRIPTION: $description"), null)
+                            return@ensureValidAccessToken
                         }
-
-                        callback(RuntimeException(errorString.toString()), null)
                     }
                 }
 
-                override fun onFailure(statusCode: Int, headers: Array<Header>?, throwable: Throwable, errorResponse: JSONObject?) {
-                    super.onFailure(statusCode, headers, throwable, errorResponse)
-
-                    callback(throwable, null)
-                }
-
-                override fun onSuccess(statusCode: Int, headers: Array<Header>?, responseString: String?) {
-                    super.onSuccess(statusCode, headers, responseString)
-
-                    callback(RuntimeException("RESPONSE STRING ONSUCCESS"), null)
-                }
-
-                override fun onFailure(statusCode: Int, headers: Array<Header>?, responseString: String?, throwable: Throwable) {
-                    super.onFailure(statusCode, headers, responseString, throwable)
-
-                    callback(throwable, null)
-                }
-            })
+                callback(RuntimeException(errorString.toString()), null)
+            }
         })
     }
-
-//    private fun ensureValidAccessTokenOLD(callback: (Throwable?) -> Unit) {
-//        if (accessToken != null && accessTokenExpirationDate!! > DateTime.now()) {
-//            callback(null)
-//            return
-//        }
-//        
-//        if (refreshToken == null) {
-//            callback(RuntimeException("Can't update access token without refresh token"))
-//            return
-//        }
-//
-//        val shc = SyncHttpClient()
-//        shc.setUserAgent(USER_AGENT)
-//        shc.setBasicAuth(APP_CLIENT_ID, APP_CLIENT_SECRET)
-//
-//        val params = RequestParams()
-//        params.add("grant_type", "refresh_token")
-//        params.add("refresh_token", refreshToken)
-//        shc.post(ACCESS_TOKEN_ENDPOINT, params, object : JsonHttpResponseHandler() {
-//            
-//            override fun onSuccess(statusCode: Int, headers: Array<Header>?, response: JSONObject?) {
-//                super.onSuccess(statusCode, headers, response)
-//
-//                try {
-//                    // TODO: compare received scope with intended scope?
-//                    updateAccessToken(response!!.getString("access_token"), response.getInt("expires_in"))
-//                } catch (e: Exception) {
-//                    callback(e)
-//                    return
-//                }
-//
-//                callback(null)
-//            }
-//
-//            override fun onFailure(statusCode: Int, headers: Array<Header>?, throwable: Throwable, errorResponse: JSONObject?) {
-//                super.onFailure(statusCode, headers, throwable, errorResponse)
-//                
-//                callback(throwable)
-//                return
-//            }
-//        })
-//    }
 
     private fun ensureValidAccessToken(callback: (Throwable?) -> Unit) {
         
@@ -258,45 +195,6 @@ class Reddit private constructor(private val callbacks: Callbacks) { // todo: us
         callbacks.onNewRefreshToken()
         callback(null)
     }
-
-//    fun fetchAuthTokensOLD(callback: (Throwable?) -> Unit) {
-//        if (authCode == null) {
-//            callback(RuntimeException("Can't fetch auth tokens without auth code"))
-//            return
-//        }
-//
-//        val shc = SyncHttpClient()
-//        shc.setUserAgent(USER_AGENT)
-//        shc.setBasicAuth(APP_CLIENT_ID, APP_CLIENT_SECRET)
-//
-//        val params = RequestParams()
-//        params.add("grant_type", "authorization_code")
-//        params.add("code", authCode)
-//        params.add("redirect_uri", APP_REDIRECT_URI)
-//        shc.post(ACCESS_TOKEN_ENDPOINT, params, object : JsonHttpResponseHandler() {
-//            override fun onSuccess(statusCode: Int, headers: Array<Header>?, response: JSONObject?) {
-//                super.onSuccess(statusCode, headers, response)
-//
-//                try {
-//                    // TODO: compare received scope with intended scope?
-//                    refreshToken = response!!.getString("refresh_token")
-//                    updateAccessToken(response.getString("access_token"), response.getInt("expires_in"))
-//                } catch (e: Exception) {
-//                    callback(e)
-//                    return
-//                }
-//
-//                callbacks.onNewRefreshToken()
-//                callback(null)
-//            }
-//
-//            override fun onFailure(statusCode: Int, headers: Array<Header>?, throwable: Throwable, errorResponse: JSONObject?) {
-//                super.onFailure(statusCode, headers, throwable, errorResponse)
-//
-//                callback(throwable)
-//            }
-//        })
-//    }
 
     fun tryExtractCode(url: String): Boolean {
         if (!url.startsWith(APP_REDIRECT_URI) || authState == null)

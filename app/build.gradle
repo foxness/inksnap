@@ -36,7 +36,6 @@ dependencies {
     def room_version = "1.1.0"
     def kodatime_version = "1.2.2"
     def anko_version = "0.10.5"
-    def async_version = "1.4.9"
     def khttp_version = "0.1.0"
     
     implementation fileTree(include: ['*.jar'], dir: 'libs')
@@ -51,8 +50,6 @@ dependencies {
     implementation "android.arch.persistence.room:runtime:$room_version"
     kapt "android.arch.persistence.room:compiler:$room_version"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-
-    implementation "com.loopj.android:android-async-http:$async_version"
     
     implementation "com.github.debop:koda-time:$kodatime_version"
     
