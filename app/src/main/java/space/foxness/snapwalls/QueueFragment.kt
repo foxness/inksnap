@@ -353,17 +353,14 @@ class QueueFragment : Fragment() {
 
                 if (reddit.tryExtractCode(url)) {
                     authDialog.dismiss()
-
+                    
                     doAsync {
-                        reddit.fetchAuthTokens({ error ->
-                            uiThread {
-                                if (error != null)
-                                    throw error
+                        reddit.fetchAuthTokens()
 
-                                toast(if (reddit.canSubmitRightNow) "Success" else "Fail")
-                                updateMenu()
-                            }
-                        })
+                        uiThread {
+                            toast(if (reddit.canSubmitRightNow) "Success" else "Fail")
+                            updateMenu()
+                        }
                     }
                 }
             }

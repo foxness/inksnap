@@ -159,11 +159,9 @@ class Reddit private constructor(private val callbacks: Callbacks) { // todo: us
         callbacks.onNewAccessToken()
     }
 
-    fun fetchAuthTokens(callback: (Throwable?) -> Unit) {
-        if (authCode == null) {
-            callback(RuntimeException("Can't fetch auth tokens without auth code"))
-            return
-        }
+    fun fetchAuthTokens() {
+        if (authCode == null)
+            throw Exception("Can't fetch auth tokens without auth code")
 
         val headers = mapOf("User-Agent" to USER_AGENT)
 
@@ -176,24 +174,19 @@ class Reddit private constructor(private val callbacks: Callbacks) { // todo: us
         
         val response = khttp.post(url = ACCESS_TOKEN_ENDPOINT, headers = headers, data = data, auth = auth)
 
-        if (response.statusCode != 200) {
-            callback(Exception("Response code: ${response.statusCode}, response: ${response}"))
-            return
-        }
+        if (response.statusCode != 200)
+            throw Exception("Response code: ${response.statusCode}, response: $response")
         
         val json = response.jsonObject
 
-        try {
-            // TODO: compare received scope with intended scope?
-            refreshToken = json.getString("refresh_token")
-            updateAccessToken(json.getString("access_token"), json.getInt("expires_in"))
-        } catch (e: Exception) {
-            callback(e)
-            return
-        }
+        // TODO: compare received scope with intended scope?
+        refreshToken = json.getString("refresh_token")
+        val accessToken = json.getString("access_token")
+        val expiresIn = json.getInt("expires_in")
+        
+        updateAccessToken(accessToken, expiresIn)
 
         callbacks.onNewRefreshToken()
-        callback(null)
     }
 
     fun tryExtractCode(url: String): Boolean {
