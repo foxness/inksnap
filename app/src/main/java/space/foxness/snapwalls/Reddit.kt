@@ -45,7 +45,7 @@ class Reddit private constructor(private val callbacks: Callbacks) { // todo: us
         
         // todo: use postfragment's definition of bad post
         if (post.title.isEmpty() || (post.type && post.content.isEmpty()) || post.subreddit.isEmpty()) {
-            callback(RuntimeException("Bad post"), null)
+            callback(Exception("Bad post"), null)
             return
         }
 
@@ -54,102 +54,90 @@ class Reddit private constructor(private val callbacks: Callbacks) { // todo: us
             return
         }
 
-        ensureValidAccessToken({
-            
-            if (it != null) {
-                callback(it, null)
-                return@ensureValidAccessToken
-            }
+        try {
+            ensureValidAccessToken()
+        } catch (e: Exception) {
+            callback(e, null)
+            return
+        }
 
-            val headers = mapOf(
-                    "User-Agent" to USER_AGENT,
-                    "Authorization" to "bearer " + accessToken!!)
+        val headers = mapOf(
+                "User-Agent" to USER_AGENT,
+                "Authorization" to "bearer " + accessToken!!)
 
-            val data = mapOf(
-                    "api_type" to "json",
-                    "kind" to if (post.type) "link" else "self",
-                    "resubmit" to if (resubmit) "true" else "false",
-                    "sendreplies" to if (sendReplies) "true" else "false",
-                    "sr" to post.subreddit,
-                    (if (post.type) "url" else "text") to post.content,
-                    "title" to post.title)
+        val data = mapOf(
+                "api_type" to "json",
+                "kind" to if (post.type) "link" else "self",
+                "resubmit" to if (resubmit) "true" else "false",
+                "sendreplies" to if (sendReplies) "true" else "false",
+                "sr" to post.subreddit,
+                (if (post.type) "url" else "text") to post.content,
+                "title" to post.title)
 
-            val response = khttp.post(url = SUBMIT_ENDPOINT, headers = headers, data = data)
+        val response = khttp.post(url = SUBMIT_ENDPOINT, headers = headers, data = data)
 
-            if (response.statusCode != 200) {
-                callback(Exception("Response code: ${response.statusCode}, response: ${response}"), null)
-                return@ensureValidAccessToken
-            }
+        if (response.statusCode != 200) {
+            callback(Exception("Response code: ${response.statusCode}, response: $response"), null)
+            return
+        }
 
-            val json = response.jsonObject.optJSONObject("json")!!
-            val errors = json.optJSONArray("errors")!!
+        val json = response.jsonObject.getJSONObject("json")
+        val errors = json.getJSONArray("errors")
 
-            if (errors.length() == 0) {
-                
-                lastSubmissionDate = DateTime.now()
-                callbacks.onNewLastSubmissionDate()
-                callback(null, json.optJSONObject("data")?.optString("url")!!)
-                
-            } else {
-                
-                val errorString = StringBuilder("You got ${errors.length()} errors: ")
-                for (i in 0 until errors.length()) {
-                    val error = errors.optJSONArray(i)!!
-                    val name = error.optString(0)!!
-                    val description = error.optString(1)!!
+        if (errors.length() == 0) {
 
-                    when (name) {
-                        "RATELIMIT", "NO_URL" -> errorString.append(name).append(" ").append(description).append("\n")
-                        else -> {
-                            callback(RuntimeException("I FOUND AN UNKNOWN ERROR:\nNAME: $name\nDESCRIPTION: $description"), null)
-                            return@ensureValidAccessToken
-                        }
+            lastSubmissionDate = DateTime.now()
+            callbacks.onNewLastSubmissionDate()
+            val postLink = json.getJSONObject("data").getString("url")
+            callback(null, postLink)
+
+        } else {
+
+            val errorString = StringBuilder("You got ${errors.length()} errors: ")
+            for (i in 0 until errors.length()) {
+                val error = errors.getJSONArray(i)
+                val name = error.getString(0)
+                val description = error.getString(1)
+
+                when (name) {
+                    "RATELIMIT", "NO_URL" -> errorString.append(name).append(" ").append(description).append("\n")
+                    else -> {
+                        callback(Exception("I FOUND AN UNKNOWN ERROR:\nNAME: $name\nDESCRIPTION: $description"), null)
+                        return
                     }
                 }
-
-                callback(RuntimeException(errorString.toString()), null)
             }
-        })
+
+            callback(Exception(errorString.toString()), null)
+        }
     }
 
-    private fun ensureValidAccessToken(callback: (Throwable?) -> Unit) {
+    private fun ensureValidAccessToken() {
         
-        if (accessToken != null && accessTokenExpirationDate!! > DateTime.now()) {
-            callback(null)
+        if (accessToken != null && accessTokenExpirationDate!! > DateTime.now())
             return
-        }
 
-        if (refreshToken == null) {
-            callback(RuntimeException("Can't update access token without refresh token"))
-            return
-        }
+        val refreshToken = refreshToken ?: throw Exception("Can't update access token without refresh token")
 
         val headers = mapOf("User-Agent" to USER_AGENT)
 
         val data = mapOf(
                 "grant_type" to "refresh_token",
-                "refresh_token" to refreshToken!!)
+                "refresh_token" to refreshToken)
 
         val auth = BasicAuthorization(APP_CLIENT_ID, APP_CLIENT_SECRET)
 
         val response = khttp.post(url = ACCESS_TOKEN_ENDPOINT, headers = headers, data = data, auth = auth)
 
-        if (response.statusCode != 200) {
-            callback(Exception("Response code: ${response.statusCode}, response: ${response}"))
-            return
-        }
+        if (response.statusCode != 200)
+            throw Exception("Response code: ${response.statusCode}, response: $response")
 
         val json = response.jsonObject
 
-        try {
-            // TODO: compare received scope with intended scope?
-            updateAccessToken(json.getString("access_token"), json.getInt("expires_in"))
-        } catch (e: Exception) {
-            callback(e)
-            return
-        }
+        val accessToken = json.getString("access_token")
+        val expiresIn = json.getInt("expires_in")
 
-        callback(null)
+        updateAccessToken(accessToken, expiresIn)
     }
 
     private fun updateAccessToken(newAccessToken: String, expiresIn: Int) {
@@ -160,8 +148,8 @@ class Reddit private constructor(private val callbacks: Callbacks) { // todo: us
     }
 
     fun fetchAuthTokens() {
-        if (authCode == null)
-            throw Exception("Can't fetch auth tokens without auth code")
+        
+        val authCode = authCode ?: throw Exception("Can't fetch auth tokens without auth code")
 
         val headers = mapOf("User-Agent" to USER_AGENT)
 
