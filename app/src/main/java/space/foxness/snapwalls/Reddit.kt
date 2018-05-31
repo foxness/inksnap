@@ -5,7 +5,7 @@ import khttp.structures.authorization.BasicAuthorization
 import org.joda.time.DateTime
 import org.joda.time.Duration
 
-class Reddit private constructor(private val callbacks: Callbacks) { // todo: use async/await
+class Reddit private constructor(private val callbacks: Callbacks) {
 
     private var authState: String? = null
     private var authCode: String? = null
@@ -41,25 +41,16 @@ class Reddit private constructor(private val callbacks: Callbacks) { // todo: us
         fun onNewLastSubmissionDate()
     }
 
-    fun submit(post: Post, callback: (Throwable?, String?) -> Unit, debugDontPost: Boolean = false, resubmit: Boolean = true, sendReplies: Boolean = true) {
+    fun submit(post: Post, debugDontPost: Boolean = false, resubmit: Boolean = true, sendReplies: Boolean = true): String {
         
         // todo: use postfragment's definition of bad post
-        if (post.title.isEmpty() || (post.type && post.content.isEmpty()) || post.subreddit.isEmpty()) {
-            callback(Exception("Bad post"), null)
-            return
-        }
+        if (post.title.isEmpty() || (post.type && post.content.isEmpty()) || post.subreddit.isEmpty())
+            throw Exception("Bad post")
 
-        if (debugDontPost) {
-            callback(null, "DEBUG: POST NOT SUBMITTED")
-            return
-        }
+        if (debugDontPost)
+            return "DEBUG: POST NOT SUBMITTED"
 
-        try {
-            ensureValidAccessToken()
-        } catch (e: Exception) {
-            callback(e, null)
-            return
-        }
+        ensureValidAccessToken()
 
         val headers = mapOf(
                 "User-Agent" to USER_AGENT,
@@ -76,10 +67,8 @@ class Reddit private constructor(private val callbacks: Callbacks) { // todo: us
 
         val response = khttp.post(url = SUBMIT_ENDPOINT, headers = headers, data = data)
 
-        if (response.statusCode != 200) {
-            callback(Exception("Response code: ${response.statusCode}, response: $response"), null)
-            return
-        }
+        if (response.statusCode != 200)
+            throw Exception("Response code: ${response.statusCode}, response: $response")
 
         val json = response.jsonObject.getJSONObject("json")
         val errors = json.getJSONArray("errors")
@@ -88,27 +77,25 @@ class Reddit private constructor(private val callbacks: Callbacks) { // todo: us
 
             lastSubmissionDate = DateTime.now()
             callbacks.onNewLastSubmissionDate()
-            val postLink = json.getJSONObject("data").getString("url")
-            callback(null, postLink)
+            return json.getJSONObject("data").getString("url") // post link
 
         } else {
 
-            val errorString = StringBuilder("You got ${errors.length()} errors: ")
+            var errorString = "You got ${errors.length()} errors: "
             for (i in 0 until errors.length()) {
                 val error = errors.getJSONArray(i)
                 val name = error.getString(0)
                 val description = error.getString(1)
 
-                when (name) {
-                    "RATELIMIT", "NO_URL" -> errorString.append(name).append(" ").append(description).append("\n")
-                    else -> {
-                        callback(Exception("I FOUND AN UNKNOWN ERROR:\nNAME: $name\nDESCRIPTION: $description"), null)
-                        return
-                    }
+                val currentError = when (name) {
+                    "RATELIMIT", "NO_URL" -> "[NAME]: $name [DESCRIPTION]: $description"
+                    else -> "[NAME OF AN UNKNOWN ERROR]: $name [DESCRIPTION OF AN UNKNOWN ERROR]: $description"
                 }
+                
+                errorString += "$currentError\n"
             }
-
-            callback(Exception(errorString.toString()), null)
+            
+            throw Exception(errorString)
         }
     }
 

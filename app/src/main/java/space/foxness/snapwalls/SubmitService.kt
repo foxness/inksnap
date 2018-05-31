@@ -38,7 +38,7 @@ class SubmitService : Service() {
 
             val reddit =  Autoreddit.getInstance(this@SubmitService).reddit
             val signedIn = reddit.isSignedIn
-            val notRatelimited = !reddit.isRestrictedByRatelimit // todo: remove the reddit part on production
+            val notRatelimited = !reddit.isRestrictedByRatelimit
             
             val networkAvailable = isNetworkAvailable()
             
@@ -47,22 +47,23 @@ class SubmitService : Service() {
                     && notRatelimited 
                     && networkAvailable
             
-            // todo: make reddit.submit() async !!
             if (everythingGood) {
                 
                 val debugDontPost = retrieveDebugDontPost()
-                
-                reddit.submit(post!!, { error, link ->
-                    if (error != null) {
-                        log("ERROR DURING SUBMISSION: ${error.message}")
-                        throw error
-                    }
 
-                    log("Successfully submitted a post. Link: $link")
-                    
-                    queue.deletePost(post.id) // todo: move to archive or something
-                    log("Deleted the submitted post from the database")
-                }, debugDontPost, RESUBMIT, SEND_REPLIES)
+                val link: String?
+                try {
+                    link = reddit.submit(post!!, debugDontPost, RESUBMIT, SEND_REPLIES)
+                } catch (error: Exception) {
+                    // todo: handle this
+                    throw error
+                }
+
+                log("Successfully submitted a post. Link: $link")
+
+                queue.deletePost(post.id) // todo: move to archive or something
+                log("Deleted the submitted post from the database")
+                
             } else {
                 log(constructErrorMessage(post, goodPost, signedIn, notRatelimited, networkAvailable))
             }

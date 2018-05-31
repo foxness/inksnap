@@ -398,22 +398,25 @@ class QueueFragment : Fragment() {
     }
     
     private fun submitTopPost() { // todo: remove
-        if (queue.posts.isEmpty()) {
-            toast("No post to submit")
-            return
-        }
 
-        if (!reddit.canSubmitRightNow) {
-            toast("Can't submit right now")
-            return
-        }
-
-        reddit.submit(queue.posts.first(), { error, link ->
-            if (error != null)
-                throw error
-
-            toast("GOT LINK: $link")
-        })
+        toast("This button is deprecated :P")
+        
+//        if (queue.posts.isEmpty()) {
+//            toast("No post to submit")
+//            return
+//        }
+//
+//        if (!reddit.canSubmitRightNow) {
+//            toast("Can't submit right now")
+//            return
+//        }
+//        
+//        reddit.submit(queue.posts.first(), { error, link ->
+//            if (error != null)
+//                throw error
+//
+//            toast("GOT LINK: $link")
+//        })
     }
 
     private fun updateMenu() {
