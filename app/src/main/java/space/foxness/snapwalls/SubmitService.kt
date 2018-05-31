@@ -9,6 +9,7 @@ import android.net.ConnectivityManager
 import android.os.*
 import android.support.annotation.RequiresApi
 import android.support.v4.app.NotificationCompat
+import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.preference.PreferenceManager
 import space.foxness.snapwalls.Util.log
 
@@ -63,6 +64,9 @@ class SubmitService : Service() {
 
                 queue.deletePost(post.id) // todo: move to archive or something
                 log("Deleted the submitted post from the database")
+                
+                val broadcastIntent = getPostSubmittedIntent()
+                LocalBroadcastManager.getInstance(this@SubmitService).sendBroadcast(broadcastIntent)
                 
             } else {
                 log(constructErrorMessage(post, goodPost, signedIn, notRatelimited, networkAvailable))
@@ -120,7 +124,7 @@ class SubmitService : Service() {
         val msg = mServiceHandler.obtainMessage()
         msg.arg1 = startId
         msg.obj = intent!!
-        mServiceHandler.sendMessage(msg)
+        mServiceHandler.sendMessage(msg) // todo: how is this different from 'msg.sendToTarget()'?
 
         return Service.START_NOT_STICKY
     }
@@ -128,6 +132,8 @@ class SubmitService : Service() {
     override fun onBind(intent: Intent): IBinder? = null
 
     companion object {
+        const val POST_SUBMITTED = "postSubmitted"
+        
         private const val SEND_REPLIES = true
         private const val RESUBMIT = true
         
@@ -135,6 +141,8 @@ class SubmitService : Service() {
         private const val NOTIFICATION_CHANNEL_NAME = "Main"
         private const val NOTIFICATION_CHANNEL_ID = NOTIFICATION_CHANNEL_NAME
         private const val EXTRA_POST_ID = "post_id"
+        
+        private fun getPostSubmittedIntent() = Intent(POST_SUBMITTED)
 
         fun newIntent(context: Context, postId: Long): Intent {
             val i = Intent(context, SubmitService::class.java)

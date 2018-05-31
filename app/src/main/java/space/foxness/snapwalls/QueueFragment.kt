@@ -3,10 +3,14 @@ package space.foxness.snapwalls
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Dialog
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.support.v4.app.Fragment
+import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.preference.PreferenceManager
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
@@ -45,6 +49,29 @@ class QueueFragment : Fragment() {
     private lateinit var queue: Queue
     private lateinit var reddit: Reddit
     private lateinit var postScheduler: PostScheduler
+    
+    private val messageReceiver = object: BroadcastReceiver() {
+        
+        override fun onReceive(context: Context?, intent: Intent?) {
+            
+            toast("post submitted :O")
+            handleEnabledAutosubmit()
+            updatePostList()
+        }
+    }
+    
+    private fun handleEnabledAutosubmit() {
+        
+        if (queue.posts.isEmpty()) {
+            config.autosubmitEnabled = false
+            config.timeLeft = period
+            updateToggleViews(false)
+        } else {
+            val unpausedTimeLeft = Duration(DateTime.now(), queue.posts.first().scheduledDate!!)
+            timerObject = getTimerObject(unpausedTimeLeft)
+            timerObject.start()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -131,6 +158,21 @@ class QueueFragment : Fragment() {
         // --------------------------------------------
 
         updateToggleViews(config.autosubmitEnabled)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        
+        val lbm = LocalBroadcastManager.getInstance(activity!!)
+        val intentFilter = IntentFilter(SubmitService.POST_SUBMITTED)
+        lbm.registerReceiver(messageReceiver, intentFilter)
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        val lbm = LocalBroadcastManager.getInstance(activity!!)
+        lbm.unregisterReceiver(messageReceiver)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -253,15 +295,7 @@ class QueueFragment : Fragment() {
         period = retrievePeriod()
         
         if (config.autosubmitEnabled) {
-            if (queue.posts.isEmpty()) {
-                config.autosubmitEnabled = false
-                config.timeLeft = period
-                updateToggleViews(false)
-            } else {
-                val unpausedTimeLeft = Duration(DateTime.now(), queue.posts.first().scheduledDate!!)
-                timerObject = getTimerObject(unpausedTimeLeft)
-                timerObject.start()
-            }
+            handleEnabledAutosubmit()
         } else {
             if (config.timeLeft!! > period) {
                 config.timeLeft = period
