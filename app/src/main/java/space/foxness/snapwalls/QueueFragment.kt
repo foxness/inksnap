@@ -50,7 +50,9 @@ class QueueFragment : Fragment() {
     private lateinit var reddit: Reddit
     private lateinit var postScheduler: PostScheduler
     
-    private val messageReceiver = object: BroadcastReceiver() {
+    private var receiverRegistered = false
+    
+    private val submitReceiver = object: BroadcastReceiver() {
         
         override fun onReceive(context: Context?, intent: Intent?) {
             
@@ -66,10 +68,14 @@ class QueueFragment : Fragment() {
             config.autosubmitEnabled = false
             config.timeLeft = period
             updateToggleViews(false)
+            
+            unregisterSubmitReceiver()
         } else {
             val unpausedTimeLeft = Duration(DateTime.now(), queue.posts.first().scheduledDate!!)
             timerObject = getTimerObject(unpausedTimeLeft)
             timerObject.start()
+            
+            registerSubmitReceiver()
         }
     }
 
@@ -146,20 +152,26 @@ class QueueFragment : Fragment() {
             }
         })
     }
+    
+    private fun registerSubmitReceiver() {
+        if (receiverRegistered)
+            return
 
-    override fun onStart() {
-        super.onStart()
+        receiverRegistered = true
         
         val lbm = LocalBroadcastManager.getInstance(activity!!)
         val intentFilter = IntentFilter(SubmitService.POST_SUBMITTED)
-        lbm.registerReceiver(messageReceiver, intentFilter)
+        lbm.registerReceiver(submitReceiver, intentFilter)
     }
-
-    override fun onStop() {
-        super.onStop()
-
+    
+    private fun unregisterSubmitReceiver() {
+        if (!receiverRegistered)
+            return
+        
+        receiverRegistered = false
+        
         val lbm = LocalBroadcastManager.getInstance(activity!!)
-        lbm.unregisterReceiver(messageReceiver)
+        lbm.unregisterReceiver(submitReceiver)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -226,6 +238,7 @@ class QueueFragment : Fragment() {
             }
 
             config.autosubmitEnabled = true
+            registerSubmitReceiver()
             
             log("Scheduled ${queue.posts.size} post(s)")
             
@@ -241,6 +254,7 @@ class QueueFragment : Fragment() {
             }
 
             config.autosubmitEnabled = false
+            unregisterSubmitReceiver()
 
             log("Canceled ${queue.posts.size} scheduled post(s)")
         }
@@ -297,6 +311,8 @@ class QueueFragment : Fragment() {
         
         if (config.autosubmitEnabled)
             timerObject.cancel()
+
+        unregisterSubmitReceiver()
     }
 
     private fun updatePostList() {

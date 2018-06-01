@@ -65,7 +65,7 @@ class SubmitService : Service() {
                 queue.deletePost(post.id) // todo: move to archive or something
                 log("Deleted the submitted post from the database")
                 
-                val broadcastIntent = getPostSubmittedIntent()
+                val broadcastIntent = Intent(POST_SUBMITTED)
                 LocalBroadcastManager.getInstance(this@SubmitService).sendBroadcast(broadcastIntent)
                 
             } else {
@@ -141,8 +141,6 @@ class SubmitService : Service() {
         private const val NOTIFICATION_CHANNEL_NAME = "Main"
         private const val NOTIFICATION_CHANNEL_ID = NOTIFICATION_CHANNEL_NAME
         private const val EXTRA_POST_ID = "post_id"
-        
-        private fun getPostSubmittedIntent() = Intent(POST_SUBMITTED)
 
         fun newIntent(context: Context, postId: Long): Intent {
             val i = Intent(context, SubmitService::class.java)
