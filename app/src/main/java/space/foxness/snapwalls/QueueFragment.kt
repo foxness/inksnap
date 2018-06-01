@@ -286,9 +286,9 @@ class QueueFragment : Fragment() {
     private fun updateTimerText(timeLeft: Duration) {
         timerText.text = timeLeft.toNice()
     }
-    
-    override fun onResume() {
-        super.onResume()
+
+    override fun onStart() {
+        super.onStart()
 
         // assume period never changes while autosubmit is enabled
         // todo: actually prohibit period changing while autosubmit is on
@@ -306,9 +306,9 @@ class QueueFragment : Fragment() {
         updatePostList()
     }
 
-    override fun onPause() {
-        super.onPause()
-        
+    override fun onStop() {
+        super.onStop()
+
         if (config.autosubmitEnabled)
             timerObject.cancel()
 
