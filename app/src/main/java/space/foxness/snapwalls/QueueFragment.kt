@@ -88,8 +88,9 @@ class QueueFragment : Fragment() {
         postScheduler = PostScheduler(ctx)
 
         PreferenceManager.setDefaultValues(ctx, R.xml.preferences, false)
-        
-        init()
+
+        if (config.timeLeft == null)
+            config.timeLeft = period
     }
     
     private fun retrievePeriod(): Duration {
@@ -101,16 +102,6 @@ class QueueFragment : Fragment() {
         
         val millisInMinute: Long = 60 * 1000
         return Duration(minutes * millisInMinute)
-    }
-    
-    private fun init() {
-        period = retrievePeriod()
-        
-        if (config.timeLeft == null)
-            config.timeLeft = period
-        
-        if (queue.posts.isEmpty() && config.autosubmitEnabled)
-            config.autosubmitEnabled = false
     }
     
     private fun initUi() {
@@ -154,10 +145,6 @@ class QueueFragment : Fragment() {
                 config.timeLeft = timeLeft
             }
         })
-        
-        // --------------------------------------------
-
-        updateToggleViews(config.autosubmitEnabled)
     }
 
     override fun onStart() {
@@ -297,14 +284,11 @@ class QueueFragment : Fragment() {
         if (config.autosubmitEnabled) {
             handleEnabledAutosubmit()
         } else {
-            if (config.timeLeft!! > period) {
+            if (config.timeLeft!! > period)
                 config.timeLeft = period
-                updateTimerText(config.timeLeft!!)
-            }
-            
-            updateSeekbarProgress(config.timeLeft!!)
         }
-        
+
+        updateToggleViews(config.autosubmitEnabled)
         updatePostList()
     }
 
