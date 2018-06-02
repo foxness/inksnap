@@ -18,6 +18,30 @@ class PostScheduler private constructor(context: Context) { // todo: throw excep
     private val queue = Queue.getInstance(context)
 
     private val alarmManager get() = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+    // this method expects the queue to be divided into 2 segments
+    // the first segment is the scheduled segment at the beginning
+    // the last segment is the segment that will be scheduled
+    fun scheduleUnscheduledPostsPeriodic(period: Duration) {
+        val posts = queue.posts
+
+        if (posts.size < 2)
+            throw Exception("Need at least 2 posts")
+
+        if (posts.first().scheduledDate == null)
+            throw Exception("Can't infer the periodic schedule")
+
+        var onlyNullsNow = false
+        for (i in 1 until posts.size) {
+            if (posts[i].scheduledDate == null) {
+                posts[i].scheduledDate = posts[i - 1].scheduledDate!! + period
+                queue.updatePost(posts[i])
+                onlyNullsNow = true
+            } else if (onlyNullsNow) {
+                throw Exception("You can't switch from nulls to non-nulls")
+            }
+        }
+    }
     
     fun isPostScheduled(post: Post) = post.scheduledDate != null
     
