@@ -54,7 +54,7 @@ class Reddit private constructor(private val callbacks: Callbacks) {
 
         val headers = mapOf(
                 "User-Agent" to USER_AGENT,
-                "Authorization" to "bearer " + accessToken!!)
+                "Authorization" to "bearer ${accessToken!!}")
 
         val data = mapOf(
                 "api_type" to "json",

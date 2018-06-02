@@ -379,7 +379,7 @@ class QueueFragment : Fragment() {
                 true
             }
             R.id.menu_queue_submit -> {
-                submitTopPost()
+                testButton()
                 true
             }
             R.id.menu_queue_settings -> {
@@ -390,26 +390,14 @@ class QueueFragment : Fragment() {
         }
     }
     
-    private fun submitTopPost() { // todo: remove
-
-        toast("This button is deprecated :P")
+    private fun testButton() { // todo: remove
         
-//        if (queue.posts.isEmpty()) {
-//            toast("No post to submit")
-//            return
-//        }
-//
-//        if (!reddit.canSubmitRightNow) {
-//            toast("Can't submit right now")
-//            return
-//        }
-//        
-//        reddit.submit(queue.posts.first(), { error, link ->
-//            if (error != null)
-//                throw error
-//
-//            toast("GOT LINK: $link")
-//        })
+        doAsync { 
+            val link = Imgur.upload("https://wallpapers.wallhaven.cc/wallpapers/full/wallhaven-295738.jpg")
+            log(link)
+            
+            uiThread { toast(link) }
+        }
     }
 
     private fun updateMenu() {
