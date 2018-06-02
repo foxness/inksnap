@@ -92,9 +92,6 @@ class QueueFragment : Fragment() {
         postScheduler = PostScheduler(ctx)
 
         PreferenceManager.setDefaultValues(ctx, R.xml.preferences, false)
-
-        if (config.timeLeft == null)
-            config.timeLeft = period
     }
     
     private fun retrievePeriod(): Duration {
@@ -277,6 +274,9 @@ class QueueFragment : Fragment() {
         // todo: actually prohibit period changing while autosubmit is on
         
         period = retrievePeriod()
+
+        if (config.timeLeft == null)
+            config.timeLeft = period
         
         if (config.autosubmitEnabled) {
             handleEnabledAutosubmit()

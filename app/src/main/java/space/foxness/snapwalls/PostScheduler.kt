@@ -9,6 +9,9 @@ import com.github.debop.kodatimes.times
 import org.joda.time.DateTime
 import org.joda.time.Duration
 
+// todo: make postscheduler a singleton
+// todo: make reddit not a singleton and rename it to reddit account
+
 class PostScheduler(context: Context) { // todo: throw exception if schedule time is in the past
 
     private val context = context.applicationContext!!
@@ -66,6 +69,11 @@ class PostScheduler(context: Context) { // todo: throw exception if schedule tim
             
             scheduleService(datetime)
         }
+    }
+    
+    fun scheduleServiceForNextPost() {
+        val esp = getEarliestScheduledPost() ?: throw Exception("No scheduled posts found")
+        scheduleService(esp.scheduledDate!!)
     }
     
     private fun scheduleService(datetime: DateTime) {
