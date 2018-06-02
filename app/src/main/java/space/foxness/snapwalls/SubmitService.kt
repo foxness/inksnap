@@ -64,7 +64,8 @@ class SubmitService : Service() {
                     Config.getInstance(this@SubmitService).autosubmitEnabled = false
                     log("Ran out of posts and disabled autosubmit")
                 } else {
-                    PostScheduler(this@SubmitService).scheduleServiceForNextPost()
+                    val ps = PostScheduler.getInstance(this@SubmitService)
+                    ps.scheduleServiceForNextPost()
                     log("Scheduled service for the next post")
                 }
                 

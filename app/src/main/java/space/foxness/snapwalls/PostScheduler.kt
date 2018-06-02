@@ -9,16 +9,15 @@ import com.github.debop.kodatimes.times
 import org.joda.time.DateTime
 import org.joda.time.Duration
 
-// todo: make postscheduler a singleton
 // todo: make reddit not a singleton and rename it to reddit account
 
-class PostScheduler(context: Context) { // todo: throw exception if schedule time is in the past
+class PostScheduler private constructor(context: Context) { // todo: throw exception if schedule time is in the past
 
     private val context = context.applicationContext!!
 
     private val queue = Queue.getInstance(context)
 
-    private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+    private val alarmManager get() = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
     
     fun isPostScheduled(post: Post) = post.scheduledDate != null
     
@@ -99,7 +98,7 @@ class PostScheduler(context: Context) { // todo: throw exception if schedule tim
             = queue.posts.filter { it.scheduledDate != null }.minBy { it.scheduledDate!!.millis }
 
     private fun getPendingIntent(flags: Int = 0): PendingIntent? {
-        val intent = SubmitService.newIntent(context) // TODO: OVERHAUL SUBMITSERVICE
+        val intent = SubmitService.newIntent(context)
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             PendingIntent.getForegroundService(context, REQUEST_CODE, intent, flags)
         } else {
@@ -107,7 +106,7 @@ class PostScheduler(context: Context) { // todo: throw exception if schedule tim
         }
     }
 
-    companion object {
+    companion object: SingletonHolder<PostScheduler, Context>(::PostScheduler) {
         private const val REQUEST_CODE = 0
 
         private fun getAlarmType(rtc: Boolean = false, wakeup: Boolean = true): Int {

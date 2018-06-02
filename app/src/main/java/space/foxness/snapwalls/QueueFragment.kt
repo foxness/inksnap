@@ -88,8 +88,8 @@ class QueueFragment : Fragment() {
         val ctx = context!!
         config = Config.getInstance(ctx)
         queue = Queue.getInstance(ctx)
+        postScheduler = PostScheduler.getInstance(ctx)
         reddit = Autoreddit.getInstance(ctx).reddit
-        postScheduler = PostScheduler(ctx)
 
         PreferenceManager.setDefaultValues(ctx, R.xml.preferences, false)
     }
