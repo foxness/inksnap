@@ -22,7 +22,6 @@ import android.widget.Button
 import android.widget.CheckBox
 import android.widget.SeekBar
 import android.widget.TextView
-import com.github.debop.kodatimes.times
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 import org.joda.time.DateTime
@@ -30,7 +29,6 @@ import org.joda.time.Duration
 import space.foxness.snapwalls.Util.log
 import space.foxness.snapwalls.Util.toNice
 import space.foxness.snapwalls.Util.toast
-import java.util.*
 
 class QueueFragment : Fragment() {
 
@@ -94,9 +92,6 @@ class QueueFragment : Fragment() {
         postScheduler = PostScheduler(ctx)
 
         PreferenceManager.setDefaultValues(ctx, R.xml.preferences, false)
-
-        if (config.timeLeft == null)
-            config.timeLeft = period
     }
     
     private fun retrievePeriod(): Duration {
@@ -221,40 +216,25 @@ class QueueFragment : Fragment() {
                 toast("No posts to autosubmit")
                 return
             }
-            
-            val postDelays = HashMap(queue.posts
-                    .mapIndexed { i, post -> post.id to config.timeLeft!! + period * i.toLong() }
-                    .toMap())
-            
-            timerObject = getTimerObject(config.timeLeft!!)
-            timerObject.start()
-            
-            postScheduler.scheduleDelayedPosts(postDelays)
-
-            val now = DateTime.now()
-            queue.posts.forEach {
-                it.scheduledDate = now + postDelays[it.id]
-                queue.updatePost(it)
-            }
 
             config.autosubmitEnabled = true
             registerSubmitReceiver()
             
+            timerObject = getTimerObject(config.timeLeft!!)
+            timerObject.start()
+            
+            postScheduler.schedulePeriodicPosts(queue.posts, period, config.timeLeft!!)
+            
             log("Scheduled ${queue.posts.size} post(s)")
             
         } else {
+            config.autosubmitEnabled = false
+            unregisterSubmitReceiver()
+            
             timerObject.cancel()
             config.timeLeft = Duration(DateTime.now(), queue.posts.first().scheduledDate!!)
             
-            postScheduler.cancelScheduledPosts(queue.posts.map { it.id })
-
-            queue.posts.forEach {
-                it.scheduledDate = null
-                queue.updatePost(it)
-            }
-
-            config.autosubmitEnabled = false
-            unregisterSubmitReceiver()
+            postScheduler.cancelScheduledPosts(queue.posts.reversed()) // ...its for optimization
 
             log("Canceled ${queue.posts.size} scheduled post(s)")
         }
@@ -294,6 +274,9 @@ class QueueFragment : Fragment() {
         // todo: actually prohibit period changing while autosubmit is on
         
         period = retrievePeriod()
+
+        if (config.timeLeft == null)
+            config.timeLeft = period
         
         if (config.autosubmitEnabled) {
             handleEnabledAutosubmit()

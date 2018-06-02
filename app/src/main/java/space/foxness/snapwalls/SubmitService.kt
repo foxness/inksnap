@@ -13,6 +13,9 @@ import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.preference.PreferenceManager
 import space.foxness.snapwalls.Util.log
 
+// todo: add all posts that failed to be submitted to a 'failed' list
+// todo: add network safeguard to auth
+
 class SubmitService : Service() {
     
     private lateinit var mServiceLooper: Looper
@@ -23,38 +26,29 @@ class SubmitService : Service() {
         override fun handleMessage(msg: Message) {
 
             log("I am trying to submit...")
-
-            // todo: add all posts that failed to be submitted to a 'failed' list
-            // todo: add network safeguard to auth
-
-            // BIG NOTE: stopSelf(msg.arg1) MUST BE CALLED BEFORE RETURNING
-            // DON'T RETURN WITHOUT CALLING IT
             
             val queue = Queue.getInstance(this@SubmitService)
-
-            val intent = msg.obj as Intent
-            val postId = intent.getLongExtra(EXTRA_POST_ID, -1)
-            val post = queue.getPost(postId)
-            val goodPost = post != null
-
+            val scheduledPosts = queue.posts.filter { it.scheduledDate != null }
+            
+            if (scheduledPosts.isEmpty())
+                throw Exception("No scheduled posts found")
+            
+            val post = scheduledPosts.minBy { it.scheduledDate!!.millis }!!
+            
             val reddit =  Autoreddit.getInstance(this@SubmitService).reddit
+            
             val signedIn = reddit.isSignedIn
             val notRatelimited = !reddit.isRestrictedByRatelimit
-            
             val networkAvailable = isNetworkAvailable()
             
-            val everythingGood = goodPost 
-                    && signedIn 
-                    && notRatelimited 
-                    && networkAvailable
+            val readyToPost = signedIn && notRatelimited && networkAvailable
+            val debugDontPost = retrieveDebugDontPost()
             
-            if (everythingGood) {
+            if (readyToPost || debugDontPost) {
                 
-                val debugDontPost = retrieveDebugDontPost()
-
                 val link: String?
                 try {
-                    link = reddit.submit(post!!, debugDontPost, RESUBMIT, SEND_REPLIES)
+                    link = reddit.submit(post, debugDontPost, RESUBMIT, SEND_REPLIES)
                 } catch (error: Exception) {
                     // todo: handle this
                     throw error
@@ -65,14 +59,27 @@ class SubmitService : Service() {
                 queue.deletePost(post.id) // todo: move to archive or something
                 log("Deleted the submitted post from the database")
                 
+                val submittedAllPosts = queue.posts.isEmpty()
+                if (submittedAllPosts) {
+                    Config.getInstance(this@SubmitService).autosubmitEnabled = false
+                    log("Ran out of posts and disabled autosubmit")
+                } else {
+                    PostScheduler(this@SubmitService).scheduleServiceForNextPost()
+                    log("Scheduled service for the next post")
+                }
+                
                 val broadcastIntent = Intent(POST_SUBMITTED)
+                broadcastIntent.putExtra(EXTRA_SUBMITTED_ALL_POSTS, submittedAllPosts)
                 LocalBroadcastManager.getInstance(this@SubmitService).sendBroadcast(broadcastIntent)
                 
             } else {
-                log(constructErrorMessage(post, goodPost, signedIn, notRatelimited, networkAvailable))
+                log(constructErrorMessage(post, signedIn, notRatelimited, networkAvailable))
             }
 
             stopSelf(msg.arg1)
+
+            // BIG NOTE: stopSelf(msg.arg1) MUST BE CALLED BEFORE RETURNING
+            // DON'T RETURN WITHOUT CALLING IT
         }
     }
 
@@ -123,7 +130,6 @@ class SubmitService : Service() {
         
         val msg = mServiceHandler.obtainMessage()
         msg.arg1 = startId
-        msg.obj = intent!!
         mServiceHandler.sendMessage(msg) // todo: how is this different from 'msg.sendToTarget()'?
 
         return Service.START_NOT_STICKY
@@ -132,6 +138,8 @@ class SubmitService : Service() {
     override fun onBind(intent: Intent): IBinder? = null
 
     companion object {
+        const val EXTRA_SUBMITTED_ALL_POSTS = "submittedAllPosts"
+        
         const val POST_SUBMITTED = "postSubmitted"
         
         private const val SEND_REPLIES = true
@@ -140,37 +148,26 @@ class SubmitService : Service() {
         private const val NOTIFICATION_ID = 1 // must not be 0
         private const val NOTIFICATION_CHANNEL_NAME = "Main"
         private const val NOTIFICATION_CHANNEL_ID = NOTIFICATION_CHANNEL_NAME
-        private const val EXTRA_POST_ID = "post_id"
 
-        fun newIntent(context: Context, postId: Long): Intent {
-            val i = Intent(context, SubmitService::class.java)
-            i.putExtra(EXTRA_POST_ID, postId)
-            return i
-        }
+        fun newIntent(context: Context) = Intent(context, SubmitService::class.java)
         
         // assumes that not all of the arguments are true
-        private fun constructErrorMessage(post: Post?,
-                                          goodPost: Boolean,
+        private fun constructErrorMessage(post: Post,
                                           signedIn: Boolean,
                                           notRatelimited: Boolean,
                                           networkAvailable: Boolean): String {
 
             val reasonsDidntPost = mutableListOf<String>()
 
-            val postNotFoundReason = "didn't find the post in the database"
             val notSignedInReason = "wasn't signed in"
             val ratelimitedReason = "was ratelimited"
             val networkNotAvailableReason = "network wasn't available"
 
-            if (!goodPost) reasonsDidntPost.add(postNotFoundReason)
             if (!signedIn) reasonsDidntPost.add(notSignedInReason)
             if (!notRatelimited) reasonsDidntPost.add(ratelimitedReason)
             if (!networkAvailable) reasonsDidntPost.add(networkNotAvailableReason)
 
-            val postString = if (goodPost)
-                "the post titled '${post!!.title}' with ID ${post.id}"
-            else
-                "this post"
+            val postString = "the post titled '${post.title}' with ID ${post.id}"
 
             var errorMessage = "Couldn't submit $postString because "
 
