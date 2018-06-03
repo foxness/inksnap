@@ -7,15 +7,15 @@ import org.joda.time.Duration
 class ImgurAccount(private val callbacks: Callbacks) {
 
     interface Callbacks {
-        fun onNewAccessToken(newAccessToken: String, accessTokenExpirationDate: DateTime)
+        fun onNewAccessToken(newAccessToken: String, newAccessTokenExpirationDate: DateTime)
         fun onNewRefreshToken(newRefreshToken: String)
     }
 
     private var authState: String? = null
 
-    private var accessToken: String? = null
-    private var refreshToken: String? = null
-    private var accessTokenExpirationDate: DateTime? = null
+    var accessToken: String? = null
+    var refreshToken: String? = null
+    var accessTokenExpirationDate: DateTime? = null
     
     val authorizationUrl: String
         get() {

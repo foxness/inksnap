@@ -8,21 +8,21 @@ class Config private constructor(context: Context) {
     
     private val sharedPreferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
 
-    var accessToken: String?
-        get() = getString(CONFIG_ACCESS_TOKEN)
-        set(value) = setString(CONFIG_ACCESS_TOKEN, value)
+    var redditAccessToken: String?
+        get() = getString(CONFIG_REDDIT_ACCESS_TOKEN)
+        set(value) = setString(CONFIG_REDDIT_ACCESS_TOKEN, value)
 
-    var refreshToken: String?
-        get() = getString(CONFIG_REFRESH_TOKEN)
-        set(value) = setString(CONFIG_REFRESH_TOKEN, value)
+    var redditRefreshToken: String?
+        get() = getString(CONFIG_REDDIT_REFRESH_TOKEN)
+        set(value) = setString(CONFIG_REDDIT_REFRESH_TOKEN, value)
 
-    var accessTokenExpirationDate: DateTime?
-        get() = getDateTime(CONFIG_ACCESS_TOKEN_EXPIRATION_DATE)
-        set(value) = setDateTime(CONFIG_ACCESS_TOKEN_EXPIRATION_DATE, value)
+    var redditAccessTokenExpirationDate: DateTime?
+        get() = getDateTime(CONFIG_REDDIT_ACCESS_TOKEN_EXPIRATION_DATE)
+        set(value) = setDateTime(CONFIG_REDDIT_ACCESS_TOKEN_EXPIRATION_DATE, value)
 
-    var lastSubmissionDate: DateTime?
-        get() = getDateTime(CONFIG_LAST_SUBMISSION_DATE)
-        set(value) = setDateTime(CONFIG_LAST_SUBMISSION_DATE, value)
+    var redditLastSubmissionDate: DateTime?
+        get() = getDateTime(CONFIG_REDDIT_LAST_SUBMISSION_DATE)
+        set(value) = setDateTime(CONFIG_REDDIT_LAST_SUBMISSION_DATE, value)
     
     var autosubmitEnabled: Boolean
         get() = getBool(CONFIG_AUTOSUBMIT_ENABLED)
@@ -31,6 +31,18 @@ class Config private constructor(context: Context) {
     var timeLeft: Duration?
         get() = getDuration(CONFIG_TIME_LEFT)
         set(value) = setDuration(CONFIG_TIME_LEFT, value)
+
+    var imgurAccessToken: String?
+        get() = getString(CONFIG_IMGUR_ACCESS_TOKEN)
+        set(value) = setString(CONFIG_IMGUR_ACCESS_TOKEN, value)
+
+    var imgurRefreshToken: String?
+        get() = getString(CONFIG_IMGUR_REFRESH_TOKEN)
+        set(value) = setString(CONFIG_IMGUR_REFRESH_TOKEN, value)
+
+    var imgurAccessTokenExpirationDate: DateTime?
+        get() = getDateTime(CONFIG_IMGUR_ACCESS_TOKEN_EXPIRATION_DATE)
+        set(value) = setDateTime(CONFIG_IMGUR_ACCESS_TOKEN_EXPIRATION_DATE, value)
 
     private fun getString(key: String) = sharedPreferences.getString(key, null)
     
@@ -72,12 +84,15 @@ class Config private constructor(context: Context) {
     
     companion object : SingletonHolder<Config, Context>(::Config) {
         private const val SHARED_PREFERENCES_NAME = "config"
-        private const val CONFIG_ACCESS_TOKEN = "accessToken"
-        private const val CONFIG_REFRESH_TOKEN = "refreshToken"
-        private const val CONFIG_ACCESS_TOKEN_EXPIRATION_DATE = "accessTokenExpirationDate"
-        private const val CONFIG_LAST_SUBMISSION_DATE = "lastSubmissionDate"
+        private const val CONFIG_REDDIT_ACCESS_TOKEN = "redditAccessToken"
+        private const val CONFIG_REDDIT_REFRESH_TOKEN = "redditRefreshToken"
+        private const val CONFIG_REDDIT_ACCESS_TOKEN_EXPIRATION_DATE = "redditAccessTokenExpirationDate"
+        private const val CONFIG_REDDIT_LAST_SUBMISSION_DATE = "redditLastSubmissionDate"
         private const val CONFIG_AUTOSUBMIT_ENABLED = "autosubmitEnabled"
         private const val CONFIG_TIME_LEFT = "timeLeft"
+        private const val CONFIG_IMGUR_ACCESS_TOKEN = "imgurAccessToken"
+        private const val CONFIG_IMGUR_REFRESH_TOKEN = "imgurRefreshToken"
+        private const val CONFIG_IMGUR_ACCESS_TOKEN_EXPIRATION_DATE = "imgurAccessTokenExpirationDate"
 
         private const val LONG_NULL_SUBSTITUTE: Long = Long.MIN_VALUE
     }

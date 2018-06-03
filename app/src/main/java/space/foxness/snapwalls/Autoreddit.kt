@@ -15,25 +15,25 @@ class Autoreddit private constructor(context: Context) {
     }
 
     private fun restoreConfig() {
-        reddit.accessToken = config.accessToken
-        reddit.refreshToken = config.refreshToken
-        reddit.accessTokenExpirationDate = config.accessTokenExpirationDate
-        reddit.lastSubmissionDate = config.lastSubmissionDate
+        reddit.accessToken = config.redditAccessToken
+        reddit.refreshToken = config.redditRefreshToken
+        reddit.accessTokenExpirationDate = config.redditAccessTokenExpirationDate
+        reddit.lastSubmissionDate = config.redditLastSubmissionDate
     }
 
     private inner class Saver : Reddit.Callbacks {
         
         override fun onNewAccessToken() {
-            config.accessToken = reddit.accessToken
-            config.accessTokenExpirationDate = reddit.accessTokenExpirationDate
+            config.redditAccessToken = reddit.accessToken
+            config.redditAccessTokenExpirationDate = reddit.accessTokenExpirationDate
         }
 
         override fun onNewRefreshToken() {
-            config.refreshToken = reddit.refreshToken
+            config.redditRefreshToken = reddit.refreshToken
         }
 
         override fun onNewLastSubmissionDate() {
-            config.lastSubmissionDate = reddit.lastSubmissionDate
+            config.redditLastSubmissionDate = reddit.lastSubmissionDate
         }
     }
     

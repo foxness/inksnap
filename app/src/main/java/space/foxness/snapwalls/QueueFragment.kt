@@ -46,17 +46,7 @@ class QueueFragment : Fragment() {
     private lateinit var config: Config
     private lateinit var queue: Queue
     private lateinit var reddit: Reddit
-    
-    private val imgur = ImgurAccount(object: ImgurAccount.Callbacks {
-        override fun onNewAccessToken(newAccessToken: String, accessTokenExpirationDate: DateTime) {
-//            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-        }
-
-        override fun onNewRefreshToken(newRefreshToken: String) {
-//            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-        }
-
-    })
+    private lateinit var imgurAccount: ImgurAccount
     
     private lateinit var postScheduler: PostScheduler
     
@@ -102,6 +92,7 @@ class QueueFragment : Fragment() {
         queue = Queue.getInstance(ctx)
         postScheduler = PostScheduler.getInstance(ctx)
         reddit = Autoreddit.getInstance(ctx).reddit
+        imgurAccount = Autoimgur.getInstance(ctx).imgurAccount
 
         PreferenceManager.setDefaultValues(ctx, R.xml.preferences, false)
     }
@@ -402,14 +393,7 @@ class QueueFragment : Fragment() {
         }
     }
     
-    private fun showImgurLoginDialog() { // todo: remove
-        
-//        doAsync { 
-//            val link = ImgurAccount.upload("https://wallpapers.wallhaven.cc/wallpapers/full/wallhaven-295738.jpg")
-//            log(link)
-//            
-//            uiThread { toast(link) }
-//        }
+    private fun showImgurLoginDialog() {
 
         val authDialog = Dialog(context!!)
         authDialog.setContentView(R.layout.dialog_auth)
@@ -420,13 +404,13 @@ class QueueFragment : Fragment() {
             override fun onPageFinished(view: WebView, url: String) {
                 super.onPageFinished(view, url)
 
-                if (imgur.tryExtractTokens(url)) {
+                if (imgurAccount.tryExtractTokens(url)) {
                     authDialog.dismiss()
                 }
             }
         }
 
-        authWebview.loadUrl(imgur.authorizationUrl)
+        authWebview.loadUrl(imgurAccount.authorizationUrl)
         authDialog.show()
     }
 
