@@ -381,7 +381,7 @@ class QueueFragment : Fragment() {
             val link = imgurAccount.uploadImage("https://wallpapers.wallhaven.cc/wallpapers/full/wallhaven-655823.png")
             
             log(link)
-            uiThread { toast(link) 
+            uiThread { toast(link) }
         }
     }
 
