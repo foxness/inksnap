@@ -34,7 +34,6 @@ class QueueFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: PostAdapter
-    private lateinit var signinMenuItem: MenuItem
     private lateinit var timerText: TextView
     private lateinit var timerToggle: Button
     private lateinit var seekBar: SeekBar
@@ -49,6 +48,8 @@ class QueueFragment : Fragment() {
     private lateinit var imgurAccount: ImgurAccount
     
     private lateinit var postScheduler: PostScheduler
+    
+    private var redditTokenFetching = false
     
     private var receiverRegistered = false
     
@@ -210,7 +211,7 @@ class QueueFragment : Fragment() {
             throw RuntimeException("Can't change autosubmit to state it's already in")
         
         if (on) {
-            if (!reddit.isSignedIn) {
+            if (!reddit.isLoggedIn) {
                 toast("You must be signed in to autosubmit")
                 return
             }
@@ -309,9 +310,11 @@ class QueueFragment : Fragment() {
         super.onCreateOptionsMenu(menu, inflater)
         inflater!!.inflate(R.menu.menu_queue, menu)
 
-        signinMenuItem = menu!!.findItem(R.id.menu_queue_signin)
-
-        updateMenu()
+        val redditLoginMenuItem = menu!!.findItem(R.id.menu_queue_reddit_login)!!
+        val imgurLoginMenuItem = menu.findItem(R.id.menu_queue_imgur_login)!!
+        
+        redditLoginMenuItem.isEnabled = !redditTokenFetching && !reddit.isLoggedIn
+        imgurLoginMenuItem.isEnabled = !imgurAccount.isLoggedIn
     }
 
     private fun createNewPost() {
@@ -334,13 +337,11 @@ class QueueFragment : Fragment() {
     }
 
     private fun showRedditLoginDialog() {
-        signinMenuItem.isEnabled = false
-        // we need ^ this because there's a token doesn't arrive immediately after the dialog is dismissed
-        // and the user should not be able to press it when the token is being fetched
-
+        
         val authDialog = Dialog(context!!)
         authDialog.setContentView(R.layout.dialog_auth)
-        authDialog.setOnCancelListener { signinMenuItem.isEnabled = true }
+        
+        authDialog.setOnCancelListener { toast("Fail") }
 
         val authWebview = authDialog.findViewById<WebView>(R.id.auth_webview)
         authWebview.webViewClient = object : WebViewClient() {
@@ -348,14 +349,18 @@ class QueueFragment : Fragment() {
                 super.onPageFinished(view, url)
 
                 if (reddit.tryExtractCode(url)) {
+                    redditTokenFetching = true
+                    activity!!.invalidateOptionsMenu()
+                    
                     authDialog.dismiss()
                     
                     doAsync {
                         reddit.fetchAuthTokens()
 
                         uiThread {
-                            toast(if (reddit.canSubmitRightNow) "Success" else "Fail")
-                            updateMenu()
+                            redditTokenFetching = false
+                            activity!!.invalidateOptionsMenu()
+                            toast(if (reddit.isLoggedIn) "Success" else "Fail")
                         }
                     }
                 }
@@ -377,11 +382,11 @@ class QueueFragment : Fragment() {
                 createNewPost()
                 true
             }
-            R.id.menu_queue_signin -> {
+            R.id.menu_queue_reddit_login -> {
                 showRedditLoginDialog()
                 true
             }
-            R.id.menu_queue_submit -> {
+            R.id.menu_queue_imgur_login -> {
                 showImgurLoginDialog()
                 true
             }
@@ -397,25 +402,24 @@ class QueueFragment : Fragment() {
 
         val authDialog = Dialog(context!!)
         authDialog.setContentView(R.layout.dialog_auth)
-//        authDialog.setOnCancelListener { signinMenuItem.isEnabled = true }
+        
+        authDialog.setOnDismissListener {
+            activity!!.invalidateOptionsMenu()
+            toast(if (imgurAccount.isLoggedIn) "Success" else "Fail")
+        }
 
         val authWebview = authDialog.findViewById<WebView>(R.id.auth_webview)
         authWebview.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView, url: String) {
                 super.onPageFinished(view, url)
 
-                if (imgurAccount.tryExtractTokens(url)) {
+                if (imgurAccount.tryExtractTokens(url))
                     authDialog.dismiss()
-                }
             }
         }
 
         authWebview.loadUrl(imgurAccount.authorizationUrl)
         authDialog.show()
-    }
-
-    private fun updateMenu() {
-        signinMenuItem.isEnabled = !reddit.isSignedIn
     }
 
     private inner class PostAdapter(private var posts: List<Post>) : RecyclerView.Adapter<PostAdapter.PostHolder>() {

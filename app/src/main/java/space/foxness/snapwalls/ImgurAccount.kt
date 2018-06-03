@@ -17,6 +17,8 @@ class ImgurAccount(private val callbacks: Callbacks) {
     var refreshToken: String? = null
     var accessTokenExpirationDate: DateTime? = null
     
+    val isLoggedIn get() = refreshToken != null
+    
     val authorizationUrl: String
         get() {
             authState = randomState()

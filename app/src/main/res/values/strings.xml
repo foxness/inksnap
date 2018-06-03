@@ -13,4 +13,6 @@
     <string name="menu_delete">Delete</string>
     <string name="save_text">Save</string>
     <string name="menu_settings">Settings</string>
+    <string name="menu_reddit_login">Log into Reddit</string>
+    <string name="menu_imgur_login">Log into Imgur</string>
 </resources>

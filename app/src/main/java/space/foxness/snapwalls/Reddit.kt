@@ -15,12 +15,12 @@ class Reddit private constructor(private val callbacks: Callbacks) {
     var accessTokenExpirationDate: DateTime? = null
     var lastSubmissionDate: DateTime? = null
 
-    val isSignedIn get() = refreshToken != null
+    val isLoggedIn get() = refreshToken != null
 
     val isRestrictedByRatelimit
         get() = lastSubmissionDate != null && DateTime.now() < lastSubmissionDate!! + Duration(RATELIMIT_MS)
 
-    val canSubmitRightNow get() = isSignedIn && !isRestrictedByRatelimit
+    val canSubmitRightNow get() = isLoggedIn && !isRestrictedByRatelimit
 
     val authorizationUrl: String
         get() {

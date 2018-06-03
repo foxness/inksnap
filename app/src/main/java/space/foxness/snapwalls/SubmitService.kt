@@ -37,7 +37,7 @@ class SubmitService : Service() {
             
             val reddit =  Autoreddit.getInstance(this@SubmitService).reddit
             
-            val signedIn = reddit.isSignedIn
+            val signedIn = reddit.isLoggedIn
             val notRatelimited = !reddit.isRestrictedByRatelimit
             val networkAvailable = isNetworkAvailable()
             
