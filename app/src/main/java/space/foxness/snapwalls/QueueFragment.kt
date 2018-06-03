@@ -375,11 +375,24 @@ class QueueFragment : Fragment() {
         val i = SettingsActivity.newIntent(context!!)
         startActivity(i)
     }
+    
+    private fun uploadImage() {
+        doAsync { 
+            val link = imgurAccount.uploadImage("https://wallpapers.wallhaven.cc/wallpapers/full/wallhaven-655823.png")
+            
+            log(link)
+            uiThread { toast(link) 
+        }
+    }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         return when (item!!.itemId) {
             R.id.menu_queue_add -> {
                 createNewPost()
+                true
+            }
+            R.id.menu_queue_test -> {
+                uploadImage()
                 true
             }
             R.id.menu_queue_reddit_login -> {
