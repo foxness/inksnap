@@ -2,6 +2,7 @@ package space.foxness.snapwalls
 
 import android.support.v4.app.Fragment
 import android.util.Log
+import android.webkit.URLUtil.isValidUrl
 import android.widget.Toast
 import org.joda.time.Duration
 import org.joda.time.format.PeriodFormatterBuilder
@@ -30,4 +31,6 @@ object Util {
     }
 
     fun Duration.toNice(): String = periodformatter.print(toPeriod()).dropLast(2)
+    
+    fun String.isImageUrl() = isValidUrl(this) && listOf(".png", ".jpg").any { this.endsWith(it) }
 }

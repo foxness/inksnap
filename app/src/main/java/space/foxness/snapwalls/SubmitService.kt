@@ -11,6 +11,7 @@ import android.support.annotation.RequiresApi
 import android.support.v4.app.NotificationCompat
 import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.preference.PreferenceManager
+import space.foxness.snapwalls.Util.isImageUrl
 import space.foxness.snapwalls.Util.log
 
 // todo: add all posts that failed to be submitted to a 'failed' list
@@ -43,6 +44,36 @@ class SubmitService : Service() {
             
             val readyToPost = signedIn && notRatelimited && networkAvailable
             val debugDontPost = retrieveDebugDontPost()
+
+            val imgurAccount = Autoimgur.getInstance(this@SubmitService).imgurAccount
+            
+            val type = post.type
+            val isImageUrl = post.content.isImageUrl()
+            val loggedIntoImgur = imgurAccount.isLoggedIn
+            
+            if (type && isImageUrl && loggedIntoImgur) {
+                log("Uploading ${post.content} to imgur...")
+                
+                val newLink: String?
+                try {
+                    newLink = imgurAccount.uploadImage(post.content)
+                } catch (error: Exception) {
+                    // todo: handle this
+                    throw error
+                }
+                
+                log("Success. New link: $newLink")
+                post.content = newLink
+            } else {
+                if (!type)
+                    log("Not uploading to imgur because it's not a link")
+                
+                if (!isImageUrl)
+                    log("Not uploading to imgur because it's not an image url")
+
+                if (!loggedIntoImgur)
+                    log("Not uploading to imgur because not logged into imgur")
+            }
             
             if (readyToPost || debugDontPost) {
                 
