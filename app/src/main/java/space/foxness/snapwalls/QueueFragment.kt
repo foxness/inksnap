@@ -46,6 +46,18 @@ class QueueFragment : Fragment() {
     private lateinit var config: Config
     private lateinit var queue: Queue
     private lateinit var reddit: Reddit
+    
+    private val imgur = ImgurAccount(object: ImgurAccount.Callbacks {
+        override fun onNewAccessToken(newAccessToken: String, accessTokenExpirationDate: DateTime) {
+//            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
+
+        override fun onNewRefreshToken(newRefreshToken: String) {
+//            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
+
+    })
+    
     private lateinit var postScheduler: PostScheduler
     
     private var receiverRegistered = false
@@ -330,7 +342,7 @@ class QueueFragment : Fragment() {
         }
     }
 
-    private fun showSigninDialog() {
+    private fun showRedditLoginDialog() {
         signinMenuItem.isEnabled = false
         // we need ^ this because there's a token doesn't arrive immediately after the dialog is dismissed
         // and the user should not be able to press it when the token is being fetched
@@ -375,11 +387,11 @@ class QueueFragment : Fragment() {
                 true
             }
             R.id.menu_queue_signin -> {
-                showSigninDialog()
+                showRedditLoginDialog()
                 true
             }
             R.id.menu_queue_submit -> {
-                testButton()
+                showImgurLoginDialog()
                 true
             }
             R.id.menu_queue_settings -> {
@@ -390,14 +402,32 @@ class QueueFragment : Fragment() {
         }
     }
     
-    private fun testButton() { // todo: remove
+    private fun showImgurLoginDialog() { // todo: remove
         
-        doAsync { 
-            val link = Imgur.upload("https://wallpapers.wallhaven.cc/wallpapers/full/wallhaven-295738.jpg")
-            log(link)
-            
-            uiThread { toast(link) }
+//        doAsync { 
+//            val link = ImgurAccount.upload("https://wallpapers.wallhaven.cc/wallpapers/full/wallhaven-295738.jpg")
+//            log(link)
+//            
+//            uiThread { toast(link) }
+//        }
+
+        val authDialog = Dialog(context!!)
+        authDialog.setContentView(R.layout.dialog_auth)
+//        authDialog.setOnCancelListener { signinMenuItem.isEnabled = true }
+
+        val authWebview = authDialog.findViewById<WebView>(R.id.auth_webview)
+        authWebview.webViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView, url: String) {
+                super.onPageFinished(view, url)
+
+                if (imgur.tryExtractTokens(url)) {
+                    authDialog.dismiss()
+                }
+            }
         }
+
+        authWebview.loadUrl(imgur.authorizationUrl)
+        authDialog.show()
     }
 
     private fun updateMenu() {
