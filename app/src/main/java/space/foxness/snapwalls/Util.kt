@@ -6,9 +6,13 @@ import android.webkit.URLUtil.isValidUrl
 import android.widget.Toast
 import org.joda.time.Duration
 import org.joda.time.format.PeriodFormatterBuilder
+import java.util.*
 
 object Util {
+    
     const val APPNAME = "Snapwalls"
+    
+    const val STATE_LENGTH = 10
     
     private val periodformatter = PeriodFormatterBuilder()
             .printZeroAlways()
@@ -33,4 +37,15 @@ object Util {
     fun Duration.toNice(): String = periodformatter.print(toPeriod()).dropLast(2)
     
     fun String.isImageUrl() = isValidUrl(this) && listOf(".png", ".jpg").any { this.endsWith(it) }
+    
+    fun randomState() = randomAlphaString(STATE_LENGTH)
+
+    fun randomAlphaString(length: Int): String {
+        
+        val rand = Random()
+        fun randomInt(min: Int, max: Int) = rand.nextInt(max - min + 1) + min // inclusive end
+        
+        val alpha = 'a'..'z' // possible characters of the string
+        return List(length, { randomInt(alpha.first.toInt(), alpha.endInclusive.toInt()).toChar() }).joinToString("")
+    }
 }

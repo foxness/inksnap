@@ -4,6 +4,7 @@ import android.net.Uri
 import khttp.structures.authorization.BasicAuthorization
 import org.joda.time.DateTime
 import org.joda.time.Duration
+import space.foxness.snapwalls.Util.randomState
 
 class Reddit private constructor(private val callbacks: Callbacks) {
 
@@ -194,9 +195,5 @@ class Reddit private constructor(private val callbacks: Callbacks) {
         private const val USER_AGENT = "Snapwalls by /u/foxneZz"
 
         private const val RATELIMIT_MS: Long = 10 * 60 * 1000 // 10 minutes, required to be long
-
-        private fun randomState(): String { // TODO: implement this method
-            return "testy"
-        }
     }
 }

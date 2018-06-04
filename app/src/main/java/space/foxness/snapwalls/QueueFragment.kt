@@ -26,7 +26,9 @@ import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 import org.joda.time.DateTime
 import org.joda.time.Duration
+import space.foxness.snapwalls.Util.STATE_LENGTH
 import space.foxness.snapwalls.Util.log
+import space.foxness.snapwalls.Util.randomAlphaString
 import space.foxness.snapwalls.Util.toNice
 import space.foxness.snapwalls.Util.toast
 
@@ -376,13 +378,8 @@ class QueueFragment : Fragment() {
         startActivity(i)
     }
     
-    private fun uploadImage() {
-        doAsync { 
-            val link = imgurAccount.uploadImage("https://wallpapers.wallhaven.cc/wallpapers/full/wallhaven-655823.png")
-            
-            log(link)
-            uiThread { toast(link) }
-        }
+    private fun testButton() {
+        toast(randomAlphaString(STATE_LENGTH))
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
@@ -392,7 +389,7 @@ class QueueFragment : Fragment() {
                 true
             }
             R.id.menu_queue_test -> {
-                uploadImage()
+                testButton()
                 true
             }
             R.id.menu_queue_reddit_login -> {

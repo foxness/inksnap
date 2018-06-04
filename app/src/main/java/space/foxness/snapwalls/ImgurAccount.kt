@@ -4,6 +4,7 @@ import android.net.Uri
 import android.webkit.URLUtil.isValidUrl
 import org.joda.time.DateTime
 import org.joda.time.Duration
+import space.foxness.snapwalls.Util.randomState
 
 class ImgurAccount(private val callbacks: Callbacks) {
 
@@ -155,10 +156,6 @@ class ImgurAccount(private val callbacks: Callbacks) {
 
             val link = json.getJSONObject("data").getString("link")
             return link
-        }
-
-        private fun randomState(): String { // TODO: implement this method
-            return "testy"
         }
     }
 }
