@@ -26,9 +26,8 @@ import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 import org.joda.time.DateTime
 import org.joda.time.Duration
-import space.foxness.snapwalls.Util.STATE_LENGTH
 import space.foxness.snapwalls.Util.log
-import space.foxness.snapwalls.Util.randomAlphaString
+import space.foxness.snapwalls.Util.randomState
 import space.foxness.snapwalls.Util.toNice
 import space.foxness.snapwalls.Util.toast
 
@@ -379,7 +378,7 @@ class QueueFragment : Fragment() {
     }
     
     private fun testButton() {
-        toast(randomAlphaString(STATE_LENGTH))
+        toast(randomState())
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {

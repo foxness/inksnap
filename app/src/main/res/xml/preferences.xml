@@ -3,19 +3,28 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     >
 
+    <SwitchPreference
+        android:key="debug_dont_post"
+        android:title="[DEBUG] Don't post"
+        android:summary="Only pretend to submit the posts"
+        android:defaultValue="false"
+        />
+
+    <ListPreference
+        android:key="autosubmit_type"
+        android:title="Autosubmit type"
+        android:summary="How your posts will be scheduled"
+        android:defaultValue="0"
+        android:entries="@array/autosubmit_type_names"
+        android:entryValues="@array/autosubmit_type_values"
+        />
+
     <!--suppress AndroidElementNotAllowed -->
     <space.foxness.snapwalls.MinutesPreference
         android:key="period_minutes"
         android:title="Timer period"
         android:summary="Set the timer period in minutes"
         android:defaultValue="180"
-        />
-    
-    <SwitchPreference
-        android:key="debug_dont_post"
-        android:title="[DEBUG] Don't post"
-        android:summary="Only pretend to submit the posts"
-        android:defaultValue="false"
         />
     
 </PreferenceScreen>
