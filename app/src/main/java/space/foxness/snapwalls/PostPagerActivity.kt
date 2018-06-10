@@ -26,7 +26,7 @@ class PostPagerActivity : AppCompatActivity() {
         viewPager.adapter = object : FragmentStatePagerAdapter(fm) {
             override fun getItem(position: Int): Fragment {
                 val s = posts[position]
-                return PostFragment.newInstance(s.id)
+                return PostFragment.newInstance(s.id, true)
             }
 
             override fun getCount() = posts.size
@@ -42,7 +42,7 @@ class PostPagerActivity : AppCompatActivity() {
     companion object {
         private const val EXTRA_POST_ID = "post_id"
 
-        fun newIntent(packageContext: Context, postId: Long): Intent {
+        fun newIntent(packageContext: Context, postId: Long): Intent { // todo: add allowScheduledDateEditing
             val i = Intent(packageContext, PostPagerActivity::class.java)
             i.putExtra(EXTRA_POST_ID, postId)
             return i

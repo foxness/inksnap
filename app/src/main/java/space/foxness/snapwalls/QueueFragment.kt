@@ -123,13 +123,14 @@ class QueueFragment : Fragment() {
             private var timeLeft: Duration = Duration.ZERO
 
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                if (fromUser) {
-                    val percentage = 1 - progress.toDouble() / SEEKBAR_MAX_VALUE
-                    val millis = settingsManager.period.millis * percentage
-                    val rounded = Math.round(millis)
-                    timeLeft = Duration(rounded)
-                    updateTimerText(timeLeft)
-                }
+                if (!fromUser)
+                    return
+
+                val percentage = 1 - progress.toDouble() / SEEKBAR_MAX_VALUE
+                val millis = settingsManager.period.millis * percentage
+                val rounded = Math.round(millis)
+                timeLeft = Duration(rounded)
+                updateTimerText(timeLeft)
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar) { }
@@ -278,12 +279,12 @@ class QueueFragment : Fragment() {
         updateToggleViews(settingsManager.autosubmitEnabled)
         updatePostList()
         
-//        val msg = when (settingsManager.autosubmitType) {
-//            SettingsManager.AutosubmitType.Manual -> "MANUAL"
-//            SettingsManager.AutosubmitType.Periodic -> "PERIODIC"
-//        }
-//        
-//        toast(msg)
+        val msg = when (settingsManager.autosubmitType) {
+            SettingsManager.AutosubmitType.Manual -> "MANUAL"
+            SettingsManager.AutosubmitType.Periodic -> "PERIODIC"
+        }
+
+        toast(msg)
     }
 
     override fun onStop() {

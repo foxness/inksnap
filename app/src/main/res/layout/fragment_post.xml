@@ -68,6 +68,22 @@
         android:inputType="text"
         />
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/scheduled_date_label"
+        style="?android:listSeparatorTextViewStyle"
+        />
+    
+    <Button
+        android:id="@+id/scheduled_date_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        tools:text="Formatted datetime here"
+        />
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"

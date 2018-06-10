@@ -1,14 +1,18 @@
 package space.foxness.snapwalls
 
 import android.app.Activity
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.text.format.DateFormat
 import android.view.*
 import android.webkit.URLUtil.isValidUrl
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Switch
+import org.joda.time.DateTime
 import space.foxness.snapwalls.Util.toast
 
 class PostFragment : Fragment() {
@@ -17,10 +21,13 @@ class PostFragment : Fragment() {
     private lateinit var contentEdit: EditText
     private lateinit var subredditEdit: EditText
     private lateinit var typeSwitch: Switch
+    
+    private var scheduledDate: DateTime? = null
 
     private lateinit var queue: Queue
     private lateinit var post: Post
     private var newPost = false
+    private var allowScheduledDateEditing = false
 
     // todo: account for submitservice
     // example: submit service submits and deletes a post while you're editing it
@@ -44,6 +51,8 @@ class PostFragment : Fragment() {
             val postId = args.getLong(ARG_POST_ID)
             post = queue.getPost(postId)!!
         }
+        
+        allowScheduledDateEditing = args.getBoolean(ARG_ALLOW_SCHEDULED_DATE_EDITING)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
@@ -94,6 +103,70 @@ class PostFragment : Fragment() {
         typeSwitch = v.findViewById(R.id.post_type)
         typeSwitch.isChecked = post.type
         
+        // SCHEDULED DATE BUTTON --------------
+        
+        scheduledDate = post.scheduledDate
+        val scheduledDateButton = v.findViewById<Button>(R.id.scheduled_date_button)
+        scheduledDateButton.text = if (scheduledDate == null) "Date not set" else scheduledDate.toString()
+        scheduledDateButton.isEnabled = allowScheduledDateEditing
+        
+        scheduledDateButton.setOnClickListener {
+            
+            val now = DateTime.now()
+            
+            var year: Int? = null
+            var month: Int? = null
+            var day: Int? = null
+            var hour: Int? = null
+            var minute: Int? = null
+            
+            var timeDialogCanceled = false
+
+            val timeDialog = TimePickerDialog(
+                    activity!!,
+                    TimePickerDialog.OnTimeSetListener { view, hourOfDay_, minute_ ->
+                        hour = hourOfDay_
+                        minute = minute_
+                    },
+                    now.hourOfDay,
+                    now.minuteOfDay,
+                    DateFormat.is24HourFormat(activity!!))
+            
+            timeDialog.setOnCancelListener { timeDialogCanceled = true }
+            
+            timeDialog.setOnDismissListener { 
+                if (!timeDialogCanceled) {
+                    scheduledDate = DateTime(year!!, month!!, day!!, hour!!, minute!!)
+                    scheduledDateButton.text = scheduledDate.toString() // todo: format this nicely
+                }
+            }
+            
+            // todo: show now + 1 hour or something
+            
+            var dateDialogCanceled = false
+            
+            val dateDialog = DatePickerDialog(
+                    activity!!,
+                    DatePickerDialog.OnDateSetListener { view, year_, month_, dayOfMonth_ ->
+                        year = year_
+                        month = month_
+                        day = dayOfMonth_
+                    },
+                    now.year,
+                    now.monthOfYear - 1,
+                    now.dayOfMonth)
+            
+            dateDialog.setOnCancelListener { dateDialogCanceled = true }
+            
+            dateDialog.setOnDismissListener({
+                if (!dateDialogCanceled) {
+                    timeDialog.show()
+                }
+            })
+            
+            dateDialog.show()
+        }
+        
         // SAVE BUTTON ------------------------
         
         val saveButton = v.findViewById<Button>(R.id.save_button)
@@ -129,6 +202,7 @@ class PostFragment : Fragment() {
         post.content = contentEdit.text.toString()
         post.subreddit = subredditEdit.text.toString()
         post.type = typeSwitch.isChecked
+        post.scheduledDate = scheduledDate
     }
     
     private fun setNewPostResult() {
@@ -144,6 +218,7 @@ class PostFragment : Fragment() {
     companion object {
         private const val ARG_POST_ID = "post_id"
         private const val ARG_NEW_POST = "new_post"
+        private const val ARG_ALLOW_SCHEDULED_DATE_EDITING = "allow_scheduled_date_editing"
         private const val RESULT_NEW_POST = "new_post"
         
         private fun constructDenyMessage(notEmptyTitle: Boolean,
@@ -165,19 +240,17 @@ class PostFragment : Fragment() {
         fun getNewPostFromResult(data: Intent)
                 = data.getSerializableExtra(RESULT_NEW_POST) as? Post
 
-        fun newInstance(postId: Long): PostFragment {
+        fun newInstance(postId: Long? = null, allowScheduledDateEditing: Boolean = true): PostFragment {
             val args = Bundle()
-            args.putLong(ARG_POST_ID, postId)
-            args.putBoolean(ARG_NEW_POST, false)
-
-            val fragment = PostFragment()
-            fragment.arguments = args
-            return fragment
-        }
-
-        fun newInstance(): PostFragment {
-            val args = Bundle()
-            args.putBoolean(ARG_NEW_POST, true)
+            
+            if (postId != null) {
+                args.putLong(ARG_POST_ID, postId)
+                args.putBoolean(ARG_NEW_POST, false)
+            } else {
+                args.putBoolean(ARG_NEW_POST, true)
+            }
+            
+            args.putBoolean(ARG_ALLOW_SCHEDULED_DATE_EDITING, allowScheduledDateEditing)
 
             val fragment = PostFragment()
             fragment.arguments = args
