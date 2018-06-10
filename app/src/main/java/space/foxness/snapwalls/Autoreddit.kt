@@ -4,7 +4,7 @@ import android.content.Context
 
 class Autoreddit private constructor(context: Context) {
 
-    private val config = Config.getInstance(context)
+    private val settingsManager = SettingsManager.getInstance(context)
     
     private val saver = Saver()
 
@@ -15,25 +15,25 @@ class Autoreddit private constructor(context: Context) {
     }
 
     private fun restoreConfig() {
-        reddit.accessToken = config.redditAccessToken
-        reddit.refreshToken = config.redditRefreshToken
-        reddit.accessTokenExpirationDate = config.redditAccessTokenExpirationDate
-        reddit.lastSubmissionDate = config.redditLastSubmissionDate
+        reddit.accessToken = settingsManager.redditAccessToken
+        reddit.refreshToken = settingsManager.redditRefreshToken
+        reddit.accessTokenExpirationDate = settingsManager.redditAccessTokenExpirationDate
+        reddit.lastSubmissionDate = settingsManager.redditLastSubmissionDate
     }
 
     private inner class Saver : Reddit.Callbacks {
         
         override fun onNewAccessToken() {
-            config.redditAccessToken = reddit.accessToken
-            config.redditAccessTokenExpirationDate = reddit.accessTokenExpirationDate
+            settingsManager.redditAccessToken = reddit.accessToken
+            settingsManager.redditAccessTokenExpirationDate = reddit.accessTokenExpirationDate
         }
 
         override fun onNewRefreshToken() {
-            config.redditRefreshToken = reddit.refreshToken
+            settingsManager.redditRefreshToken = reddit.refreshToken
         }
 
         override fun onNewLastSubmissionDate() {
-            config.redditLastSubmissionDate = reddit.lastSubmissionDate
+            settingsManager.redditLastSubmissionDate = reddit.lastSubmissionDate
         }
     }
     

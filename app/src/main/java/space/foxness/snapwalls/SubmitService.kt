@@ -10,7 +10,6 @@ import android.os.*
 import android.support.annotation.RequiresApi
 import android.support.v4.app.NotificationCompat
 import android.support.v4.content.LocalBroadcastManager
-import android.support.v7.preference.PreferenceManager
 import space.foxness.snapwalls.Util.isImageUrl
 import space.foxness.snapwalls.Util.log
 
@@ -43,7 +42,7 @@ class SubmitService : Service() {
             val networkAvailable = isNetworkAvailable()
             
             val readyToPost = signedIn && notRatelimited && networkAvailable
-            val debugDontPost = retrieveDebugDontPost()
+            val debugDontPost = SettingsManager.getInstance(this@SubmitService).debugDontPost
 
             val imgurAccount = Autoimgur.getInstance(this@SubmitService).imgurAccount
             
@@ -92,7 +91,7 @@ class SubmitService : Service() {
                 
                 val submittedAllPosts = queue.posts.isEmpty()
                 if (submittedAllPosts) {
-                    Config.getInstance(this@SubmitService).autosubmitEnabled = false
+                    SettingsManager.getInstance(this@SubmitService).autosubmitEnabled = false
                     log("Ran out of posts and disabled autosubmit")
                 } else {
                     val ps = PostScheduler.getInstance(this@SubmitService)
@@ -113,11 +112,6 @@ class SubmitService : Service() {
             // BIG NOTE: stopSelf(msg.arg1) MUST BE CALLED BEFORE RETURNING
             // DON'T RETURN WITHOUT CALLING IT
         }
-    }
-
-    private fun retrieveDebugDontPost(): Boolean {
-        val preferences = PreferenceManager.getDefaultSharedPreferences(this)
-        return preferences.getBoolean(SettingsFragment.PREF_DEBUG_DONT_POST, false)
     }
 
     private fun isNetworkAvailable(): Boolean {

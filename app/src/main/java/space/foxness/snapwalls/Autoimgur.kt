@@ -5,7 +5,7 @@ import org.joda.time.DateTime
 
 class Autoimgur private constructor(context: Context) {
 
-    private val config = Config.getInstance(context)
+    private val settingsManager = SettingsManager.getInstance(context)
 
     private val saver = Saver()
 
@@ -16,20 +16,20 @@ class Autoimgur private constructor(context: Context) {
     }
 
     private fun restoreConfig() {
-        imgurAccount.accessToken = config.imgurAccessToken
-        imgurAccount.refreshToken = config.imgurRefreshToken
-        imgurAccount.accessTokenExpirationDate = config.imgurAccessTokenExpirationDate
+        imgurAccount.accessToken = settingsManager.imgurAccessToken
+        imgurAccount.refreshToken = settingsManager.imgurRefreshToken
+        imgurAccount.accessTokenExpirationDate = settingsManager.imgurAccessTokenExpirationDate
     }
 
     private inner class Saver : ImgurAccount.Callbacks {
         
         override fun onNewAccessToken(newAccessToken: String, newAccessTokenExpirationDate: DateTime) {
-            config.imgurAccessToken = newAccessToken
-            config.imgurAccessTokenExpirationDate = newAccessTokenExpirationDate
+            settingsManager.imgurAccessToken = newAccessToken
+            settingsManager.imgurAccessTokenExpirationDate = newAccessTokenExpirationDate
         }
 
         override fun onNewRefreshToken(newRefreshToken: String) {
-            config.imgurRefreshToken = newRefreshToken
+            settingsManager.imgurRefreshToken = newRefreshToken
         }
     }
 

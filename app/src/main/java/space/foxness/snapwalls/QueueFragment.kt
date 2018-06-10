@@ -43,7 +43,7 @@ class QueueFragment : Fragment() {
 
     private lateinit var period: Duration
     
-    private lateinit var config: Config
+    private lateinit var settingsManager: SettingsManager
     private lateinit var queue: Queue
     private lateinit var reddit: Reddit
     private lateinit var imgurAccount: ImgurAccount
@@ -67,8 +67,8 @@ class QueueFragment : Fragment() {
     private fun handleEnabledAutosubmit() {
         
         if (queue.posts.isEmpty()) {
-            config.autosubmitEnabled = false
-            config.timeLeft = period
+            settingsManager.autosubmitEnabled = false
+            settingsManager.timeLeft = period
             updateToggleViews(false)
             
             unregisterSubmitReceiver()
@@ -90,7 +90,7 @@ class QueueFragment : Fragment() {
         // im talking mostly about config.timeLeft and config.autosubmitEnabled
         
         val ctx = context!!
-        config = Config.getInstance(ctx)
+        settingsManager = SettingsManager.getInstance(ctx)
         queue = Queue.getInstance(ctx)
         postScheduler = PostScheduler.getInstance(ctx)
         reddit = Autoreddit.getInstance(ctx).reddit
@@ -100,8 +100,7 @@ class QueueFragment : Fragment() {
     }
     
     private fun retrievePeriod(): Duration {
-        val preferences = PreferenceManager.getDefaultSharedPreferences(context!!)
-        val minutes = preferences.getInt(SettingsFragment.PREF_PERIOD_MINUTES, -1)
+        val minutes = settingsManager.periodMinutes!!
         
         if (minutes == -1)
             throw Exception("Default value wasn't set")
@@ -124,7 +123,7 @@ class QueueFragment : Fragment() {
 
         timerToggle.setOnClickListener { button ->
             button.isEnabled = false
-            toggleAutosubmit(!config.autosubmitEnabled)
+            toggleAutosubmit(!settingsManager.autosubmitEnabled)
             button.isEnabled = true
         }
 
@@ -148,7 +147,7 @@ class QueueFragment : Fragment() {
             override fun onStartTrackingTouch(seekBar: SeekBar) { }
 
             override fun onStopTrackingTouch(seekBar: SeekBar) {
-                config.timeLeft = timeLeft
+                settingsManager.timeLeft = timeLeft
             }
         })
     }
@@ -198,7 +197,7 @@ class QueueFragment : Fragment() {
             seekBar.isEnabled = true
         }
 
-        updateTimerViews(config.timeLeft!!)
+        updateTimerViews(settingsManager.timeLeft!!)
     }
     
     private fun updateTimerViews(timeLeft: Duration) {
@@ -208,7 +207,7 @@ class QueueFragment : Fragment() {
 
     private fun toggleAutosubmit(on: Boolean) {
         
-        if (on == config.autosubmitEnabled) // this should never happen
+        if (on == settingsManager.autosubmitEnabled) // this should never happen
             throw RuntimeException("Can't change autosubmit to state it's already in")
         
         if (on) {
@@ -222,22 +221,22 @@ class QueueFragment : Fragment() {
                 return
             }
 
-            config.autosubmitEnabled = true
+            settingsManager.autosubmitEnabled = true
             registerSubmitReceiver()
             
-            timerObject = getTimerObject(config.timeLeft!!)
+            timerObject = getTimerObject(settingsManager.timeLeft!!)
             timerObject.start()
             
-            postScheduler.schedulePeriodicPosts(queue.posts, period, config.timeLeft!!)
+            postScheduler.schedulePeriodicPosts(queue.posts, period, settingsManager.timeLeft!!)
             
             log("Scheduled ${queue.posts.size} post(s)")
             
         } else {
-            config.autosubmitEnabled = false
+            settingsManager.autosubmitEnabled = false
             unregisterSubmitReceiver()
             
             timerObject.cancel()
-            config.timeLeft = Duration(DateTime.now(), queue.posts.first().scheduledDate!!)
+            settingsManager.timeLeft = Duration(DateTime.now(), queue.posts.first().scheduledDate!!)
             
             postScheduler.cancelScheduledPosts(queue.posts.reversed()) // ...its for optimization
 
@@ -280,26 +279,22 @@ class QueueFragment : Fragment() {
         
         period = retrievePeriod()
 
-        if (config.timeLeft == null)
-            config.timeLeft = period
+        if (settingsManager.timeLeft == null)
+            settingsManager.timeLeft = period
         
-        if (config.autosubmitEnabled) {
+        if (settingsManager.autosubmitEnabled) {
             handleEnabledAutosubmit()
         } else {
-            if (config.timeLeft!! > period)
-                config.timeLeft = period
+            if (settingsManager.timeLeft!! > period)
+                settingsManager.timeLeft = period
         }
 
-        updateToggleViews(config.autosubmitEnabled)
+        updateToggleViews(settingsManager.autosubmitEnabled)
         updatePostList()
         
-        val preferences = PreferenceManager.getDefaultSharedPreferences(context!!)
-        val type = preferences.getString(SettingsFragment.PREF_AUTOSUBMIT_TYPE, "")
-        
-        val msg = when (type) {
-            SettingsFragment.PREFVAL_MANUAL_AUTOSUBMIT -> "MANUAL"
-            SettingsFragment.PREFVAL_PERIODIC_AUTOSUBMIT -> "PERIODIC"
-            else -> throw Exception("Unknown autosubmit type")
+        val msg = when (settingsManager.autosubmitType) {
+            SettingsManager.AutosubmitType.Manual -> "MANUAL"
+            SettingsManager.AutosubmitType.Periodic -> "PERIODIC"
         }
         
         toast(msg)
@@ -308,7 +303,7 @@ class QueueFragment : Fragment() {
     override fun onStop() {
         super.onStop()
 
-        if (config.autosubmitEnabled)
+        if (settingsManager.autosubmitEnabled)
             timerObject.cancel()
 
         unregisterSubmitReceiver()
@@ -343,7 +338,7 @@ class QueueFragment : Fragment() {
 
             queue.addPost(newPost)
             
-            if (config.autosubmitEnabled)
+            if (settingsManager.autosubmitEnabled)
                 postScheduler.scheduleUnscheduledPostsPeriodic(period)
         }
     }
