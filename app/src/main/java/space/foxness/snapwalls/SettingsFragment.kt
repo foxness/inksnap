@@ -19,10 +19,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
         
         if (dialogFragment != null) {
             dialogFragment.setTargetFragment(this, REQUEST_CODE)
-            dialogFragment.show(fragmentManager,
-                    "android.support.v7.preference.PreferenceFragment.DIALOG")
-        }
-        else {
+            dialogFragment.show(fragmentManager, "android.support.v7.preference.PreferenceFragment.DIALOG")
+        } else {
             super.onDisplayPreferenceDialog(preference)
         }
     }

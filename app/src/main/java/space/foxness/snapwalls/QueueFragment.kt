@@ -40,8 +40,6 @@ class QueueFragment : Fragment() {
     private lateinit var seekBar: SeekBar
     
     private lateinit var timerObject: CountDownTimer
-
-    private lateinit var period: Duration
     
     private lateinit var settingsManager: SettingsManager
     private lateinit var queue: Queue
@@ -68,7 +66,7 @@ class QueueFragment : Fragment() {
         
         if (queue.posts.isEmpty()) {
             settingsManager.autosubmitEnabled = false
-            settingsManager.timeLeft = period
+            settingsManager.timeLeft = settingsManager.period
             updateToggleViews(false)
             
             unregisterSubmitReceiver()
@@ -99,16 +97,6 @@ class QueueFragment : Fragment() {
         PreferenceManager.setDefaultValues(ctx, R.xml.preferences, false)
     }
     
-    private fun retrievePeriod(): Duration {
-        val minutes = settingsManager.periodMinutes!!
-        
-        if (minutes == -1)
-            throw Exception("Default value wasn't set")
-        
-        val millisInMinute: Long = 60 * 1000
-        return Duration(minutes * millisInMinute)
-    }
-    
     private fun initUi() {
         
         // RECYCLER VIEW ------------------------------
@@ -137,7 +125,7 @@ class QueueFragment : Fragment() {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
                     val percentage = 1 - progress.toDouble() / SEEKBAR_MAX_VALUE
-                    val millis = period.millis * percentage
+                    val millis = settingsManager.period.millis * percentage
                     val rounded = Math.round(millis)
                     timeLeft = Duration(rounded)
                     updateTimerText(timeLeft)
@@ -227,7 +215,7 @@ class QueueFragment : Fragment() {
             timerObject = getTimerObject(settingsManager.timeLeft!!)
             timerObject.start()
             
-            postScheduler.schedulePeriodicPosts(queue.posts, period, settingsManager.timeLeft!!)
+            postScheduler.schedulePeriodicPosts(queue.posts, settingsManager.period, settingsManager.timeLeft!!)
             
             log("Scheduled ${queue.posts.size} post(s)")
             
@@ -262,7 +250,7 @@ class QueueFragment : Fragment() {
     
     private fun updateSeekbarProgress(timeLeft: Duration) {
         val millis = timeLeft.millis
-        val percentage = 1 - millis.toFloat() / period.millis
+        val percentage = 1 - millis.toFloat() / settingsManager.period.millis
         val rounded = Math.round(percentage * SEEKBAR_MAX_VALUE)
         seekBar.progress = rounded
     }
@@ -274,30 +262,28 @@ class QueueFragment : Fragment() {
     override fun onStart() {
         super.onStart()
 
-        // assume period never changes while autosubmit is enabled
-        // todo: actually prohibit period changing while autosubmit is on
-        
-        period = retrievePeriod()
+        // assume period and autosubmit type never change while autosubmit is enabled
+        // todo: actually prohibit changing these values while autosubmit is on
 
         if (settingsManager.timeLeft == null)
-            settingsManager.timeLeft = period
+            settingsManager.timeLeft = settingsManager.period
         
         if (settingsManager.autosubmitEnabled) {
             handleEnabledAutosubmit()
         } else {
-            if (settingsManager.timeLeft!! > period)
-                settingsManager.timeLeft = period
+            if (settingsManager.timeLeft!! > settingsManager.period)
+                settingsManager.timeLeft = settingsManager.period
         }
 
         updateToggleViews(settingsManager.autosubmitEnabled)
         updatePostList()
         
-        val msg = when (settingsManager.autosubmitType) {
-            SettingsManager.AutosubmitType.Manual -> "MANUAL"
-            SettingsManager.AutosubmitType.Periodic -> "PERIODIC"
-        }
-        
-        toast(msg)
+//        val msg = when (settingsManager.autosubmitType) {
+//            SettingsManager.AutosubmitType.Manual -> "MANUAL"
+//            SettingsManager.AutosubmitType.Periodic -> "PERIODIC"
+//        }
+//        
+//        toast(msg)
     }
 
     override fun onStop() {
@@ -339,7 +325,7 @@ class QueueFragment : Fragment() {
             queue.addPost(newPost)
             
             if (settingsManager.autosubmitEnabled)
-                postScheduler.scheduleUnscheduledPostsPeriodic(period)
+                postScheduler.scheduleUnscheduledPostsPeriodic(settingsManager.period)
         }
     }
 

@@ -47,11 +47,9 @@ class SettingsManager private constructor(context: Context) {
 
     // SETTINGS ------
     
-    val periodMinutes: Int?
-        get() = getInt(PREF_PERIOD_MINUTES)
+    val period get() = Duration(getInt(PREF_PERIOD_MINUTES)!! * MILLIS_IN_MINUTE)
 
-    val debugDontPost: Boolean
-        get() = getBool(PREF_DEBUG_DONT_POST)
+    val debugDontPost get() = getBool(PREF_DEBUG_DONT_POST)
 
     enum class AutosubmitType { Manual, Periodic }
 
@@ -131,5 +129,7 @@ class SettingsManager private constructor(context: Context) {
 
         private const val LONG_NULL_SUBSTITUTE = Long.MIN_VALUE
         private const val INT_NULL_SUBSTITUTE = Int.MIN_VALUE
+        
+        private const val MILLIS_IN_MINUTE: Long = 60 * 1000
     }
 }
