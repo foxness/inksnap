@@ -32,5 +32,9 @@ class SettingsFragment : PreferenceFragmentCompat() {
         
         const val PREF_PERIOD_MINUTES = "period_minutes"
         const val PREF_DEBUG_DONT_POST = "debug_dont_post"
+        const val PREF_AUTOSUBMIT_TYPE = "autosubmit_type"
+        
+        const val PREFVAL_MANUAL_AUTOSUBMIT = "0"
+        const val PREFVAL_PERIODIC_AUTOSUBMIT = "1"
     }
 }

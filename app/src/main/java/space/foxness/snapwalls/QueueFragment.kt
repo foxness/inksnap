@@ -292,6 +292,17 @@ class QueueFragment : Fragment() {
 
         updateToggleViews(config.autosubmitEnabled)
         updatePostList()
+        
+        val preferences = PreferenceManager.getDefaultSharedPreferences(context!!)
+        val type = preferences.getString(SettingsFragment.PREF_AUTOSUBMIT_TYPE, "")
+        
+        val msg = when (type) {
+            SettingsFragment.PREFVAL_MANUAL_AUTOSUBMIT -> "MANUAL"
+            SettingsFragment.PREFVAL_PERIODIC_AUTOSUBMIT -> "PERIODIC"
+            else -> throw Exception("Unknown autosubmit type")
+        }
+        
+        toast(msg)
     }
 
     override fun onStop() {
