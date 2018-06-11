@@ -13,6 +13,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Switch
 import org.joda.time.DateTime
+import org.joda.time.format.DateTimeFormat
 import space.foxness.snapwalls.Util.toast
 
 class PostFragment : Fragment() {
@@ -82,7 +83,11 @@ class PostFragment : Fragment() {
     }
     
     private fun updateScheduledDateButtonText() {
-        scheduledDateButton.text = if (scheduledDate == null) "Date not set" else scheduledDate.toString()
+        scheduledDateButton.text = if (scheduledDate == null)
+            "Date not set"
+        else { 
+            DateTimeFormat.forPattern(DATETIME_FORMAT).print(scheduledDate)
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -225,6 +230,8 @@ class PostFragment : Fragment() {
         private const val ARG_NEW_POST = "new_post"
         private const val ARG_ALLOW_SCHEDULED_DATE_EDITING = "allow_scheduled_date_editing"
         private const val RESULT_NEW_POST = "new_post"
+        
+        private const val DATETIME_FORMAT = "yyyy/MM/dd EEE HH:mm" // todo: make dependent on region/locale
         
         private fun constructDenyMessage(notEmptyTitle: Boolean,
                                          content: String,
