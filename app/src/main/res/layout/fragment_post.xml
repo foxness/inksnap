@@ -71,12 +71,12 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/scheduled_date_label"
+        android:text="@string/intended_submit_date_label"
         style="?android:listSeparatorTextViewStyle"
         />
     
     <Button
-        android:id="@+id/scheduled_date_button"
+        android:id="@+id/intended_submit_date_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"

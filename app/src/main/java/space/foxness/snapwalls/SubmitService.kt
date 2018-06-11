@@ -28,12 +28,12 @@ class SubmitService : Service() {
             log("I am trying to submit...")
             
             val queue = Queue.getInstance(this@SubmitService)
-            val scheduledPosts = queue.posts.filter { it.scheduledDate != null }
+            val scheduledPosts = queue.posts.filter { it.intendedSubmitDate != null }
             
             if (scheduledPosts.isEmpty())
                 throw Exception("No scheduled posts found")
             
-            val post = scheduledPosts.minBy { it.scheduledDate!!.millis }!!
+            val post = scheduledPosts.minBy { it.intendedSubmitDate!!.millis }!!
             
             val reddit =  Autoreddit.getInstance(this@SubmitService).reddit
             

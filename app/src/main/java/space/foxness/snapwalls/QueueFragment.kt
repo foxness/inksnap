@@ -65,7 +65,7 @@ class QueueFragment : Fragment() {
         }
     }
     
-    private val allowScheduledDateEditing get() = settingsManager.autosubmitType == AutosubmitType.Manual
+    private val allowIntendedSubmitDateEditing get() = settingsManager.autosubmitType == AutosubmitType.Manual
     
     private fun handleEnabledAutosubmit() {
         
@@ -76,7 +76,7 @@ class QueueFragment : Fragment() {
             
             unregisterSubmitReceiver()
         } else {
-            val unpausedTimeLeft = Duration(DateTime.now(), queue.posts.first().scheduledDate!!)
+            val unpausedTimeLeft = Duration(DateTime.now(), queue.posts.first().intendedSubmitDate!!)
             timerObject = getTimerObject(unpausedTimeLeft)
             timerObject.start()
             
@@ -232,7 +232,7 @@ class QueueFragment : Fragment() {
             unregisterSubmitReceiver()
             
             timerObject.cancel()
-            settingsManager.timeLeft = Duration(DateTime.now(), queue.posts.first().scheduledDate!!)
+            settingsManager.timeLeft = Duration(DateTime.now(), queue.posts.first().intendedSubmitDate!!)
             
             postScheduler.cancelScheduledPosts(queue.posts.reversed()) // ...its for optimization
 
@@ -318,7 +318,7 @@ class QueueFragment : Fragment() {
     }
 
     private fun createNewPost() {
-        val i = NewPostActivity.newIntent(context!!, allowScheduledDateEditing)
+        val i = NewPostActivity.newIntent(context!!, allowIntendedSubmitDateEditing)
         startActivityForResult(i, REQUEST_CODE_NEW_POST)
     }
 
@@ -441,7 +441,7 @@ class QueueFragment : Fragment() {
 
             init {
                 itemView.setOnClickListener({
-                    val i = PostPagerActivity.newIntent(context!!, post.id, allowScheduledDateEditing)
+                    val i = PostPagerActivity.newIntent(context!!, post.id, allowIntendedSubmitDateEditing)
                     startActivity(i)
                 })
 

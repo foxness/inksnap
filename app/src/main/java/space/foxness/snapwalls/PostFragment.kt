@@ -22,14 +22,14 @@ class PostFragment : Fragment() {
     private lateinit var contentEdit: EditText
     private lateinit var subredditEdit: EditText
     private lateinit var typeSwitch: Switch
-    private lateinit var scheduledDateButton: Button
+    private lateinit var intendedSubmitDateButton: Button
     
-    private var scheduledDate: DateTime? = null
+    private var intendedSubmitDate: DateTime? = null
 
     private lateinit var queue: Queue
     private lateinit var post: Post
     private var newPost = false
-    private var allowScheduledDateEditing = false
+    private var allowIntendedSubmitDateEditing = false
 
     // todo: account for submitservice
     // example: submit service submits and deletes a post while you're editing it
@@ -54,7 +54,7 @@ class PostFragment : Fragment() {
             post = queue.getPost(postId)!!
         }
         
-        allowScheduledDateEditing = args.getBoolean(ARG_ALLOW_SCHEDULED_DATE_EDITING)
+        allowIntendedSubmitDateEditing = args.getBoolean(ARG_ALLOW_INTENDED_SUBMIT_DATE_EDITING)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
@@ -82,11 +82,11 @@ class PostFragment : Fragment() {
         activity!!.finish()
     }
     
-    private fun updateScheduledDateButtonText() {
-        scheduledDateButton.text = if (scheduledDate == null)
+    private fun updateIntendedSubmitDateButtonText() {
+        intendedSubmitDateButton.text = if (intendedSubmitDate == null)
             "Date not set"
         else { 
-            DateTimeFormat.forPattern(DATETIME_FORMAT).print(scheduledDate)
+            DateTimeFormat.forPattern(DATETIME_FORMAT).print(intendedSubmitDate)
         }
     }
 
@@ -113,17 +113,17 @@ class PostFragment : Fragment() {
         typeSwitch = v.findViewById(R.id.post_type)
         typeSwitch.isChecked = post.type
         
-        // SCHEDULED DATE BUTTON --------------
+        // INTENDED SUBMIT DATE BUTTON --------------
         
-        scheduledDate = post.scheduledDate
-        scheduledDateButton = v.findViewById(R.id.scheduled_date_button)
-        updateScheduledDateButtonText()
-        scheduledDateButton.isEnabled = allowScheduledDateEditing
+        intendedSubmitDate = post.intendedSubmitDate
+        intendedSubmitDateButton = v.findViewById(R.id.intended_submit_date_button)
+        updateIntendedSubmitDateButtonText()
+        intendedSubmitDateButton.isEnabled = allowIntendedSubmitDateEditing
         
-        scheduledDateButton.setOnClickListener {
+        intendedSubmitDateButton.setOnClickListener {
             
             // todo: maybe show now + 1 hour or something?
-            val dialogDatetime = scheduledDate ?: DateTime.now()
+            val dialogDatetime = intendedSubmitDate ?: DateTime.now()
             
             var newYear: Int? = null
             var newMonth: Int? = null
@@ -147,8 +147,8 @@ class PostFragment : Fragment() {
             
             timeDialog.setOnDismissListener { 
                 if (!timeDialogCanceled) {
-                    scheduledDate = DateTime(newYear!!, newMonth!!, newDay!!, newHour!!, newMinute!!)
-                    updateScheduledDateButtonText()
+                    intendedSubmitDate = DateTime(newYear!!, newMonth!!, newDay!!, newHour!!, newMinute!!)
+                    updateIntendedSubmitDateButtonText()
                 }
             }
             
@@ -212,7 +212,7 @@ class PostFragment : Fragment() {
         post.content = contentEdit.text.toString()
         post.subreddit = subredditEdit.text.toString()
         post.type = typeSwitch.isChecked
-        post.scheduledDate = scheduledDate
+        post.intendedSubmitDate = intendedSubmitDate
     }
     
     private fun setNewPostResult() {
@@ -228,7 +228,7 @@ class PostFragment : Fragment() {
     companion object {
         private const val ARG_POST_ID = "post_id"
         private const val ARG_NEW_POST = "new_post"
-        private const val ARG_ALLOW_SCHEDULED_DATE_EDITING = "allow_scheduled_date_editing"
+        private const val ARG_ALLOW_INTENDED_SUBMIT_DATE_EDITING = "allow_intended_submit_date_editing"
         private const val RESULT_NEW_POST = "new_post"
         
         private const val DATETIME_FORMAT = "yyyy/MM/dd EEE HH:mm" // todo: make dependent on region/locale
@@ -252,7 +252,7 @@ class PostFragment : Fragment() {
         fun getNewPostFromResult(data: Intent)
                 = data.getSerializableExtra(RESULT_NEW_POST) as? Post
 
-        fun newInstance(postId: Long?, allowScheduledDateEditing: Boolean): PostFragment {
+        fun newInstance(postId: Long?, allowIntendedSubmitDateEditing: Boolean): PostFragment {
             val args = Bundle()
             
             if (postId != null) {
@@ -262,7 +262,7 @@ class PostFragment : Fragment() {
                 args.putBoolean(ARG_NEW_POST, true)
             }
             
-            args.putBoolean(ARG_ALLOW_SCHEDULED_DATE_EDITING, allowScheduledDateEditing)
+            args.putBoolean(ARG_ALLOW_INTENDED_SUBMIT_DATE_EDITING, allowIntendedSubmitDateEditing)
 
             val fragment = PostFragment()
             fragment.arguments = args

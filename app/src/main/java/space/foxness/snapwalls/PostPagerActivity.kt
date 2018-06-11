@@ -18,7 +18,7 @@ class PostPagerActivity : AppCompatActivity() {
         setContentView(R.layout.activity_post_pager)
 
         val postId = intent.getLongExtra(EXTRA_POST_ID, -1)
-        val allowScheduledDateEditing = intent.getBooleanExtra(EXTRA_ALLOW_SCHEDULED_DATE_EDITING, false)
+        val allowIntendedSubmitDateEditing = intent.getBooleanExtra(EXTRA_ALLOW_INTENDED_SUBMIT_DATE_EDITING, false)
 
         viewPager = findViewById(R.id.activity_post_pager_viewpager)
 
@@ -27,7 +27,7 @@ class PostPagerActivity : AppCompatActivity() {
         viewPager.adapter = object : FragmentStatePagerAdapter(fm) {
             override fun getItem(position: Int): Fragment {
                 val s = posts[position]
-                return PostFragment.newInstance(s.id, allowScheduledDateEditing)
+                return PostFragment.newInstance(s.id, allowIntendedSubmitDateEditing)
             }
 
             override fun getCount() = posts.size
@@ -42,16 +42,16 @@ class PostPagerActivity : AppCompatActivity() {
 
     companion object {
         private const val EXTRA_POST_ID = "post_id"
-        private const val EXTRA_ALLOW_SCHEDULED_DATE_EDITING = "allow_scheduled_date_editing"
+        private const val EXTRA_ALLOW_INTENDED_SUBMIT_DATE_EDITING = "allow_intended_submit_date_editing"
 
         fun newIntent(
                 packageContext: Context,
                 postId: Long,
-                allowScheduledDateEditing: Boolean): Intent {
+                allowIntendedSubmitDateEditing: Boolean): Intent {
             
             val i = Intent(packageContext, PostPagerActivity::class.java)
             i.putExtra(EXTRA_POST_ID, postId)
-            i.putExtra(EXTRA_ALLOW_SCHEDULED_DATE_EDITING, allowScheduledDateEditing)
+            i.putExtra(EXTRA_ALLOW_INTENDED_SUBMIT_DATE_EDITING, allowIntendedSubmitDateEditing)
             return i
         }
     }

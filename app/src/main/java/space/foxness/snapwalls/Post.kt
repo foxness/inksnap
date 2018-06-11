@@ -17,8 +17,8 @@ class Post : Serializable {
 
     var content: String = ""
     
-    @ColumnInfo(name = "scheduled_date")
-    var scheduledDate: DateTime? = null
+    @ColumnInfo(name = "intended_submit_date")
+    var intendedSubmitDate: DateTime? = null
 
     var type: Boolean = false // true - link, false - self/text
 }

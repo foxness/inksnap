@@ -28,13 +28,13 @@ class PostScheduler private constructor(context: Context) { // todo: throw excep
         if (posts.size < 2)
             throw Exception("Need at least 2 posts")
 
-        if (posts.first().scheduledDate == null)
+        if (posts.first().intendedSubmitDate == null)
             throw Exception("Can't infer the periodic schedule")
 
         var onlyNullsNow = false
         for (i in 1 until posts.size) {
-            if (posts[i].scheduledDate == null) {
-                posts[i].scheduledDate = posts[i - 1].scheduledDate!! + period
+            if (posts[i].intendedSubmitDate == null) {
+                posts[i].intendedSubmitDate = posts[i - 1].intendedSubmitDate!! + period
                 queue.updatePost(posts[i])
                 onlyNullsNow = true
             } else if (onlyNullsNow) {
@@ -43,7 +43,7 @@ class PostScheduler private constructor(context: Context) { // todo: throw excep
         }
     }
     
-    fun isPostScheduled(post: Post) = post.scheduledDate != null
+    fun isPostScheduled(post: Post) = post.intendedSubmitDate != null
     
     fun cancelScheduledPosts(posts: List<Post>)
             = posts.forEach { cancelScheduledPost(it) }
@@ -52,7 +52,7 @@ class PostScheduler private constructor(context: Context) { // todo: throw excep
         
         val esp = getEarliestScheduledPost()!!
 
-        post.scheduledDate = null
+        post.intendedSubmitDate = null
         queue.updatePost(post)
         
         if (esp.id == post.id) {
@@ -61,7 +61,7 @@ class PostScheduler private constructor(context: Context) { // todo: throw excep
             
             val esp2 = getEarliestScheduledPost()
             if (esp2 != null)
-                scheduleService(esp2.scheduledDate!!)
+                scheduleService(esp2.intendedSubmitDate!!)
         }
     }
     
@@ -80,11 +80,11 @@ class PostScheduler private constructor(context: Context) { // todo: throw excep
         
         val esp = getEarliestScheduledPost()
 
-        post.scheduledDate = datetime
+        post.intendedSubmitDate = datetime
         queue.updatePost(post)
         
         val firstPost = esp == null
-        val earlierPost = !firstPost && esp!!.scheduledDate!! > datetime
+        val earlierPost = !firstPost && esp!!.intendedSubmitDate!! > datetime
         
         if (firstPost || earlierPost) {
             if (earlierPost)
@@ -96,7 +96,7 @@ class PostScheduler private constructor(context: Context) { // todo: throw excep
     
     fun scheduleServiceForNextPost() {
         val esp = getEarliestScheduledPost() ?: throw Exception("No scheduled posts found")
-        scheduleService(esp.scheduledDate!!)
+        scheduleService(esp.intendedSubmitDate!!)
     }
     
     private fun scheduleService(datetime: DateTime) {
@@ -119,7 +119,7 @@ class PostScheduler private constructor(context: Context) { // todo: throw excep
             = getPendingIntent(PendingIntent.FLAG_NO_CREATE) != null
     
     private fun getEarliestScheduledPost()
-            = queue.posts.filter { it.scheduledDate != null }.minBy { it.scheduledDate!!.millis }
+            = queue.posts.filter { it.intendedSubmitDate != null }.minBy { it.intendedSubmitDate!!.millis }
 
     private fun getPendingIntent(flags: Int = 0): PendingIntent? {
         val intent = SubmitService.newIntent(context)
