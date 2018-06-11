@@ -21,6 +21,7 @@ class PostFragment : Fragment() {
     private lateinit var contentEdit: EditText
     private lateinit var subredditEdit: EditText
     private lateinit var typeSwitch: Switch
+    private lateinit var scheduledDateButton: Button
     
     private var scheduledDate: DateTime? = null
 
@@ -79,6 +80,10 @@ class PostFragment : Fragment() {
             
         activity!!.finish()
     }
+    
+    private fun updateScheduledDateButtonText() {
+        scheduledDateButton.text = if (scheduledDate == null) "Date not set" else scheduledDate.toString()
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val v = inflater.inflate(R.layout.fragment_post, container, false)
@@ -106,55 +111,54 @@ class PostFragment : Fragment() {
         // SCHEDULED DATE BUTTON --------------
         
         scheduledDate = post.scheduledDate
-        val scheduledDateButton = v.findViewById<Button>(R.id.scheduled_date_button)
-        scheduledDateButton.text = if (scheduledDate == null) "Date not set" else scheduledDate.toString()
+        scheduledDateButton = v.findViewById(R.id.scheduled_date_button)
+        updateScheduledDateButtonText()
         scheduledDateButton.isEnabled = allowScheduledDateEditing
         
         scheduledDateButton.setOnClickListener {
             
-            val now = DateTime.now()
+            // todo: maybe show now + 1 hour or something?
+            val dialogDatetime = scheduledDate ?: DateTime.now()
             
-            var year: Int? = null
-            var month: Int? = null
-            var day: Int? = null
-            var hour: Int? = null
-            var minute: Int? = null
+            var newYear: Int? = null
+            var newMonth: Int? = null
+            var newDay: Int? = null
+            var newHour: Int? = null
+            var newMinute: Int? = null
             
             var timeDialogCanceled = false
 
             val timeDialog = TimePickerDialog(
                     activity!!,
-                    TimePickerDialog.OnTimeSetListener { view, hourOfDay_, minute_ ->
-                        hour = hourOfDay_
-                        minute = minute_
+                    TimePickerDialog.OnTimeSetListener { view, hour, minute ->
+                        newHour = hour
+                        newMinute = minute
                     },
-                    now.hourOfDay,
-                    now.minuteOfDay,
+                    dialogDatetime.hourOfDay,
+                    dialogDatetime.minuteOfDay,
                     DateFormat.is24HourFormat(activity!!))
             
             timeDialog.setOnCancelListener { timeDialogCanceled = true }
             
             timeDialog.setOnDismissListener { 
                 if (!timeDialogCanceled) {
-                    scheduledDate = DateTime(year!!, month!!, day!!, hour!!, minute!!)
-                    scheduledDateButton.text = scheduledDate.toString() // todo: format this nicely
+                    scheduledDate = DateTime(newYear!!, newMonth!!, newDay!!, newHour!!, newMinute!!)
+                    updateScheduledDateButtonText()
                 }
             }
-            
-            // todo: show now + 1 hour or something
             
             var dateDialogCanceled = false
             
             val dateDialog = DatePickerDialog(
                     activity!!,
-                    DatePickerDialog.OnDateSetListener { view, year_, month_, dayOfMonth_ ->
-                        year = year_
-                        month = month_
-                        day = dayOfMonth_
+                    DatePickerDialog.OnDateSetListener { view, year, month, day ->
+                        newYear = year
+                        newMonth = month + 1 // DatePicker months start at 0
+                        newDay = day
                     },
-                    now.year,
-                    now.monthOfYear - 1,
-                    now.dayOfMonth)
+                    dialogDatetime.year,
+                    dialogDatetime.monthOfYear - 1, // same ^
+                    dialogDatetime.dayOfMonth)
             
             dateDialog.setOnCancelListener { dateDialogCanceled = true }
             
@@ -182,10 +186,11 @@ class PostFragment : Fragment() {
             
             if (isPostValid) {
                 
-                if (newPost)
+                if (newPost) {
                     setNewPostResult()
-                else
+                } else {
                     queue.updatePost(post)
+                }
                 
                 activity!!.finish()
                 
