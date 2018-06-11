@@ -26,6 +26,7 @@ import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 import org.joda.time.DateTime
 import org.joda.time.Duration
+import space.foxness.snapwalls.SettingsManager.AutosubmitType
 import space.foxness.snapwalls.Util.log
 import space.foxness.snapwalls.Util.randomState
 import space.foxness.snapwalls.Util.toNice
@@ -48,6 +49,8 @@ class QueueFragment : Fragment() {
     
     private lateinit var postScheduler: PostScheduler
     
+    private lateinit var currentType: AutosubmitType
+    
     private var redditTokenFetching = false
     
     private var receiverRegistered = false
@@ -62,7 +65,7 @@ class QueueFragment : Fragment() {
         }
     }
     
-    private val allowScheduledDateEditing get() = settingsManager.autosubmitType == SettingsManager.AutosubmitType.Manual
+    private val allowScheduledDateEditing get() = settingsManager.autosubmitType == AutosubmitType.Manual
     
     private fun handleEnabledAutosubmit() {
         
@@ -100,6 +103,8 @@ class QueueFragment : Fragment() {
     }
     
     private fun initUi() {
+        
+        currentType = settingsManager.autosubmitType
         
         // RECYCLER VIEW ------------------------------
 
@@ -267,6 +272,12 @@ class QueueFragment : Fragment() {
 
         // assume period and autosubmit type never change while autosubmit is enabled
         // todo: actually prohibit changing these values while autosubmit is on
+        
+        if (currentType != settingsManager.autosubmitType) {
+            toast("Changed from $currentType to ${settingsManager.autosubmitType}")
+            
+            currentType = settingsManager.autosubmitType
+        }
 
         if (settingsManager.timeLeft == null)
             settingsManager.timeLeft = settingsManager.period
@@ -280,13 +291,6 @@ class QueueFragment : Fragment() {
 
         updateToggleViews(settingsManager.autosubmitEnabled)
         updatePostList()
-        
-        val msg = when (settingsManager.autosubmitType) {
-            SettingsManager.AutosubmitType.Manual -> "MANUAL"
-            SettingsManager.AutosubmitType.Periodic -> "PERIODIC"
-        }
-
-        toast(msg)
     }
 
     override fun onStop() {
