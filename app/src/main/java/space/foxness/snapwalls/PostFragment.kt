@@ -252,7 +252,7 @@ class PostFragment : Fragment() {
         fun getNewPostFromResult(data: Intent)
                 = data.getSerializableExtra(RESULT_NEW_POST) as? Post
 
-        fun newInstance(postId: Long? = null, allowScheduledDateEditing: Boolean = true): PostFragment {
+        fun newInstance(postId: Long?, allowScheduledDateEditing: Boolean): PostFragment {
             val args = Bundle()
             
             if (postId != null) {

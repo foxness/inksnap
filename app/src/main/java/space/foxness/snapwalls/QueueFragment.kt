@@ -62,6 +62,8 @@ class QueueFragment : Fragment() {
         }
     }
     
+    private val allowScheduledDateEditing get() = settingsManager.autosubmitType == SettingsManager.AutosubmitType.Manual
+    
     private fun handleEnabledAutosubmit() {
         
         if (queue.posts.isEmpty()) {
@@ -312,7 +314,7 @@ class QueueFragment : Fragment() {
     }
 
     private fun createNewPost() {
-        val i = NewPostActivity.newIntent(context!!)
+        val i = NewPostActivity.newIntent(context!!, allowScheduledDateEditing)
         startActivityForResult(i, REQUEST_CODE_NEW_POST)
     }
 
@@ -435,7 +437,7 @@ class QueueFragment : Fragment() {
 
             init {
                 itemView.setOnClickListener({
-                    val i = PostPagerActivity.newIntent(context!!, post.id)
+                    val i = PostPagerActivity.newIntent(context!!, post.id, allowScheduledDateEditing)
                     startActivity(i)
                 })
 
