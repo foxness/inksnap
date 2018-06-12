@@ -40,7 +40,7 @@
             android:parentActivityName=".QueueActivity"
             />
 
-        <service android:name=".SubmitService" />
+        <service android:name=".AutosubmitService" />
         
     </application>
 

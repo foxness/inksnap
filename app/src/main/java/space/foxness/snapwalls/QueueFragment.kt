@@ -155,7 +155,7 @@ class QueueFragment : Fragment() {
         receiverRegistered = true
         
         val lbm = LocalBroadcastManager.getInstance(activity!!)
-        val intentFilter = IntentFilter(SubmitService.POST_SUBMITTED)
+        val intentFilter = IntentFilter(AutosubmitService.POST_SUBMITTED)
         lbm.registerReceiver(submitReceiver, intentFilter)
     }
     

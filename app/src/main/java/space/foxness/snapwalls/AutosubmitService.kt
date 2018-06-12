@@ -16,7 +16,7 @@ import space.foxness.snapwalls.Util.log
 // todo: add all posts that failed to be submitted to a 'failed' list
 // todo: add network safeguard to auth
 
-class SubmitService : Service() {
+class AutosubmitService : Service() {
     
     private lateinit var mServiceLooper: Looper
     private lateinit var mServiceHandler: ServiceHandler
@@ -27,24 +27,24 @@ class SubmitService : Service() {
 
             log("I am trying to submit...")
             
-            val queue = Queue.getInstance(this@SubmitService)
-            val scheduledPosts = queue.posts.filter { it.intendedSubmitDate != null }
+            val queue = Queue.getInstance(this@AutosubmitService)
+            val scheduledPosts = queue.posts.filter { it.scheduled } // refactor this method to queue or smth
             
             if (scheduledPosts.isEmpty())
                 throw Exception("No scheduled posts found")
             
-            val post = scheduledPosts.minBy { it.intendedSubmitDate!!.millis }!!
+            val post = scheduledPosts.minBy { it.intendedSubmitDate!!.millis }!! // same ^
             
-            val reddit =  Autoreddit.getInstance(this@SubmitService).reddit
+            val reddit =  Autoreddit.getInstance(this@AutosubmitService).reddit
             
             val signedIn = reddit.isLoggedIn
             val notRatelimited = !reddit.isRestrictedByRatelimit
             val networkAvailable = isNetworkAvailable()
             
             val readyToPost = signedIn && notRatelimited && networkAvailable
-            val debugDontPost = SettingsManager.getInstance(this@SubmitService).debugDontPost
+            val debugDontPost = SettingsManager.getInstance(this@AutosubmitService).debugDontPost
 
-            val imgurAccount = Autoimgur.getInstance(this@SubmitService).imgurAccount
+            val imgurAccount = Autoimgur.getInstance(this@AutosubmitService).imgurAccount
             
             val type = post.type
             val isImageUrl = post.content.isImageUrl()
@@ -91,17 +91,17 @@ class SubmitService : Service() {
                 
                 val submittedAllPosts = queue.posts.isEmpty()
                 if (submittedAllPosts) {
-                    SettingsManager.getInstance(this@SubmitService).autosubmitEnabled = false
+                    SettingsManager.getInstance(this@AutosubmitService).autosubmitEnabled = false
                     log("Ran out of posts and disabled autosubmit")
                 } else {
-                    val ps = PostScheduler.getInstance(this@SubmitService)
+                    val ps = PostScheduler.getInstance(this@AutosubmitService)
                     ps.scheduleServiceForNextPost()
                     log("Scheduled service for the next post")
                 }
                 
                 val broadcastIntent = Intent(POST_SUBMITTED)
                 broadcastIntent.putExtra(EXTRA_SUBMITTED_ALL_POSTS, submittedAllPosts)
-                LocalBroadcastManager.getInstance(this@SubmitService).sendBroadcast(broadcastIntent)
+                LocalBroadcastManager.getInstance(this@AutosubmitService).sendBroadcast(broadcastIntent)
                 
             } else {
                 log(constructErrorMessage(post, signedIn, notRatelimited, networkAvailable))
@@ -175,7 +175,7 @@ class SubmitService : Service() {
         private const val NOTIFICATION_CHANNEL_NAME = "Main"
         private const val NOTIFICATION_CHANNEL_ID = NOTIFICATION_CHANNEL_NAME
 
-        fun newIntent(context: Context) = Intent(context, SubmitService::class.java)
+        fun newIntent(context: Context) = Intent(context, AutosubmitService::class.java)
         
         // assumes that not all of the arguments are true
         private fun constructErrorMessage(post: Post,

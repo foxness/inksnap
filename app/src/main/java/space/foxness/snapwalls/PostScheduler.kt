@@ -22,7 +22,7 @@ class PostScheduler private constructor(context: Context) { // todo: throw excep
     // this method expects the queue to be divided into 2 segments
     // the first segment is the scheduled segment at the beginning
     // the last segment is the segment that will be scheduled
-    fun scheduleUnscheduledPostsPeriodic(period: Duration) {
+    fun scheduleUnscheduledPostsPeriodic(period: Duration) { // todo: refactor this to use schedulePost()
         val posts = queue.posts
 
         if (posts.size < 2)
@@ -31,19 +31,21 @@ class PostScheduler private constructor(context: Context) { // todo: throw excep
         if (posts.first().intendedSubmitDate == null)
             throw Exception("Can't infer the periodic schedule")
 
-        var onlyNullsNow = false
+        var onlyUnscheduledNow = false
         for (i in 1 until posts.size) {
+            
             if (posts[i].intendedSubmitDate == null) {
+                
                 posts[i].intendedSubmitDate = posts[i - 1].intendedSubmitDate!! + period
+                posts[i].scheduled = true
                 queue.updatePost(posts[i])
-                onlyNullsNow = true
-            } else if (onlyNullsNow) {
-                throw Exception("You can't switch from nulls to non-nulls")
+                onlyUnscheduledNow = true
+                
+            } else if (onlyUnscheduledNow) {
+                throw Exception("You can't switch from unscheduled to scheduled posts")
             }
         }
     }
-    
-    fun isPostScheduled(post: Post) = post.intendedSubmitDate != null
     
     fun cancelScheduledPosts(posts: List<Post>)
             = posts.forEach { cancelScheduledPost(it) }
@@ -52,7 +54,7 @@ class PostScheduler private constructor(context: Context) { // todo: throw excep
         
         val esp = getEarliestScheduledPost()!!
 
-        post.intendedSubmitDate = null
+        post.scheduled = false
         queue.updatePost(post)
         
         if (esp.id == post.id) {
@@ -81,6 +83,7 @@ class PostScheduler private constructor(context: Context) { // todo: throw excep
         val esp = getEarliestScheduledPost()
 
         post.intendedSubmitDate = datetime
+        post.scheduled = true
         queue.updatePost(post)
         
         val firstPost = esp == null
@@ -119,10 +122,10 @@ class PostScheduler private constructor(context: Context) { // todo: throw excep
             = getPendingIntent(PendingIntent.FLAG_NO_CREATE) != null
     
     private fun getEarliestScheduledPost()
-            = queue.posts.filter { it.intendedSubmitDate != null }.minBy { it.intendedSubmitDate!!.millis }
+            = queue.posts.filter { it.scheduled }.minBy { it.intendedSubmitDate!!.millis }
 
     private fun getPendingIntent(flags: Int = 0): PendingIntent? {
-        val intent = SubmitService.newIntent(context)
+        val intent = AutosubmitService.newIntent(context)
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             PendingIntent.getForegroundService(context, REQUEST_CODE, intent, flags)
         } else {
@@ -148,103 +151,3 @@ class PostScheduler private constructor(context: Context) { // todo: throw excep
         }
     }
 }
-
-//package space.foxness.snapwalls
-//
-//import android.app.AlarmManager
-//import android.app.PendingIntent
-//import android.content.Context
-//import android.os.Build
-//import android.os.SystemClock
-//import com.github.debop.kodatimes.times
-//import org.joda.time.DateTime
-//import org.joda.time.Duration
-//
-//class PostScheduler(context: Context) { // todo: throw exception if schedule time is in the past
-//
-//    private val context = context.applicationContext!!
-//    
-//    private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-//    
-//    fun schedulePeriodicPosts(postIds: List<Long>,
-//                              period: Duration,
-//                              initialDelay: Duration,
-//                              wakeup: Boolean = true) {
-//
-//        val postDelays = HashMap(postIds
-//                .mapIndexed { i, postId -> postId to initialDelay + period * i.toLong() }
-//                .toMap())
-//        
-//        scheduleDelayedPosts(postDelays, wakeup)
-//    }
-//    
-//    fun scheduleDelayedPosts(postDelays: HashMap<Long, Duration>, wakeup: Boolean = true) 
-//            = postDelays.forEach { postId, delay -> scheduleDelayedPost(postId, delay, wakeup) }
-//    
-//    // the post order is determined by the postIds order
-//    fun scheduleTimelyPosts(postIds: List<Long>, schedule: WeekSchedule, wakeup: Boolean = true) {
-//        
-//        val scheduleTimes = schedule.getScheduleTimes(DateTime.now(), postIds.size)
-//        if (postIds.size != scheduleTimes.size)
-//            throw RuntimeException("How did this even happen?") // this should never happen
-//
-//        val postTimes = HashMap<Long, DateTime>()
-//        for ((index, time) in scheduleTimes.withIndex())
-//            postTimes[postIds[index]] = time
-//
-//        scheduleTimelyPosts(postTimes, wakeup)
-//    }
-//
-//    fun scheduleTimelyPosts(postTimes: HashMap<Long, DateTime>, wakeup: Boolean = true) 
-//            = postTimes.forEach { postId, dateTime -> scheduleTimelyPost(postId, dateTime, wakeup) }
-//    
-//    fun cancelScheduledPosts(postIds: List<Long>)
-//            = postIds.forEach { cancelScheduledPost(it) }
-//    
-//    fun scheduleDelayedPost(postId: Long, delay: Duration, wakeup: Boolean = true) {
-//        val datetime = (Duration(SystemClock.elapsedRealtime()) + delay)
-//        schedulePost(postId, datetime.millis, false, wakeup)
-//    }
-//    
-//    fun scheduleTimelyPost(postId: Long, datetime: DateTime, wakeup: Boolean = true)
-//            = schedulePost(postId, datetime.millis, true, wakeup)
-//    
-//    fun isPostScheduled(postId: Long)
-//            = getPendingIntent(postId, PendingIntent.FLAG_NO_CREATE) != null
-//    
-//    fun cancelScheduledPost(postId: Long) {
-//        val pi = getPendingIntent(postId)!!
-//        alarmManager.cancel(pi)
-//        pi.cancel()
-//    }
-//
-//    private fun schedulePost(postId: Long, millis: Long, rtc: Boolean = false, wakeup: Boolean = true) {
-//        val type = getAlarmType(rtc, wakeup)
-//        val pi = getPendingIntent(postId)!!
-//        alarmManager.setExact(type, millis, pi)
-//    }
-//    
-//    private fun getPendingIntent(postId: Long, flags: Int = 0): PendingIntent? {
-//        val intent = SubmitService.newIntent(context, postId)
-//        val requestCode = postId.toInt()
-//        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            PendingIntent.getForegroundService(context, requestCode, intent, flags)
-//        } else {
-//            PendingIntent.getService(context, requestCode, intent, flags)
-//        }
-//    }
-//    
-//    private fun getAlarmType(rtc: Boolean = false, wakeup: Boolean = true): Int {
-//        return if (rtc) {
-//            if (wakeup)
-//                AlarmManager.RTC_WAKEUP
-//            else
-//                AlarmManager.RTC
-//        } else {
-//            if (wakeup)
-//                AlarmManager.ELAPSED_REALTIME_WAKEUP
-//            else
-//                AlarmManager.ELAPSED_REALTIME
-//        }
-//    }
-//}

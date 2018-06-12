@@ -21,4 +21,6 @@ class Post : Serializable {
     var intendedSubmitDate: DateTime? = null
 
     var type = false // true - link, false - self/text
+    
+    var scheduled = false
 }
