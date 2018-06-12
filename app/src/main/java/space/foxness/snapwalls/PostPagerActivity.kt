@@ -17,7 +17,7 @@ class PostPagerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_post_pager)
 
-        val postId = intent.getLongExtra(EXTRA_POST_ID, -1)
+        val postId = intent.getIntExtra(EXTRA_POST_ID, -1)
         val allowIntendedSubmitDateEditing = intent.getBooleanExtra(EXTRA_ALLOW_INTENDED_SUBMIT_DATE_EDITING, false)
 
         viewPager = findViewById(R.id.activity_post_pager_viewpager)
@@ -46,7 +46,7 @@ class PostPagerActivity : AppCompatActivity() {
 
         fun newIntent(
                 packageContext: Context,
-                postId: Long,
+                postId: Int,
                 allowIntendedSubmitDateEditing: Boolean): Intent {
             
             val i = Intent(packageContext, PostPagerActivity::class.java)

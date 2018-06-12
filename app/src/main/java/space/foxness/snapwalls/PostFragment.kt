@@ -50,7 +50,7 @@ class PostFragment : Fragment() {
             post.content = "besty" // same ^
             post.subreddit = "test" // same ^
         } else {
-            val postId = args.getLong(ARG_POST_ID)
+            val postId = args.getInt(ARG_POST_ID)
             post = queue.getPost(postId)!!
         }
         
@@ -252,11 +252,11 @@ class PostFragment : Fragment() {
         fun getNewPostFromResult(data: Intent)
                 = data.getSerializableExtra(RESULT_NEW_POST) as? Post
 
-        fun newInstance(postId: Long?, allowIntendedSubmitDateEditing: Boolean): PostFragment {
+        fun newInstance(postId: Int?, allowIntendedSubmitDateEditing: Boolean): PostFragment {
             val args = Bundle()
             
             if (postId != null) {
-                args.putLong(ARG_POST_ID, postId)
+                args.putInt(ARG_POST_ID, postId)
                 args.putBoolean(ARG_NEW_POST, false)
             } else {
                 args.putBoolean(ARG_NEW_POST, true)

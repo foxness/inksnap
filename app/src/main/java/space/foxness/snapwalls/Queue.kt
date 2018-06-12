@@ -12,11 +12,11 @@ class Queue private constructor(context: Context) {
 
     fun addPost(post: Post) = dbDao.addPost(post)
 
-    fun getPost(id: Long) = dbDao.getPostById(id)
+    fun getPost(id: Int) = dbDao.getPostById(id)
 
     fun updatePost(post: Post) = dbDao.updatePost(post)
 
-    fun deletePost(id: Long) = dbDao.deletePostbyId(id)
+    fun deletePost(id: Int) = dbDao.deletePostbyId(id)
 
     companion object : SingletonHolder<Queue, Context>(::Queue)
 }

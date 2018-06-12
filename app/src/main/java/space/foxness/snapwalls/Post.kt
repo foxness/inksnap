@@ -9,16 +9,16 @@ import java.io.Serializable
 @Entity(tableName = "queue")
 class Post : Serializable {
     @PrimaryKey(autoGenerate = true)
-    var id: Long = 0
+    var id = 0
     
-    var title: String = ""
+    var title = ""
 
-    var subreddit: String = ""
+    var subreddit = ""
 
-    var content: String = ""
+    var content = ""
     
     @ColumnInfo(name = "intended_submit_date")
     var intendedSubmitDate: DateTime? = null
 
-    var type: Boolean = false // true - link, false - self/text
+    var type = false // true - link, false - self/text
 }

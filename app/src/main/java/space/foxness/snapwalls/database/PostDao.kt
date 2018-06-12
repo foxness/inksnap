@@ -12,7 +12,7 @@ interface PostDao {
     val posts: List<Post>
 
     @Query("SELECT * FROM queue WHERE id = :id LIMIT 1")
-    fun getPostById(id: Long): Post?
+    fun getPostById(id: Int): Post?
 
     @Insert
     fun addPost(post: Post): Long
@@ -24,5 +24,5 @@ interface PostDao {
 //    fun deletePost(post: Post)
 
     @Query("DELETE FROM queue WHERE id = :id")
-    fun deletePostbyId(id: Long)
+    fun deletePostbyId(id: Int)
 }
