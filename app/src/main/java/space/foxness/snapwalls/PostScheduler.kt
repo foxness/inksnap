@@ -8,6 +8,8 @@ import android.os.SystemClock
 import com.github.debop.kodatimes.times
 import org.joda.time.DateTime
 import org.joda.time.Duration
+import space.foxness.snapwalls.Queue.Companion.earliest
+import space.foxness.snapwalls.Queue.Companion.onlyScheduled
 
 // todo: make reddit not a singleton and rename it to reddit account
 
@@ -59,7 +61,7 @@ class PostScheduler private constructor(context: Context)
 
     fun cancelScheduledPost(post: Post)
     {
-        val esp = getEarliestScheduledPost()!!
+        val esp = queue.posts.onlyScheduled().earliest()!!
 
         post.scheduled = false
         queue.updatePost(post)
@@ -68,7 +70,7 @@ class PostScheduler private constructor(context: Context)
         {
             cancelScheduledService()
 
-            val esp2 = getEarliestScheduledPost()
+            val esp2 = queue.posts.onlyScheduled().earliest()
             if (esp2 != null)
             {
                 scheduleService(esp2.intendedSubmitDate!!)
@@ -89,7 +91,7 @@ class PostScheduler private constructor(context: Context)
 
     fun schedulePost(post: Post)
     {
-        val esp = getEarliestScheduledPost()
+        val esp = queue.posts.onlyScheduled().earliest()
         
         post.scheduled = true
         queue.updatePost(post)
@@ -110,7 +112,7 @@ class PostScheduler private constructor(context: Context)
 
     fun scheduleServiceForNextPost()
     {
-        val esp = getEarliestScheduledPost() ?: throw Exception("No scheduled posts found")
+        val esp = queue.posts.onlyScheduled().earliest() ?: throw Exception("No scheduled posts found")
         scheduleService(esp.intendedSubmitDate!!)
     }
 
@@ -133,9 +135,6 @@ class PostScheduler private constructor(context: Context)
     }
 
     private fun isServiceScheduled() = getPendingIntent(PendingIntent.FLAG_NO_CREATE) != null
-
-    private fun getEarliestScheduledPost() =
-            queue.posts.filter { it.scheduled }.minBy { it.intendedSubmitDate!!.millis }
 
     private fun getPendingIntent(flags: Int = 0): PendingIntent?
     {

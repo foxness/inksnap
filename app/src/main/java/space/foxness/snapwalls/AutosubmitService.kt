@@ -10,6 +10,8 @@ import android.os.*
 import android.support.annotation.RequiresApi
 import android.support.v4.app.NotificationCompat
 import android.support.v4.content.LocalBroadcastManager
+import space.foxness.snapwalls.Queue.Companion.onlyScheduled
+import space.foxness.snapwalls.Queue.Companion.earliest
 import space.foxness.snapwalls.Util.isImageUrl
 import space.foxness.snapwalls.Util.log
 
@@ -28,15 +30,14 @@ class AutosubmitService : Service()
             log("I am trying to submit...")
 
             val queue = Queue.getInstance(this@AutosubmitService)
-            val scheduledPosts =
-                    queue.posts.filter { it.scheduled } // refactor this method to queue or smth
+            val scheduledPosts = queue.posts.onlyScheduled()
 
             if (scheduledPosts.isEmpty())
             {
                 throw Exception("No scheduled posts found")
             }
 
-            val post = scheduledPosts.minBy { it.intendedSubmitDate!!.millis }!! // same ^
+            val post = scheduledPosts.earliest()!!
 
             val reddit = Autoreddit.getInstance(this@AutosubmitService).reddit
 

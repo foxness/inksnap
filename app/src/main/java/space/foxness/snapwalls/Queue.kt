@@ -19,4 +19,9 @@ class Queue private constructor(context: Context)
     fun deletePost(id: Int) = dbDao.deletePostbyId(id)
 
     companion object : SingletonHolder<Queue, Context>(::Queue)
+    {
+        fun List<Post>.onlyScheduled() = filter { it.scheduled }
+        
+        fun List<Post>.earliest() = minBy { it.intendedSubmitDate!!.millis }
+    }
 }

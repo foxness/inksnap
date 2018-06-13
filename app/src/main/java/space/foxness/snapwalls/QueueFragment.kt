@@ -383,7 +383,10 @@ class QueueFragment : Fragment()
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
     {
-        if (resultCode != Activity.RESULT_OK) return
+        if (resultCode != Activity.RESULT_OK)
+        {
+            return
+        }
 
         if (requestCode == REQUEST_CODE_NEW_POST)
         {
