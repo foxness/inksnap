@@ -16,70 +16,89 @@ import space.foxness.snapwalls.Util.log
 // todo: add all posts that failed to be submitted to a 'failed' list
 // todo: add network safeguard to auth
 
-class AutosubmitService : Service() {
-    
+class AutosubmitService : Service()
+{
     private lateinit var mServiceLooper: Looper
     private lateinit var mServiceHandler: ServiceHandler
-    
-    private inner class ServiceHandler(looper: Looper) : Handler(looper) {
 
-        override fun handleMessage(msg: Message) {
-
+    private inner class ServiceHandler(looper: Looper) : Handler(looper)
+    {
+        override fun handleMessage(msg: Message)
+        {
             log("I am trying to submit...")
-            
+
             val queue = Queue.getInstance(this@AutosubmitService)
-            val scheduledPosts = queue.posts.filter { it.scheduled } // refactor this method to queue or smth
-            
+            val scheduledPosts =
+                    queue.posts.filter { it.scheduled } // refactor this method to queue or smth
+
             if (scheduledPosts.isEmpty())
+            {
                 throw Exception("No scheduled posts found")
-            
+            }
+
             val post = scheduledPosts.minBy { it.intendedSubmitDate!!.millis }!! // same ^
-            
-            val reddit =  Autoreddit.getInstance(this@AutosubmitService).reddit
-            
+
+            val reddit = Autoreddit.getInstance(this@AutosubmitService).reddit
+
             val signedIn = reddit.isLoggedIn
             val notRatelimited = !reddit.isRestrictedByRatelimit
             val networkAvailable = isNetworkAvailable()
-            
+
             val readyToPost = signedIn && notRatelimited && networkAvailable
             val debugDontPost = SettingsManager.getInstance(this@AutosubmitService).debugDontPost
 
             val imgurAccount = Autoimgur.getInstance(this@AutosubmitService).imgurAccount
-            
+
             val type = post.type
             val isImageUrl = post.content.isImageUrl()
             val loggedIntoImgur = imgurAccount.isLoggedIn
-            
-            if (type && isImageUrl && loggedIntoImgur) {
+
+            if (type && isImageUrl && loggedIntoImgur)
+            {
                 log("Uploading ${post.content} to imgur...")
-                
+
                 val newLink: String?
-                try {
+                try
+                {
                     newLink = imgurAccount.uploadImage(post.content)
-                } catch (error: Exception) {
+                }
+                catch (error: Exception)
+                {
                     // todo: handle this
                     throw error
                 }
-                
+
                 log("Success. New link: $newLink")
                 post.content = newLink
-            } else {
+            }
+            else
+            {
                 if (!type)
+                {
                     log("Not uploading to imgur because it's not a link")
-                
+                }
+
                 if (!isImageUrl)
+                {
                     log("Not uploading to imgur because it's not an image url")
+                }
 
                 if (!loggedIntoImgur)
+                {
                     log("Not uploading to imgur because not logged into imgur")
+                }
             }
-            
-            if (readyToPost || debugDontPost) {
-                
+
+            if (readyToPost || debugDontPost)
+            {
+
                 val link: String?
-                try {
+                try
+                {
                     link = reddit.submit(post, debugDontPost, RESUBMIT, SEND_REPLIES)
-                } catch (error: Exception) {
+                }
+                catch (error: Exception)
+                {
                     // todo: handle this
                     throw error
                 }
@@ -88,22 +107,28 @@ class AutosubmitService : Service() {
 
                 queue.deletePost(post.id) // todo: move to archive or something
                 log("Deleted the submitted post from the database")
-                
+
                 val submittedAllPosts = queue.posts.isEmpty()
-                if (submittedAllPosts) {
+                if (submittedAllPosts)
+                {
                     SettingsManager.getInstance(this@AutosubmitService).autosubmitEnabled = false
                     log("Ran out of posts and disabled autosubmit")
-                } else {
+                }
+                else
+                {
                     val ps = PostScheduler.getInstance(this@AutosubmitService)
                     ps.scheduleServiceForNextPost()
                     log("Scheduled service for the next post")
                 }
-                
+
                 val broadcastIntent = Intent(POST_SUBMITTED)
                 broadcastIntent.putExtra(EXTRA_SUBMITTED_ALL_POSTS, submittedAllPosts)
-                LocalBroadcastManager.getInstance(this@AutosubmitService).sendBroadcast(broadcastIntent)
-                
-            } else {
+                LocalBroadcastManager.getInstance(this@AutosubmitService)
+                        .sendBroadcast(broadcastIntent)
+
+            }
+            else
+            {
                 log(constructErrorMessage(post, signedIn, notRatelimited, networkAvailable))
             }
 
@@ -114,46 +139,46 @@ class AutosubmitService : Service() {
         }
     }
 
-    private fun isNetworkAvailable(): Boolean {
+    private fun isNetworkAvailable(): Boolean
+    {
         val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val ani = cm.activeNetworkInfo
         return ani?.isConnected == true // same as (ani?.isConnected ?: false)
     }
 
-    override fun onCreate() {
+    override fun onCreate()
+    {
         val thread = HandlerThread("ServiceStartArguments", Process.THREAD_PRIORITY_BACKGROUND)
         thread.start()
 
         mServiceLooper = thread.looper
         mServiceHandler = ServiceHandler(mServiceLooper)
     }
-    
+
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun createNotificationChannel() {
-        
-        val nc = NotificationChannel(NOTIFICATION_CHANNEL_ID, NOTIFICATION_CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT)
-        
+    private fun createNotificationChannel()
+    {
+        val nc = NotificationChannel(NOTIFICATION_CHANNEL_ID,
+                                     NOTIFICATION_CHANNEL_NAME,
+                                     NotificationManager.IMPORTANCE_DEFAULT)
+
         val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        
+
         nm.createNotificationChannel(nc)
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int
+    {
         // todo: remove the possibility of 2 parallel submissions
-        
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            createNotificationChannel()
-        
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) createNotificationChannel()
+
         val builder = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
-        val notification = builder
-                .setContentTitle(getString(R.string.app_name))
-                .setContentText("Submitting...")
-                .setSmallIcon(R.drawable.snapwalls_icon)
-                .build()
-        
+        val notification = builder.setContentTitle(getString(R.string.app_name))
+                .setContentText("Submitting...").setSmallIcon(R.drawable.snapwalls_icon).build()
+
         startForeground(NOTIFICATION_ID, notification)
-        
+
         val msg = mServiceHandler.obtainMessage()
         msg.arg1 = startId
         mServiceHandler.sendMessage(msg) // todo: how is this different from 'msg.sendToTarget()'?
@@ -163,26 +188,27 @@ class AutosubmitService : Service() {
 
     override fun onBind(intent: Intent): IBinder? = null
 
-    companion object {
+    companion object
+    {
         const val EXTRA_SUBMITTED_ALL_POSTS = "submittedAllPosts"
-        
+
         const val POST_SUBMITTED = "postSubmitted"
-        
+
         private const val SEND_REPLIES = true
         private const val RESUBMIT = true
-        
+
         private const val NOTIFICATION_ID = 1 // must not be 0
         private const val NOTIFICATION_CHANNEL_NAME = "Main"
         private const val NOTIFICATION_CHANNEL_ID = NOTIFICATION_CHANNEL_NAME
 
         fun newIntent(context: Context) = Intent(context, AutosubmitService::class.java)
-        
+
         // assumes that not all of the arguments are true
         private fun constructErrorMessage(post: Post,
                                           signedIn: Boolean,
                                           notRatelimited: Boolean,
-                                          networkAvailable: Boolean): String {
-
+                                          networkAvailable: Boolean): String
+        {
             val reasonsDidntPost = mutableListOf<String>()
 
             val notSignedInReason = "wasn't signed in"
@@ -197,13 +223,11 @@ class AutosubmitService : Service() {
 
             var errorMessage = "Couldn't submit $postString because "
 
-            reasonsDidntPost.forEachIndexed { index, reason ->
-                errorMessage += if (index == reasonsDidntPost.size - 1)
-                    reason
-                else
-                    "$reason and "
-            }
-            
+            reasonsDidntPost.forEachIndexed({ index, reason ->
+                                                errorMessage += if (index == reasonsDidntPost.size - 1) reason
+                                                else "$reason and "
+                                            })
+
             return errorMessage
         }
     }

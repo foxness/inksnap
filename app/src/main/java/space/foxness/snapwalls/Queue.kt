@@ -4,8 +4,8 @@ import android.content.Context
 import space.foxness.snapwalls.database.AppDatabase
 import space.foxness.snapwalls.database.PostDao
 
-class Queue private constructor(context: Context) {
-
+class Queue private constructor(context: Context)
+{
     private val dbDao: PostDao = AppDatabase.getInstance(context).postDao()
 
     val posts: List<Post> get() = dbDao.posts

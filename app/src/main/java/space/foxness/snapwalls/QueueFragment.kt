@@ -32,66 +32,71 @@ import space.foxness.snapwalls.Util.randomState
 import space.foxness.snapwalls.Util.toNice
 import space.foxness.snapwalls.Util.toast
 
-class QueueFragment : Fragment() {
-
+class QueueFragment : Fragment()
+{
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: PostAdapter
     private lateinit var timerText: TextView
     private lateinit var timerToggle: Button
     private lateinit var seekBar: SeekBar
-    
+
     private lateinit var timerObject: CountDownTimer
-    
+
     private lateinit var settingsManager: SettingsManager
     private lateinit var queue: Queue
     private lateinit var reddit: Reddit
     private lateinit var imgurAccount: ImgurAccount
-    
+
     private lateinit var postScheduler: PostScheduler
-    
+
     private lateinit var currentType: AutosubmitType
-    
+
     private var redditTokenFetching = false
-    
+
     private var receiverRegistered = false
-    
-    private val submitReceiver = object: BroadcastReceiver() {
-        
-        override fun onReceive(context: Context?, intent: Intent?) {
-            
+
+    private val submitReceiver = object : BroadcastReceiver()
+    {
+        override fun onReceive(context: Context?, intent: Intent?)
+        {
             toast("post submitted :O")
             handleEnabledAutosubmit()
             updatePostList()
         }
     }
-    
+
     private val allowIntendedSubmitDateEditing get() = settingsManager.autosubmitType == AutosubmitType.Manual
-    
-    private fun handleEnabledAutosubmit() {
-        
-        if (queue.posts.isEmpty()) {
+
+    private fun handleEnabledAutosubmit()
+    {
+        if (queue.posts.isEmpty())
+        {
             settingsManager.autosubmitEnabled = false
             settingsManager.timeLeft = settingsManager.period
             updateToggleViews(false)
-            
+
             unregisterSubmitReceiver()
-        } else {
-            val unpausedTimeLeft = Duration(DateTime.now(), queue.posts.first().intendedSubmitDate!!)
+        }
+        else
+        {
+            val unpausedTimeLeft =
+                    Duration(DateTime.now(), queue.posts.first().intendedSubmitDate!!)
             timerObject = getTimerObject(unpausedTimeLeft)
             timerObject.start()
-            
+
             registerSubmitReceiver()
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?)
+    {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
-        
+
         // todo: to be more efficient don't write to config on every change
         // write like in onPause or something
         // im talking mostly about config.timeLeft and config.autosubmitEnabled
-        
+
         val ctx = context!!
         settingsManager = SettingsManager.getInstance(ctx)
         queue = Queue.getInstance(ctx)
@@ -101,15 +106,16 @@ class QueueFragment : Fragment() {
 
         PreferenceManager.setDefaultValues(ctx, R.xml.preferences, false)
     }
-    
-    private fun initUi() {
-        
+
+    private fun initUi()
+    {
         currentType = settingsManager.autosubmitType
-        
+
         // RECYCLER VIEW ------------------------------
 
         recyclerView.layoutManager = LinearLayoutManager(context!!)
-        recyclerView.addItemDecoration(DividerItemDecoration(recyclerView.context, DividerItemDecoration.VERTICAL))
+        recyclerView.addItemDecoration(DividerItemDecoration(recyclerView.context,
+                                                             DividerItemDecoration.VERTICAL))
 
         adapter = PostAdapter(queue.posts)
         recyclerView.adapter = adapter
@@ -125,51 +131,70 @@ class QueueFragment : Fragment() {
         // SEEKBAR ------------------------------------
 
         seekBar.max = SEEKBAR_MAX_VALUE
-        seekBar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
+        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener
+                                           {
+                                               private var timeLeft: Duration = Duration.ZERO
 
-            private var timeLeft: Duration = Duration.ZERO
+                                               override fun onProgressChanged(seekBar: SeekBar,
+                                                                              progress: Int,
+                                                                              fromUser: Boolean)
+                                               {
+                                                   if (!fromUser)
+                                                   {
+                                                       return
+                                                   }
 
-            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                if (!fromUser)
-                    return
+                                                   val percentage =
+                                                           1 - progress.toDouble() / SEEKBAR_MAX_VALUE
+                                                   val millis =
+                                                           settingsManager.period.millis * percentage
+                                                   val rounded = Math.round(millis)
+                                                   timeLeft = Duration(rounded)
+                                                   updateTimerText(timeLeft)
+                                               }
 
-                val percentage = 1 - progress.toDouble() / SEEKBAR_MAX_VALUE
-                val millis = settingsManager.period.millis * percentage
-                val rounded = Math.round(millis)
-                timeLeft = Duration(rounded)
-                updateTimerText(timeLeft)
-            }
+                                               override fun onStartTrackingTouch(seekBar: SeekBar)
+                                               {
+                                               }
 
-            override fun onStartTrackingTouch(seekBar: SeekBar) { }
-
-            override fun onStopTrackingTouch(seekBar: SeekBar) {
-                settingsManager.timeLeft = timeLeft
-            }
-        })
+                                               override fun onStopTrackingTouch(seekBar: SeekBar)
+                                               {
+                                                   settingsManager.timeLeft = timeLeft
+                                               }
+                                           })
     }
-    
-    private fun registerSubmitReceiver() {
+
+    private fun registerSubmitReceiver()
+    {
         if (receiverRegistered)
+        {
             return
+        }
 
         receiverRegistered = true
-        
+
         val lbm = LocalBroadcastManager.getInstance(activity!!)
         val intentFilter = IntentFilter(AutosubmitService.POST_SUBMITTED)
         lbm.registerReceiver(submitReceiver, intentFilter)
     }
-    
-    private fun unregisterSubmitReceiver() {
+
+    private fun unregisterSubmitReceiver()
+    {
         if (!receiverRegistered)
+        {
             return
-        
+        }
+
         receiverRegistered = false
-        
+
         val lbm = LocalBroadcastManager.getInstance(activity!!)
         lbm.unregisterReceiver(submitReceiver)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater,
+                              container: ViewGroup?,
+                              savedInstanceState: Bundle?): View?
+    {
         val v = inflater.inflate(R.layout.fragment_queue, container, false)
 
         recyclerView = v.findViewById(R.id.queue_recyclerview)
@@ -178,62 +203,75 @@ class QueueFragment : Fragment() {
         timerText = v.findViewById(R.id.queue_timer)
 
         initUi()
-        
+
         return v
     }
-    
+
     @SuppressLint("SetTextI18n") // todo: deal with this
-    private fun updateToggleViews(autosubmitEnabled: Boolean) {
-        
-        if (autosubmitEnabled) {
+    private fun updateToggleViews(autosubmitEnabled: Boolean)
+    {
+        if (autosubmitEnabled)
+        {
             timerToggle.text = "Turn off"
             seekBar.isEnabled = false
-        } else {
+        }
+        else
+        {
             timerToggle.text = "Turn on"
             seekBar.isEnabled = true
         }
 
         updateTimerViews(settingsManager.timeLeft!!)
     }
-    
-    private fun updateTimerViews(timeLeft: Duration) {
+
+    private fun updateTimerViews(timeLeft: Duration)
+    {
         updateSeekbarProgress(timeLeft)
         updateTimerText(timeLeft)
     }
 
-    private fun toggleAutosubmit(on: Boolean) {
-        
+    private fun toggleAutosubmit(on: Boolean)
+    {
         if (on == settingsManager.autosubmitEnabled) // this should never happen
+        {
             throw RuntimeException("Can't change autosubmit to state it's already in")
-        
-        if (on) {
-            if (!reddit.isLoggedIn) {
+        }
+
+        if (on)
+        {
+            if (!reddit.isLoggedIn)
+            {
                 toast("You must be signed in to autosubmit")
                 return
             }
 
-            if (queue.posts.isEmpty()) {
+            if (queue.posts.isEmpty())
+            {
                 toast("No posts to autosubmit")
                 return
             }
 
             settingsManager.autosubmitEnabled = true
             registerSubmitReceiver()
-            
+
             timerObject = getTimerObject(settingsManager.timeLeft!!)
             timerObject.start()
-            
-            postScheduler.schedulePeriodicPosts(queue.posts, settingsManager.period, settingsManager.timeLeft!!)
-            
+
+            postScheduler.schedulePeriodicPosts(queue.posts,
+                                                settingsManager.period,
+                                                settingsManager.timeLeft!!)
+
             log("Scheduled ${queue.posts.size} post(s)")
-            
-        } else {
+        }
+        else
+        {
             settingsManager.autosubmitEnabled = false
             unregisterSubmitReceiver()
-            
+
             timerObject.cancel()
-            settingsManager.timeLeft = Duration(DateTime.now(), queue.posts.first().intendedSubmitDate!!)
-            
+            settingsManager.timeLeft =
+                    Duration(DateTime.now(), queue.posts.first().intendedSubmitDate!!)
+
             postScheduler.cancelScheduledPosts(queue.posts.reversed()) // ...its for optimization
 
             log("Canceled ${queue.posts.size} scheduled post(s)")
@@ -241,119 +279,146 @@ class QueueFragment : Fragment() {
 
         updateToggleViews(on)
     }
-    
-    private fun getTimerObject(timeLeft: Duration): CountDownTimer {
-        return object : CountDownTimer(timeLeft.millis, TIMER_UPDATE_INTERVAL_MS) {
-            
-            override fun onFinish() {
+
+    private fun getTimerObject(timeLeft: Duration): CountDownTimer
+    {
+        return object : CountDownTimer(timeLeft.millis, TIMER_UPDATE_INTERVAL_MS)
+        {
+            override fun onFinish()
+            {
                 // todo: remove the submitted item from post list
             }
 
-            override fun onTick(millisUntilFinished: Long) {
+            override fun onTick(millisUntilFinished: Long)
+            {
                 val timeUntilFinished = Duration(millisUntilFinished)
                 updateTimerViews(timeUntilFinished)
             }
         }
     }
-    
-    private fun updateSeekbarProgress(timeLeft: Duration) {
+
+    private fun updateSeekbarProgress(timeLeft: Duration)
+    {
         val millis = timeLeft.millis
         val percentage = 1 - millis.toFloat() / settingsManager.period.millis
         val rounded = Math.round(percentage * SEEKBAR_MAX_VALUE)
         seekBar.progress = rounded
     }
-    
-    private fun updateTimerText(timeLeft: Duration) {
+
+    private fun updateTimerText(timeLeft: Duration)
+    {
         timerText.text = timeLeft.toNice()
     }
 
-    override fun onStart() {
+    override fun onStart()
+    {
         super.onStart()
 
         // assume period and autosubmit type never change while autosubmit is enabled
         // todo: actually prohibit changing these values while autosubmit is on
-        
-        if (currentType != settingsManager.autosubmitType) {
+
+        if (currentType != settingsManager.autosubmitType)
+        {
             toast("Changed from $currentType to ${settingsManager.autosubmitType}")
-            
+
             currentType = settingsManager.autosubmitType
         }
 
         if (settingsManager.timeLeft == null)
+        {
             settingsManager.timeLeft = settingsManager.period
-        
-        if (settingsManager.autosubmitEnabled) {
+        }
+
+        if (settingsManager.autosubmitEnabled)
+        {
             handleEnabledAutosubmit()
-        } else {
+        }
+        else
+        {
             if (settingsManager.timeLeft!! > settingsManager.period)
+            {
                 settingsManager.timeLeft = settingsManager.period
+            }
         }
 
         updateToggleViews(settingsManager.autosubmitEnabled)
         updatePostList()
     }
 
-    override fun onStop() {
+    override fun onStop()
+    {
         super.onStop()
 
         if (settingsManager.autosubmitEnabled)
+        {
             timerObject.cancel()
+        }
 
         unregisterSubmitReceiver()
     }
 
-    private fun updatePostList() {
+    private fun updatePostList()
+    {
         adapter.setPosts(queue.posts)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?)
+    {
         super.onCreateOptionsMenu(menu, inflater)
         inflater!!.inflate(R.menu.menu_queue, menu)
 
         val redditLoginMenuItem = menu!!.findItem(R.id.menu_queue_reddit_login)!!
         val imgurLoginMenuItem = menu.findItem(R.id.menu_queue_imgur_login)!!
-        
+
         redditLoginMenuItem.isEnabled = !redditTokenFetching && !reddit.isLoggedIn
         imgurLoginMenuItem.isEnabled = !imgurAccount.isLoggedIn
     }
 
-    private fun createNewPost() {
+    private fun createNewPost()
+    {
         val i = NewPostActivity.newIntent(context!!, allowIntendedSubmitDateEditing)
         startActivityForResult(i, REQUEST_CODE_NEW_POST)
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (resultCode != Activity.RESULT_OK)
-            return
-        
-        if (requestCode == REQUEST_CODE_NEW_POST) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
+    {
+        if (resultCode != Activity.RESULT_OK) return
+
+        if (requestCode == REQUEST_CODE_NEW_POST)
+        {
             val newPost = PostFragment.getNewPostFromResult(data!!)!!
 
             queue.addPost(newPost)
-            
+
             if (settingsManager.autosubmitEnabled)
+            {
                 postScheduler.scheduleUnscheduledPostsPeriodic(settingsManager.period)
+            }
         }
     }
 
-    private fun showRedditLoginDialog() {
-        
+    private fun showRedditLoginDialog()
+    {
+
         val authDialog = Dialog(context!!)
         authDialog.setContentView(R.layout.dialog_auth)
-        
+
         authDialog.setOnCancelListener { toast("Fail") }
 
         val authWebview = authDialog.findViewById<WebView>(R.id.auth_webview)
-        authWebview.webViewClient = object : WebViewClient() {
-            override fun onPageFinished(view: WebView, url: String) {
+        authWebview.webViewClient = object : WebViewClient()
+        {
+            override fun onPageFinished(view: WebView, url: String)
+            {
                 super.onPageFinished(view, url)
 
-                if (reddit.tryExtractCode(url)) {
+                if (reddit.tryExtractCode(url))
+                {
                     redditTokenFetching = true
                     activity!!.invalidateOptionsMenu()
-                    
+
                     authDialog.dismiss()
-                    
+
                     doAsync {
                         reddit.fetchAuthTokens()
 
@@ -370,59 +435,72 @@ class QueueFragment : Fragment() {
         authWebview.loadUrl(reddit.authorizationUrl)
         authDialog.show()
     }
-    
-    private fun openSettings() {
+
+    private fun openSettings()
+    {
         val i = SettingsActivity.newIntent(context!!)
         startActivity(i)
     }
-    
-    private fun testButton() {
+
+    private fun testButton()
+    {
         toast(randomState())
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        return when (item!!.itemId) {
-            R.id.menu_queue_add -> {
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean
+    {
+        return when (item!!.itemId)
+        {
+            R.id.menu_queue_add ->
+            {
                 createNewPost()
                 true
             }
-            R.id.menu_queue_test -> {
+            R.id.menu_queue_test ->
+            {
                 testButton()
                 true
             }
-            R.id.menu_queue_reddit_login -> {
+            R.id.menu_queue_reddit_login ->
+            {
                 showRedditLoginDialog()
                 true
             }
-            R.id.menu_queue_imgur_login -> {
+            R.id.menu_queue_imgur_login ->
+            {
                 showImgurLoginDialog()
                 true
             }
-            R.id.menu_queue_settings -> {
+            R.id.menu_queue_settings ->
+            {
                 openSettings()
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
     }
-    
-    private fun showImgurLoginDialog() {
 
+    private fun showImgurLoginDialog()
+    {
         val authDialog = Dialog(context!!)
         authDialog.setContentView(R.layout.dialog_auth)
-        
+
         authDialog.setOnDismissListener {
             activity!!.invalidateOptionsMenu()
             toast(if (imgurAccount.isLoggedIn) "Success" else "Fail")
         }
 
         val authWebview = authDialog.findViewById<WebView>(R.id.auth_webview)
-        authWebview.webViewClient = object : WebViewClient() {
-            override fun onPageFinished(view: WebView, url: String) {
+        authWebview.webViewClient = object : WebViewClient()
+        {
+            override fun onPageFinished(view: WebView, url: String)
+            {
                 super.onPageFinished(view, url)
 
                 if (imgurAccount.tryExtractTokens(url))
+                {
                     authDialog.dismiss()
+                }
             }
         }
 
@@ -430,27 +508,32 @@ class QueueFragment : Fragment() {
         authDialog.show()
     }
 
-    private inner class PostAdapter(private var posts: List<Post>) : RecyclerView.Adapter<PostAdapter.PostHolder>() {
-
-        private inner class PostHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    private inner class PostAdapter(private var posts: List<Post>) : RecyclerView.Adapter<PostAdapter.PostHolder>()
+    {
+        private inner class PostHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
+        {
             private val titleTextView: TextView
             private val contentTextView: TextView
             private val typeCheckBox: CheckBox
 
             private lateinit var post: Post
 
-            init {
+            init
+            {
                 itemView.setOnClickListener({
-                    val i = PostPagerActivity.newIntent(context!!, post.id, allowIntendedSubmitDateEditing)
-                    startActivity(i)
-                })
+                                                val i = PostPagerActivity.newIntent(context!!,
+                                                                                    post.id,
+                                                                                    allowIntendedSubmitDateEditing)
+                                                startActivity(i)
+                                            })
 
                 titleTextView = itemView.findViewById(R.id.queue_post_title)
                 contentTextView = itemView.findViewById(R.id.queue_post_content)
                 typeCheckBox = itemView.findViewById(R.id.queue_post_type)
             }
 
-            fun bindPost(p: Post) {
+            fun bindPost(p: Post)
+            {
                 post = p
                 titleTextView.text = post.title
                 contentTextView.text = post.content
@@ -458,26 +541,30 @@ class QueueFragment : Fragment() {
             }
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostHolder {
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostHolder
+        {
             val inflater = LayoutInflater.from(context)
             val v = inflater.inflate(R.layout.queue_post, parent, false)
             return PostHolder(v)
         }
 
-        override fun onBindViewHolder(holder: PostHolder, position: Int) {
+        override fun onBindViewHolder(holder: PostHolder, position: Int)
+        {
             val post = posts[position]
             holder.bindPost(post)
         }
 
-        fun setPosts(posts_: List<Post>) {
+        fun setPosts(posts_: List<Post>)
+        {
             posts = posts_
             notifyDataSetChanged()
         }
 
         override fun getItemCount() = posts.size
     }
-    
-    companion object {
+
+    companion object
+    {
         private const val TIMER_UPDATE_INTERVAL_MS: Long = 100 // 0.1 seconds
         private const val SEEKBAR_MAX_VALUE = 1000
         private const val REQUEST_CODE_NEW_POST = 0

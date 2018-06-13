@@ -1,5 +1,6 @@
 package space.foxness.snapwalls
 
-class QueueActivity : SingleFragmentActivity() {
+class QueueActivity : SingleFragmentActivity()
+{
     override fun createFragment() = QueueFragment()
 }
