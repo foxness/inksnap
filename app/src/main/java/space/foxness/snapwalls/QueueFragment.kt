@@ -131,37 +131,38 @@ class QueueFragment : Fragment()
         // SEEKBAR ------------------------------------
 
         seekBar.max = SEEKBAR_MAX_VALUE
-        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener
-                                           {
-                                               private var timeLeft: Duration = Duration.ZERO
+        seekBar.setOnSeekBarChangeListener(
+                object : SeekBar.OnSeekBarChangeListener
+                {
+                    private var timeLeft: Duration = Duration.ZERO
 
-                                               override fun onProgressChanged(seekBar: SeekBar,
-                                                                              progress: Int,
-                                                                              fromUser: Boolean)
-                                               {
-                                                   if (!fromUser)
-                                                   {
-                                                       return
-                                                   }
+                    override fun onProgressChanged(seekBar: SeekBar,
+                                                   progress: Int,
+                                                   fromUser: Boolean)
+                    {
+                        if (!fromUser)
+                        {
+                            return
+                        }
 
-                                                   val percentage =
-                                                           1 - progress.toDouble() / SEEKBAR_MAX_VALUE
-                                                   val millis =
-                                                           settingsManager.period.millis * percentage
-                                                   val rounded = Math.round(millis)
-                                                   timeLeft = Duration(rounded)
-                                                   updateTimerText(timeLeft)
-                                               }
+                        val percentage =
+                                1 - progress.toDouble() / SEEKBAR_MAX_VALUE
+                        val millis =
+                                settingsManager.period.millis * percentage
+                        val rounded = Math.round(millis)
+                        timeLeft = Duration(rounded)
+                        updateTimerText(timeLeft)
+                    }
 
-                                               override fun onStartTrackingTouch(seekBar: SeekBar)
-                                               {
-                                               }
+                    override fun onStartTrackingTouch(seekBar: SeekBar)
+                    {
+                    }
 
-                                               override fun onStopTrackingTouch(seekBar: SeekBar)
-                                               {
-                                                   settingsManager.timeLeft = timeLeft
-                                               }
-                                           })
+                    override fun onStopTrackingTouch(seekBar: SeekBar)
+                    {
+                        settingsManager.timeLeft = timeLeft
+                    }
+                })
     }
 
     private fun registerSubmitReceiver()
@@ -399,7 +400,6 @@ class QueueFragment : Fragment()
 
     private fun showRedditLoginDialog()
     {
-
         val authDialog = Dialog(context!!)
         authDialog.setContentView(R.layout.dialog_auth)
 
@@ -485,10 +485,11 @@ class QueueFragment : Fragment()
         val authDialog = Dialog(context!!)
         authDialog.setContentView(R.layout.dialog_auth)
 
-        authDialog.setOnDismissListener {
-            activity!!.invalidateOptionsMenu()
-            toast(if (imgurAccount.isLoggedIn) "Success" else "Fail")
-        }
+        authDialog.setOnDismissListener(
+                {
+                    activity!!.invalidateOptionsMenu()
+                    toast(if (imgurAccount.isLoggedIn) "Success" else "Fail")
+                })
 
         val authWebview = authDialog.findViewById<WebView>(R.id.auth_webview)
         authWebview.webViewClient = object : WebViewClient()

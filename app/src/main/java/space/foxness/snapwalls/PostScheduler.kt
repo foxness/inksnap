@@ -79,10 +79,10 @@ class PostScheduler private constructor(context: Context)
     fun schedulePeriodicPosts(posts: List<Post>, period: Duration, initialDelay: Duration)
     {
         val now = DateTime.now()
-        posts.forEachIndexed({ index, post ->
-                                 val datetime = now + initialDelay + period * index.toLong()
-                                 schedulePost(post, datetime)
-                             })
+        posts.forEachIndexed { index, post ->
+            val datetime = now + initialDelay + period * index.toLong()
+            schedulePost(post, datetime)
+        }
     }
 
     fun schedulePost(post: Post, datetime: DateTime)

@@ -119,7 +119,8 @@ class ImgurAccount(private val callbacks: Callbacks)
         ensureValidAccessToken()
 
         val headers =
-                mapOf("User-Agent" to USER_AGENT, "Authorization" to "Bearer ${accessToken!!}")
+                mapOf("User-Agent" to USER_AGENT, 
+                      "Authorization" to "Bearer ${accessToken!!}")
 
         val data = mapOf("image" to url, "type" to "URL")
 

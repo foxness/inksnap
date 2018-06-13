@@ -91,7 +91,6 @@ class AutosubmitService : Service()
 
             if (readyToPost || debugDontPost)
             {
-
                 val link: String?
                 try
                 {
@@ -125,7 +124,6 @@ class AutosubmitService : Service()
                 broadcastIntent.putExtra(EXTRA_SUBMITTED_ALL_POSTS, submittedAllPosts)
                 LocalBroadcastManager.getInstance(this@AutosubmitService)
                         .sendBroadcast(broadcastIntent)
-
             }
             else
             {
@@ -171,7 +169,10 @@ class AutosubmitService : Service()
     {
         // todo: remove the possibility of 2 parallel submissions
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) createNotificationChannel()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        {
+            createNotificationChannel()
+        }
 
         val builder = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
         val notification = builder.setContentTitle(getString(R.string.app_name))
@@ -223,10 +224,10 @@ class AutosubmitService : Service()
 
             var errorMessage = "Couldn't submit $postString because "
 
-            reasonsDidntPost.forEachIndexed({ index, reason ->
-                                                errorMessage += if (index == reasonsDidntPost.size - 1) reason
-                                                else "$reason and "
-                                            })
+            reasonsDidntPost.forEachIndexed { index, reason ->
+                errorMessage += if (index == reasonsDidntPost.size - 1) reason
+                else "$reason and "
+            }
 
             return errorMessage
         }

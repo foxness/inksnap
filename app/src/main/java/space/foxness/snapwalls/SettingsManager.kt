@@ -7,7 +7,6 @@ import org.joda.time.Duration
 
 class SettingsManager private constructor(context: Context)
 {
-
     private val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 
     var redditAccessToken: String?

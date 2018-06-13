@@ -65,15 +65,17 @@ class Reddit private constructor(private val callbacks: Callbacks)
         ensureValidAccessToken()
 
         val headers =
-                mapOf("User-Agent" to USER_AGENT, "Authorization" to "bearer ${accessToken!!}")
+                mapOf("User-Agent" to USER_AGENT,
+                      "Authorization" to "bearer ${accessToken!!}")
 
-        val data = mapOf("api_type" to "json",
-                         "kind" to if (post.type) "link" else "self",
-                         "resubmit" to if (resubmit) "true" else "false",
-                         "sendreplies" to if (sendReplies) "true" else "false",
-                         "sr" to post.subreddit,
-                         (if (post.type) "url" else "text") to post.content,
-                         "title" to post.title)
+        val data = mapOf(
+                "api_type" to "json",
+                "kind" to if (post.type) "link" else "self",
+                "resubmit" to if (resubmit) "true" else "false",
+                "sendreplies" to if (sendReplies) "true" else "false",
+                "sr" to post.subreddit,
+                (if (post.type) "url" else "text") to post.content,
+                "title" to post.title)
 
         val response = khttp.post(url = SUBMIT_ENDPOINT, headers = headers, data = data)
 
