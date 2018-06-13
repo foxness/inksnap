@@ -43,9 +43,9 @@ android {
 dependencies {
     def support_version = "27.1.1"
     def room_version = "1.1.0"
-    def kodatime_version = "1.2.2"
     def anko_version = "0.10.5"
     def khttp_version = "0.1.0"
+    def jodatime_version = "2.10"
     
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     testImplementation 'junit:junit:4.12'
@@ -60,12 +60,12 @@ dependencies {
     kapt "android.arch.persistence.room:compiler:$room_version"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     
-    implementation "com.github.debop:koda-time:$kodatime_version"
-    
     implementation "org.jetbrains.anko:anko-commons:$anko_version"
 //    implementation "org.jetbrains.anko:anko-coroutines:$anko_version"
 
     implementation "khttp:khttp:$khttp_version"
+
+    implementation "joda-time:joda-time:$jodatime_version"
 }
 repositories {
     mavenCentral()

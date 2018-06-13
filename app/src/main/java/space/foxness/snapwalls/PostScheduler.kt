@@ -5,7 +5,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.os.Build
 import android.os.SystemClock
-import com.github.debop.kodatimes.times
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import space.foxness.snapwalls.Queue.Companion.earliest
@@ -82,7 +81,7 @@ class PostScheduler private constructor(context: Context)
     {
         val now = DateTime.now()
         posts.forEachIndexed { index, post ->
-            post.intendedSubmitDate = now + initialDelay + period * index.toLong()
+            post.intendedSubmitDate = now + initialDelay + Duration(period.millis * index)
             schedulePost(post)
         }
     }
