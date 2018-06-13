@@ -80,22 +80,23 @@ class PostScheduler private constructor(context: Context)
     {
         val now = DateTime.now()
         posts.forEachIndexed { index, post ->
-            val datetime = now + initialDelay + period * index.toLong()
-            schedulePost(post, datetime)
+            post.intendedSubmitDate = now + initialDelay + period * index.toLong()
+            schedulePost(post)
         }
     }
+    
+    fun scheduleManualPosts(posts: List<Post>) = posts.forEach { schedulePost(it) }
 
-    fun schedulePost(post: Post, datetime: DateTime)
+    fun schedulePost(post: Post)
     {
         val esp = getEarliestScheduledPost()
-
-        post.intendedSubmitDate = datetime
+        
         post.scheduled = true
         queue.updatePost(post)
-
+        
         val firstPost = esp == null
-        val earlierPost = !firstPost && esp!!.intendedSubmitDate!! > datetime
-
+        val earlierPost = !firstPost && esp!!.intendedSubmitDate!! > post.intendedSubmitDate!!
+        
         if (firstPost || earlierPost)
         {
             if (earlierPost)
@@ -103,7 +104,7 @@ class PostScheduler private constructor(context: Context)
                 cancelScheduledService()
             }
 
-            scheduleService(datetime)
+            scheduleService(post.intendedSubmitDate!!)
         }
     }
 
