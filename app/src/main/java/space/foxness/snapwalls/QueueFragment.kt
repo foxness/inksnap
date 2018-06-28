@@ -84,10 +84,7 @@ class QueueFragment : Fragment()
         else
         {
             val unpausedTimeLeft = timeLeftUntil(queue.posts.earliest()!!.intendedSubmitDate!!)
-            timerObject = getTimerObject(unpausedTimeLeft)
-            timerObject.start()
-
-            registerSubmitReceiver()
+            startTimerAndRegisterReceiver(unpausedTimeLeft)
         }
     }
 
@@ -272,8 +269,6 @@ class QueueFragment : Fragment()
             
             if (currentType != AutosubmitType.Manual || manualPosts.isNotEmpty())
             {
-                registerSubmitReceiver()
-                
                 val timeLeft = if (currentType == AutosubmitType.Manual)
                 {
                     val earliestPost = manualPosts.earliest()!!
@@ -283,9 +278,8 @@ class QueueFragment : Fragment()
                 {
                     settingsManager.timeLeft!!
                 }
-
-                timerObject = getTimerObject(timeLeft)
-                timerObject.start()
+                
+                startTimerAndRegisterReceiver(timeLeft)
                 
                 if (currentType == AutosubmitType.Periodic)
                 {
@@ -323,23 +317,6 @@ class QueueFragment : Fragment()
         }
 
         updateToggleViews(on)
-    }
-
-    private fun getTimerObject(timeLeft: Duration): CountDownTimer
-    {
-        return object : CountDownTimer(timeLeft.millis, TIMER_UPDATE_INTERVAL_MS)
-        {
-            override fun onFinish()
-            {
-                // todo: remove the submitted item from post list
-            }
-
-            override fun onTick(millisUntilFinished: Long)
-            {
-                val timeUntilFinished = Duration(millisUntilFinished)
-                updateTimerViews(timeUntilFinished)
-            }
-        }
     }
 
     private fun updateSeekbarProgress(timeLeft: Duration?)
@@ -396,15 +373,36 @@ class QueueFragment : Fragment()
             if (scheduledPosts.isNotEmpty())
             {
                 val timeLeft = timeLeftUntil(scheduledPosts.earliest()!!.intendedSubmitDate!!)
-                timerObject = getTimerObject(timeLeft)
-                timerObject.start()
-
-                registerSubmitReceiver()
+                startTimerAndRegisterReceiver(timeLeft)
             }
         }
 
         updateToggleViews(settingsManager.autosubmitEnabled)
         updatePostList()
+    }
+    
+    private fun startTimerAndRegisterReceiver(timeLeft: Duration)
+    {
+        fun getTimerObject(timeLeft_: Duration): CountDownTimer
+        {
+            return object : CountDownTimer(timeLeft_.millis, TIMER_UPDATE_INTERVAL_MS)
+            {
+                override fun onFinish()
+                {
+                    // todo: remove the submitted item from post list
+                }
+
+                override fun onTick(millisUntilFinished: Long)
+                {
+                    val timeUntilFinished = Duration(millisUntilFinished)
+                    updateTimerViews(timeUntilFinished)
+                }
+            }
+        }
+        
+        timerObject = getTimerObject(timeLeft)
+        timerObject.start()
+        registerSubmitReceiver()
     }
 
     override fun onStop()
