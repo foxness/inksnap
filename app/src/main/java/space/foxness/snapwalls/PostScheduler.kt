@@ -60,6 +60,11 @@ class PostScheduler private constructor(context: Context)
 
     fun cancelScheduledPost(post: Post)
     {
+        if (!post.scheduled)
+        {
+            return
+        }
+        
         val esp = queue.posts.onlyScheduled().earliest()!!
 
         post.scheduled = false
