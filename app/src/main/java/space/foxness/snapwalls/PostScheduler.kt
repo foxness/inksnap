@@ -9,6 +9,7 @@ import org.joda.time.DateTime
 import org.joda.time.Duration
 import space.foxness.snapwalls.Queue.Companion.earliest
 import space.foxness.snapwalls.Queue.Companion.onlyScheduled
+import space.foxness.snapwalls.Util.timeLeftUntil
 
 // todo: make reddit not a singleton and rename it to reddit account
 
@@ -125,7 +126,7 @@ class PostScheduler private constructor(context: Context)
         val type = getAlarmType(false, true)
         val pi = getPendingIntent()!!
 
-        val delay = Duration(DateTime.now(), datetime)
+        val delay = timeLeftUntil(datetime)
         val datetimeElapsed = Duration(SystemClock.elapsedRealtime()) + delay
 
         alarmManager.setExact(type, datetimeElapsed.millis, pi)

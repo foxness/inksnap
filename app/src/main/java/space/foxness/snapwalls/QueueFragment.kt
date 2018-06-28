@@ -24,13 +24,13 @@ import android.widget.SeekBar
 import android.widget.TextView
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
-import org.joda.time.DateTime
 import org.joda.time.Duration
 import space.foxness.snapwalls.Queue.Companion.earliest
 import space.foxness.snapwalls.Queue.Companion.onlyScheduled
 import space.foxness.snapwalls.SettingsManager.AutosubmitType
 import space.foxness.snapwalls.Util.log
 import space.foxness.snapwalls.Util.randomState
+import space.foxness.snapwalls.Util.timeLeftUntil
 import space.foxness.snapwalls.Util.toNice
 import space.foxness.snapwalls.Util.toast
 
@@ -83,8 +83,7 @@ class QueueFragment : Fragment()
         }
         else
         {
-            val unpausedTimeLeft =
-                    Duration(DateTime.now(), queue.posts.first().intendedSubmitDate!!)
+            val unpausedTimeLeft = timeLeftUntil(queue.posts.earliest()!!.intendedSubmitDate!!)
             timerObject = getTimerObject(unpausedTimeLeft)
             timerObject.start()
 
@@ -233,7 +232,7 @@ class QueueFragment : Fragment()
             val earliestPost = queue.posts.onlyScheduled().earliest()
             if (autosubmitEnabled && earliestPost != null)
             {
-                timeLeft = Duration(DateTime.now(), earliestPost.intendedSubmitDate!!)
+                timeLeft = timeLeftUntil(earliestPost.intendedSubmitDate!!)
             }
         }
 
@@ -278,7 +277,7 @@ class QueueFragment : Fragment()
                 val timeLeft = if (currentType == AutosubmitType.Manual)
                 {
                     val earliestPost = manualPosts.earliest()!!
-                    Duration(DateTime.now(), earliestPost.intendedSubmitDate)
+                    timeLeftUntil(earliestPost.intendedSubmitDate!!)
                 }
                 else
                 {
@@ -314,8 +313,7 @@ class QueueFragment : Fragment()
                 
                 if (currentType == AutosubmitType.Periodic)
                 {
-                    settingsManager.timeLeft =
-                            Duration(DateTime.now(), queue.posts.earliest()!!.intendedSubmitDate!!)
+                    settingsManager.timeLeft = timeLeftUntil(queue.posts.earliest()!!.intendedSubmitDate!!)
                 }
 
                 postScheduler.cancelScheduledPosts(queue.posts.reversed()) // ...its for optimization
@@ -382,24 +380,6 @@ class QueueFragment : Fragment()
         {
             if (settingsManager.autosubmitEnabled)
             {
-//                if (queue.posts.isEmpty())
-//                {
-//                    settingsManager.autosubmitEnabled = false
-//                    settingsManager.timeLeft = settingsManager.period
-//                    updateToggleViews(false)
-//    
-//                    unregisterSubmitReceiver()
-//                }
-//                else
-//                {
-//                    val unpausedTimeLeft =
-//                            Duration(DateTime.now(), queue.posts.first().intendedSubmitDate!!)
-//                    timerObject = getTimerObject(unpausedTimeLeft)
-//                    timerObject.start()
-//    
-//                    registerSubmitReceiver()
-//                }
-
                 handleEnabledAutosubmit()
             }
             else
@@ -415,7 +395,7 @@ class QueueFragment : Fragment()
             val scheduledPosts = queue.posts.onlyScheduled()
             if (scheduledPosts.isNotEmpty())
             {
-                val timeLeft = Duration(DateTime.now(), scheduledPosts.earliest()!!.intendedSubmitDate!!)
+                val timeLeft = timeLeftUntil(scheduledPosts.earliest()!!.intendedSubmitDate!!)
                 timerObject = getTimerObject(timeLeft)
                 timerObject.start()
 

@@ -4,6 +4,7 @@ import android.support.v4.app.Fragment
 import android.util.Log
 import android.webkit.URLUtil.isValidUrl
 import android.widget.Toast
+import org.joda.time.DateTime
 import org.joda.time.Duration
 import org.joda.time.format.PeriodFormatterBuilder
 import java.util.*
@@ -47,4 +48,6 @@ object Util
                                   alpha.endInclusive.toInt()).toChar()
                     }).joinToString("")
     }
+    
+    fun timeLeftUntil(datetime: DateTime) = Duration(DateTime.now(), datetime)
 }
