@@ -61,32 +61,44 @@ class QueueFragment : Fragment()
     {
         override fun onReceive(context: Context?, intent: Intent?)
         {
-            // todo: handle the case where type is manual
-            
             toast("post submitted :O")
-            handleEnabledAutosubmit()
+            
+            if (currentType == AutosubmitType.Periodic)
+            {
+                if (queue.posts.isEmpty())
+                {
+                    settingsManager.autosubmitEnabled = false
+                    settingsManager.timeLeft = settingsManager.period
+                    updateToggleViews(false)
+
+                    unregisterSubmitReceiver()
+                }
+                else
+                {
+                    val unpausedTimeLeft = timeLeftUntil(queue.posts.earliest()!!.intendedSubmitDate!!)
+                    startTimer(unpausedTimeLeft)
+                }
+            }
+            else
+            {
+                val scheduledPosts = queue.posts.onlyScheduled()
+                
+                if (scheduledPosts.isEmpty())
+                {
+                    updateTimerText(null)
+                }
+                else
+                {
+                    val timeLeft = timeLeftUntil(scheduledPosts.earliest()!!.intendedSubmitDate!!)
+                    startTimer(timeLeft)
+                }
+            }
+            
             updatePostList()
         }
     }
 
     private val allowIntendedSubmitDateEditing get() = settingsManager.autosubmitType == AutosubmitType.Manual
-
-    private fun handleEnabledAutosubmit()
-    {
-        if (queue.posts.isEmpty())
-        {
-            settingsManager.autosubmitEnabled = false
-            settingsManager.timeLeft = settingsManager.period
-            updateToggleViews(false)
-
-            unregisterSubmitReceiver()
-        }
-        else
-        {
-            val unpausedTimeLeft = timeLeftUntil(queue.posts.earliest()!!.intendedSubmitDate!!)
-            startTimerAndRegisterReceiver(unpausedTimeLeft)
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -214,7 +226,7 @@ class QueueFragment : Fragment()
     }
 
     @SuppressLint("SetTextI18n") // todo: deal with this
-    private fun updateToggleViews(autosubmitEnabled: Boolean)
+    private fun updateToggleViews(autosubmitEnabled: Boolean) // todo: refactor to not use arg
     {
         timerToggle.text = if (autosubmitEnabled) "Turn off" else "Turn on"
         
@@ -357,7 +369,16 @@ class QueueFragment : Fragment()
         {
             if (settingsManager.autosubmitEnabled)
             {
-                handleEnabledAutosubmit()
+                if (queue.posts.isEmpty())
+                {
+                    settingsManager.autosubmitEnabled = false
+                    settingsManager.timeLeft = settingsManager.period
+                }
+                else
+                {
+                    val unpausedTimeLeft = timeLeftUntil(queue.posts.earliest()!!.intendedSubmitDate!!)
+                    startTimerAndRegisterReceiver(unpausedTimeLeft)
+                }
             }
             else
             {
@@ -381,7 +402,7 @@ class QueueFragment : Fragment()
         updatePostList()
     }
     
-    private fun startTimerAndRegisterReceiver(timeLeft: Duration)
+    private fun startTimer(timeLeft: Duration)
     {
         fun getTimerObject(timeLeft_: Duration): CountDownTimer
         {
@@ -399,9 +420,14 @@ class QueueFragment : Fragment()
                 }
             }
         }
-        
+
         timerObject = getTimerObject(timeLeft)
         timerObject.start()
+    }
+    
+    private fun startTimerAndRegisterReceiver(timeLeft: Duration)
+    {
+        startTimer(timeLeft)
         registerSubmitReceiver()
     }
 
