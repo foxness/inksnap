@@ -11,15 +11,21 @@ abstract class SingleFragmentActivity : AppCompatActivity()
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_fragment)
+        setContentView(SINGLE_FRAGMENT_LAYOUT)
 
         val fm = supportFragmentManager
-        var fragment: Fragment? = fm.findFragmentById(R.id.fragment_container)
+        var fragment: Fragment? = fm.findFragmentById(FRAGMENT_CONTAINER)
 
         if (fragment == null)
         {
             fragment = createFragment()
-            fm.beginTransaction().add(R.id.fragment_container, fragment).commit()
+            fm.beginTransaction().add(FRAGMENT_CONTAINER, fragment).commit()
         }
+    }
+
+    companion object
+    {
+        protected const val SINGLE_FRAGMENT_LAYOUT = R.layout.activity_fragment
+        protected const val FRAGMENT_CONTAINER = R.id.fragment_container
     }
 }
