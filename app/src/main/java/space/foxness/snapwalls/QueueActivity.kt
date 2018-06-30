@@ -31,7 +31,7 @@ class QueueActivity : AppCompatActivity()
         }
     }
     
-    private fun createFragment(): Fragment // todo: do this using queuefragment
+    private fun createFragment(): QueueFragment
     {
         log("Created a new fragment")
         return when (settingsManager.autosubmitType)

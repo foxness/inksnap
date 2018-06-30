@@ -9,7 +9,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
 import android.os.CountDownTimer
-import android.support.v4.app.Fragment
 import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.preference.PreferenceManager
 import android.support.v7.widget.DividerItemDecoration
@@ -32,7 +31,7 @@ import space.foxness.snapwalls.Util.timeLeftUntil
 import space.foxness.snapwalls.Util.toNice
 import space.foxness.snapwalls.Util.toast
 
-class ManualQueueFragment : Fragment()
+class ManualQueueFragment : QueueFragment()
 {
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: PostAdapter
