@@ -20,14 +20,12 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Button
 import android.widget.CheckBox
-import android.widget.SeekBar
 import android.widget.TextView
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 import org.joda.time.Duration
 import space.foxness.snapwalls.Queue.Companion.earliest
 import space.foxness.snapwalls.Queue.Companion.onlyScheduled
-import space.foxness.snapwalls.SettingsManager.AutosubmitType
 import space.foxness.snapwalls.Util.log
 import space.foxness.snapwalls.Util.randomState
 import space.foxness.snapwalls.Util.timeLeftUntil
@@ -40,7 +38,6 @@ class ManualQueueFragment : Fragment()
     private lateinit var adapter: PostAdapter
     private lateinit var timerText: TextView
     private lateinit var timerToggle: Button
-    private lateinit var seekBar: SeekBar
 
     private lateinit var timerObject: CountDownTimer
 
@@ -50,8 +47,6 @@ class ManualQueueFragment : Fragment()
     private lateinit var imgurAccount: ImgurAccount
 
     private lateinit var postScheduler: PostScheduler
-
-    private lateinit var currentType: AutosubmitType
 
     private var redditTokenFetching = false
 
@@ -63,42 +58,21 @@ class ManualQueueFragment : Fragment()
         {
             toast("post submitted :O")
 
-            if (currentType == AutosubmitType.Periodic)
-            {
-                if (queue.posts.isEmpty())
-                {
-                    settingsManager.autosubmitEnabled = false
-                    settingsManager.timeLeft = settingsManager.period
-                    updateToggleViews(false)
+            val scheduledPosts = queue.posts.onlyScheduled()
 
-                    unregisterSubmitReceiver()
-                }
-                else
-                {
-                    val unpausedTimeLeft = timeLeftUntil(queue.posts.earliest()!!.intendedSubmitDate!!)
-                    startTimer(unpausedTimeLeft)
-                }
+            if (scheduledPosts.isEmpty())
+            {
+                updateTimerText(null)
             }
             else
             {
-                val scheduledPosts = queue.posts.onlyScheduled()
-
-                if (scheduledPosts.isEmpty())
-                {
-                    updateTimerText(null)
-                }
-                else
-                {
-                    val timeLeft = timeLeftUntil(scheduledPosts.earliest()!!.intendedSubmitDate!!)
-                    startTimer(timeLeft)
-                }
+                val timeLeft = timeLeftUntil(scheduledPosts.earliest()!!.intendedSubmitDate!!)
+                startTimer(timeLeft)
             }
 
             updatePostList()
         }
     }
-
-    private val allowIntendedSubmitDateEditing get() = settingsManager.autosubmitType == AutosubmitType.Manual
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -121,8 +95,6 @@ class ManualQueueFragment : Fragment()
 
     private fun initUi()
     {
-        currentType = settingsManager.autosubmitType
-
         // RECYCLER VIEW ------------------------------
 
         recyclerView.layoutManager = LinearLayoutManager(context!!)
@@ -138,47 +110,6 @@ class ManualQueueFragment : Fragment()
             button.isEnabled = false
             toggleAutosubmit(!settingsManager.autosubmitEnabled)
             button.isEnabled = true
-        }
-
-        // SEEKBAR ------------------------------------
-
-        seekBar.max = SEEKBAR_MAX_VALUE
-        seekBar.setOnSeekBarChangeListener(
-                object : SeekBar.OnSeekBarChangeListener
-                {
-                    private var timeLeft: Duration = Duration.ZERO
-
-                    override fun onProgressChanged(seekBar: SeekBar,
-                                                   progress: Int,
-                                                   fromUser: Boolean)
-                    {
-                        if (!fromUser)
-                        {
-                            return
-                        }
-
-                        val percentage =
-                                1 - progress.toDouble() / SEEKBAR_MAX_VALUE
-                        val millis =
-                                settingsManager.period.millis * percentage
-                        val rounded = Math.round(millis)
-                        timeLeft = Duration(rounded)
-                        updateTimerText(timeLeft)
-                    }
-
-                    override fun onStartTrackingTouch(seekBar: SeekBar)
-                    {
-                    }
-
-                    override fun onStopTrackingTouch(seekBar: SeekBar)
-                    {
-                        settingsManager.timeLeft = timeLeft
-                    }
-                })
-
-        if (currentType == AutosubmitType.Manual)
-        {
-            seekBar.isEnabled = false
         }
     }
 
@@ -213,11 +144,10 @@ class ManualQueueFragment : Fragment()
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View?
     {
-        val v = inflater.inflate(R.layout.fragment_queue, container, false)
+        val v = inflater.inflate(R.layout.fragment_queue_manual, container, false)
 
         recyclerView = v.findViewById(R.id.queue_recyclerview)
         timerToggle = v.findViewById(R.id.queue_toggle)
-        seekBar = v.findViewById(R.id.queue_seekbar)
         timerText = v.findViewById(R.id.queue_timer)
 
         initUi()
@@ -231,26 +161,13 @@ class ManualQueueFragment : Fragment()
         timerToggle.text = if (autosubmitEnabled) "Turn off" else "Turn on"
 
         var timeLeft: Duration? = null
-        if (currentType == AutosubmitType.Periodic)
+
+        val earliestPost = queue.posts.onlyScheduled().earliest()
+        if (autosubmitEnabled && earliestPost != null)
         {
-            seekBar.isEnabled = !autosubmitEnabled
-            timeLeft = settingsManager.timeLeft!!
-        }
-        else
-        {
-            val earliestPost = queue.posts.onlyScheduled().earliest()
-            if (autosubmitEnabled && earliestPost != null)
-            {
-                timeLeft = timeLeftUntil(earliestPost.intendedSubmitDate!!)
-            }
+            timeLeft = timeLeftUntil(earliestPost.intendedSubmitDate!!)
         }
 
-        updateTimerViews(timeLeft)
-    }
-
-    private fun updateTimerViews(timeLeft: Duration?)
-    {
-        updateSeekbarProgress(timeLeft)
         updateTimerText(timeLeft)
     }
 
@@ -269,74 +186,41 @@ class ManualQueueFragment : Fragment()
                 return
             }
 
-            if (currentType != AutosubmitType.Manual && queue.posts.isEmpty ())
-            {
-                toast("No posts to autosubmit")
-                return
-            }
-
             settingsManager.autosubmitEnabled = true
 
             val manualPosts = queue.posts.filter { it.intendedSubmitDate != null }
 
-            if (currentType != AutosubmitType.Manual || manualPosts.isNotEmpty())
+            if (manualPosts.isNotEmpty())
             {
-                val timeLeft = if (currentType == AutosubmitType.Manual)
-                {
-                    val earliestPost = manualPosts.earliest()!!
-                    timeLeftUntil(earliestPost.intendedSubmitDate!!)
-                }
-                else
-                {
-                    settingsManager.timeLeft!!
-                }
+                val earliestPost = manualPosts.earliest()!!
+                val timeLeft = timeLeftUntil(earliestPost.intendedSubmitDate!!)
 
                 startTimerAndRegisterReceiver(timeLeft)
 
-                if (currentType == AutosubmitType.Periodic)
-                {
-                    postScheduler.schedulePeriodicPosts(queue.posts,
-                                                        settingsManager.period,
-                                                        timeLeft)
-                }
-                else
-                {
-                    postScheduler.scheduleManualPosts(manualPosts)
-                }
+                postScheduler.scheduleManualPosts(manualPosts)
 
-                log("Scheduled ${(if (currentType == AutosubmitType.Manual) manualPosts else queue.posts).size} post(s)")
+                log("Scheduled ${manualPosts.size} post(s)")
             }
         }
         else
         {
             settingsManager.autosubmitEnabled = false
+            
+            val scheduledPosts = queue.posts.onlyScheduled()
 
-            if (queue.posts.any { it.scheduled })
+            if (scheduledPosts.isNotEmpty())
             {
                 unregisterSubmitReceiver()
 
                 timerObject.cancel()
 
-                if (currentType == AutosubmitType.Periodic)
-                {
-                    settingsManager.timeLeft = timeLeftUntil(queue.posts.earliest()!!.intendedSubmitDate!!)
-                }
+                postScheduler.cancelScheduledPosts(scheduledPosts.reversed()) // ...its for optimization
 
-                postScheduler.cancelScheduledPosts(queue.posts.reversed()) // ...its for optimization
-
-                log("Canceled ${(queue.posts.filter { it.scheduled }).size} scheduled post(s)")
+                log("Canceled ${scheduledPosts.size} scheduled post(s)")
             }
         }
 
         updateToggleViews(on)
-    }
-
-    private fun updateSeekbarProgress(timeLeft: Duration?)
-    {
-        val millis = (timeLeft ?: Duration.ZERO).millis
-        val percentage = 1 - millis.toFloat() / settingsManager.period.millis
-        val rounded = Math.round(percentage * SEEKBAR_MAX_VALUE)
-        seekBar.progress = rounded
     }
 
     private fun updateTimerText(timeLeft: Duration?)
@@ -355,49 +239,16 @@ class ManualQueueFragment : Fragment()
         // assume period and autosubmit type never change while autosubmit is enabled
         // todo: actually prohibit changing these values while autosubmit is on
 
-        if (currentType != settingsManager.autosubmitType)
-        {
-            toast("Changed from $currentType to ${settingsManager.autosubmitType}")
-
-            currentType = settingsManager.autosubmitType
-        }
-
         if (settingsManager.timeLeft == null)
         {
             settingsManager.timeLeft = settingsManager.period
         }
 
-        if (currentType == AutosubmitType.Periodic)
+        val scheduledPosts = queue.posts.onlyScheduled()
+        if (scheduledPosts.isNotEmpty())
         {
-            if (settingsManager.autosubmitEnabled)
-            {
-                if (queue.posts.isEmpty())
-                {
-                    settingsManager.autosubmitEnabled = false
-                    settingsManager.timeLeft = settingsManager.period
-                }
-                else
-                {
-                    val unpausedTimeLeft = timeLeftUntil(queue.posts.earliest()!!.intendedSubmitDate!!)
-                    startTimerAndRegisterReceiver(unpausedTimeLeft)
-                }
-            }
-            else
-            {
-                if (settingsManager.timeLeft!! > settingsManager.period)
-                {
-                    settingsManager.timeLeft = settingsManager.period
-                }
-            }
-        }
-        else
-        {
-            val scheduledPosts = queue.posts.onlyScheduled()
-            if (scheduledPosts.isNotEmpty())
-            {
-                val timeLeft = timeLeftUntil(scheduledPosts.earliest()!!.intendedSubmitDate!!)
-                startTimerAndRegisterReceiver(timeLeft)
-            }
+            val timeLeft = timeLeftUntil(scheduledPosts.earliest()!!.intendedSubmitDate!!)
+            startTimerAndRegisterReceiver(timeLeft)
         }
 
         updateToggleViews(settingsManager.autosubmitEnabled)
@@ -417,8 +268,7 @@ class ManualQueueFragment : Fragment()
 
                 override fun onTick(millisUntilFinished: Long)
                 {
-                    val timeUntilFinished = Duration(millisUntilFinished)
-                    updateTimerViews(timeUntilFinished)
+                    updateTimerText(Duration(millisUntilFinished))
                 }
             }
         }
@@ -437,7 +287,8 @@ class ManualQueueFragment : Fragment()
     {
         super.onStop()
 
-        if (queue.posts.any { it.scheduled })
+        val scheduledPosts = queue.posts.onlyScheduled()
+        if (scheduledPosts.isNotEmpty())
         {
             timerObject.cancel()
         }
@@ -464,7 +315,7 @@ class ManualQueueFragment : Fragment()
 
     private fun createNewPost()
     {
-        val i = NewPostActivity.newIntent(context!!, allowIntendedSubmitDateEditing)
+        val i = NewPostActivity.newIntent(context!!, true)
         startActivityForResult(i, REQUEST_CODE_NEW_POST)
     }
 
@@ -481,16 +332,9 @@ class ManualQueueFragment : Fragment()
 
             queue.addPost(newPost)
 
-            if (settingsManager.autosubmitEnabled)
+            if (settingsManager.autosubmitEnabled && newPost.intendedSubmitDate != null)
             {
-                if (currentType == AutosubmitType.Periodic)
-                {
-                    postScheduler.scheduleUnscheduledPostsPeriodic(settingsManager.period)
-                }
-                else if (newPost.intendedSubmitDate != null)
-                {
-                    postScheduler.schedulePost(newPost)
-                }
+                postScheduler.schedulePost(newPost)
             }
         }
     }
@@ -582,11 +426,10 @@ class ManualQueueFragment : Fragment()
         val authDialog = Dialog(context!!)
         authDialog.setContentView(R.layout.dialog_auth)
 
-        authDialog.setOnDismissListener(
-                {
-                    activity!!.invalidateOptionsMenu()
-                    toast(if (imgurAccount.isLoggedIn) "Success" else "Fail")
-                })
+        authDialog.setOnDismissListener {
+            activity!!.invalidateOptionsMenu()
+            toast(if (imgurAccount.isLoggedIn) "Success" else "Fail")
+        }
 
         val authWebview = authDialog.findViewById<WebView>(R.id.auth_webview)
         authWebview.webViewClient = object : WebViewClient()
@@ -618,12 +461,10 @@ class ManualQueueFragment : Fragment()
 
             init
             {
-                itemView.setOnClickListener({
-                                                val i = PostPagerActivity.newIntent(context!!,
-                                                                                    post.id,
-                                                                                    allowIntendedSubmitDateEditing)
-                                                startActivity(i)
-                                            })
+                itemView.setOnClickListener {
+                    val i = PostPagerActivity.newIntent(context!!, post.id, true)
+                    startActivity(i)
+                }
 
                 titleTextView = itemView.findViewById(R.id.queue_post_title)
                 contentTextView = itemView.findViewById(R.id.queue_post_content)
@@ -664,7 +505,6 @@ class ManualQueueFragment : Fragment()
     companion object
     {
         private const val TIMER_UPDATE_INTERVAL_MS: Long = 100 // 0.1 seconds
-        private const val SEEKBAR_MAX_VALUE = 1000
         private const val REQUEST_CODE_NEW_POST = 0
     }
 }

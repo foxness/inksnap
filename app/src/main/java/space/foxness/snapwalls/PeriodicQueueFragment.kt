@@ -179,7 +179,7 @@ class PeriodicQueueFragment : Fragment()
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View?
     {
-        val v = inflater.inflate(R.layout.fragment_queue, container, false)
+        val v = inflater.inflate(R.layout.fragment_queue_periodic, container, false)
 
         recyclerView = v.findViewById(R.id.queue_recyclerview)
         timerToggle = v.findViewById(R.id.queue_toggle)
@@ -482,11 +482,10 @@ class PeriodicQueueFragment : Fragment()
         val authDialog = Dialog(context!!)
         authDialog.setContentView(R.layout.dialog_auth)
 
-        authDialog.setOnDismissListener(
-                {
-                    activity!!.invalidateOptionsMenu()
-                    toast(if (imgurAccount.isLoggedIn) "Success" else "Fail")
-                })
+        authDialog.setOnDismissListener {
+            activity!!.invalidateOptionsMenu()
+            toast(if (imgurAccount.isLoggedIn) "Success" else "Fail")
+        }
 
         val authWebview = authDialog.findViewById<WebView>(R.id.auth_webview)
         authWebview.webViewClient = object : WebViewClient()

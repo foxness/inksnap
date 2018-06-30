@@ -5,6 +5,8 @@ import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
 import space.foxness.snapwalls.Util.log
 
+// todo: replace fragments in onStart if type has changed
+
 class QueueActivity : AppCompatActivity()
 {
     private lateinit var settingsManager: SettingsManager

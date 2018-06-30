@@ -152,6 +152,7 @@ class PostFragment : Fragment()
 
             var timeDialogCanceled = false
 
+            // todo: fix the '59 minutes' bug
             val timeDialog = TimePickerDialog(activity!!,
                                               TimePickerDialog.OnTimeSetListener(
                                                       { view, hour, minute ->
