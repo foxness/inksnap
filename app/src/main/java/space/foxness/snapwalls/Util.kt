@@ -1,6 +1,8 @@
 package space.foxness.snapwalls
 
+import android.content.Context
 import android.support.v4.app.Fragment
+import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.webkit.URLUtil.isValidUrl
 import android.widget.Toast
@@ -19,8 +21,12 @@ object Util
             PeriodFormatterBuilder().printZeroAlways().minimumPrintedDigits(2) // gives the '01'
                     .appendHours().appendSeparator(":").appendMinutes().appendSeparator(":")
                     .appendSecondsWithMillis().toFormatter()
+    
+    fun toast(ctx: Context?, text: String) = Toast.makeText(ctx, text, Toast.LENGTH_SHORT).show()
 
-    fun Fragment.toast(text: String) = Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
+    fun Fragment.toast(text: String) = toast(context, text)
+
+    fun AppCompatActivity.toast(text: String) = toast(this, text)
 
     fun Any.log(text: String)
     {
@@ -42,11 +48,10 @@ object Util
         fun randomInt(min: Int, max: Int) = rand.nextInt(max - min + 1) + min // inclusive end
 
         val alpha = 'a'..'z' // possible characters of the string
-        return List(length,
-                    {
-                        randomInt(alpha.first.toInt(),
-                                  alpha.endInclusive.toInt()).toChar()
-                    }).joinToString("")
+        return List(length) {
+            randomInt(alpha.first.toInt(),
+                      alpha.endInclusive.toInt()).toChar()
+        }.joinToString("")
     }
     
     fun timeLeftUntil(datetime: DateTime) = Duration(DateTime.now(), datetime)

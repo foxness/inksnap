@@ -171,8 +171,6 @@ class PeriodicQueueFragment : QueueFragment()
     {
         super.onStart()
         
-        toast("I am Periodic")
-        
         // TODO: schedule posts that were added a date if autosubmit is on and type is manual
 
         // assume period and autosubmit type never change while autosubmit is enabled
