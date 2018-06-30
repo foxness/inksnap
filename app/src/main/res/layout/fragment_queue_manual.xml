@@ -7,27 +7,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     >
 
-    <android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+    <android.support.v7.widget.RecyclerView
+        xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/queue_recyclerview"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="78"
+        android:layout_weight="85"
         />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="22"
+        android:layout_weight="15"
         android:gravity="center"
         android:orientation="vertical"
         >
-
-        <SeekBar
-            android:id="@+id/queue_seekbar"
-            android:layout_width="320dp"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="13dp"
-            />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -38,17 +32,18 @@
 
             <Button
                 android:id="@+id/queue_toggle"
-                android:layout_width="wrap_content"
+                android:layout_width="100dp"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="40dp"
+                android:layout_marginEnd="20dp"
                 tools:text="Turn on"
                 />
 
             <TextView
                 android:id="@+id/queue_timer"
-                android:layout_width="wrap_content"
+                android:layout_width="200dp"
                 android:layout_height="wrap_content"
                 android:fontFamily="monospace"
+                android:gravity="center"
                 android:textSize="32sp"
                 tools:text="12:00:05"
                 />
@@ -56,5 +51,5 @@
         </LinearLayout>
 
     </LinearLayout>
-    
+
 </LinearLayout>
