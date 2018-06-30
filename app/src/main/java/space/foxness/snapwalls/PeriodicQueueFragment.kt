@@ -34,7 +34,7 @@ import space.foxness.snapwalls.Util.timeLeftUntil
 import space.foxness.snapwalls.Util.toNice
 import space.foxness.snapwalls.Util.toast
 
-class QueueFragment : Fragment()
+class PeriodicQueueFragment : Fragment()
 {
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: PostAdapter
@@ -62,7 +62,7 @@ class QueueFragment : Fragment()
         override fun onReceive(context: Context?, intent: Intent?)
         {
             toast("post submitted :O")
-            
+
             if (currentType == AutosubmitType.Periodic)
             {
                 if (queue.posts.isEmpty())
@@ -82,7 +82,7 @@ class QueueFragment : Fragment()
             else
             {
                 val scheduledPosts = queue.posts.onlyScheduled()
-                
+
                 if (scheduledPosts.isEmpty())
                 {
                     updateTimerText(null)
@@ -93,7 +93,7 @@ class QueueFragment : Fragment()
                     startTimer(timeLeft)
                 }
             }
-            
+
             updatePostList()
         }
     }
@@ -175,7 +175,7 @@ class QueueFragment : Fragment()
                         settingsManager.timeLeft = timeLeft
                     }
                 })
-        
+
         if (currentType == AutosubmitType.Manual)
         {
             seekBar.isEnabled = false
@@ -229,7 +229,7 @@ class QueueFragment : Fragment()
     private fun updateToggleViews(autosubmitEnabled: Boolean) // todo: refactor to not use arg
     {
         timerToggle.text = if (autosubmitEnabled) "Turn off" else "Turn on"
-        
+
         var timeLeft: Duration? = null
         if (currentType == AutosubmitType.Periodic)
         {
@@ -276,9 +276,9 @@ class QueueFragment : Fragment()
             }
 
             settingsManager.autosubmitEnabled = true
-            
+
             val manualPosts = queue.posts.filter { it.intendedSubmitDate != null }
-            
+
             if (currentType != AutosubmitType.Manual || manualPosts.isNotEmpty())
             {
                 val timeLeft = if (currentType == AutosubmitType.Manual)
@@ -290,9 +290,9 @@ class QueueFragment : Fragment()
                 {
                     settingsManager.timeLeft!!
                 }
-                
+
                 startTimerAndRegisterReceiver(timeLeft)
-                
+
                 if (currentType == AutosubmitType.Periodic)
                 {
                     postScheduler.schedulePeriodicPosts(queue.posts,
@@ -310,13 +310,13 @@ class QueueFragment : Fragment()
         else
         {
             settingsManager.autosubmitEnabled = false
-            
+
             if (queue.posts.any { it.scheduled })
             {
                 unregisterSubmitReceiver()
 
                 timerObject.cancel()
-                
+
                 if (currentType == AutosubmitType.Periodic)
                 {
                     settingsManager.timeLeft = timeLeftUntil(queue.posts.earliest()!!.intendedSubmitDate!!)
@@ -347,6 +347,8 @@ class QueueFragment : Fragment()
     override fun onStart()
     {
         super.onStart()
+        
+        toast("I am Periodic")
         
         // TODO: schedule posts that were added a date if autosubmit is on and type is manual
 
@@ -401,7 +403,7 @@ class QueueFragment : Fragment()
         updateToggleViews(settingsManager.autosubmitEnabled)
         updatePostList()
     }
-    
+
     private fun startTimer(timeLeft: Duration)
     {
         fun getTimerObject(timeLeft_: Duration): CountDownTimer
@@ -424,7 +426,7 @@ class QueueFragment : Fragment()
         timerObject = getTimerObject(timeLeft)
         timerObject.start()
     }
-    
+
     private fun startTimerAndRegisterReceiver(timeLeft: Duration)
     {
         startTimer(timeLeft)
