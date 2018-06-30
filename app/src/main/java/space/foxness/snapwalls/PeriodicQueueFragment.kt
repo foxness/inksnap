@@ -3,8 +3,6 @@ package space.foxness.snapwalls
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Dialog
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
@@ -33,41 +31,23 @@ class PeriodicQueueFragment : QueueFragment()
     
     private lateinit var seekBar: SeekBar
 
-    private lateinit var timerObject: CountDownTimer
-
-    private lateinit var settingsManager: SettingsManager
-    private lateinit var queue: Queue
-    private lateinit var reddit: Reddit
-    private lateinit var imgurAccount: ImgurAccount
-
-    private lateinit var postScheduler: PostScheduler
-
-    private var redditTokenFetching = false
-
-    private var receiverRegistered = false
-
-    private val submitReceiver = object : BroadcastReceiver()
+    override fun onSubmitReceived()
     {
-        override fun onReceive(context: Context?, intent: Intent?)
+        if (queue.posts.isEmpty())
         {
-            toast("post submitted :O")
+            settingsManager.autosubmitEnabled = false
+            settingsManager.timeLeft = settingsManager.period
+            updateToggleViews(false)
 
-            if (queue.posts.isEmpty())
-            {
-                settingsManager.autosubmitEnabled = false
-                settingsManager.timeLeft = settingsManager.period
-                updateToggleViews(false)
-
-                unregisterSubmitReceiver()
-            }
-            else
-            {
-                val unpausedTimeLeft = timeLeftUntil(queue.posts.earliest()!!.intendedSubmitDate!!)
-                startTimer(unpausedTimeLeft)
-            }
-
-            updatePostList()
+            unregisterSubmitReceiver()
         }
+        else
+        {
+            val unpausedTimeLeft = timeLeftUntil(queue.posts.earliest()!!.intendedSubmitDate!!)
+            startTimer(unpausedTimeLeft)
+        }
+
+        updatePostList()
     }
 
     override fun onCreate(savedInstanceState: Bundle?)

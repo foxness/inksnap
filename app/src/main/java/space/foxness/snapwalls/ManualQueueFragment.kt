@@ -3,8 +3,6 @@ package space.foxness.snapwalls
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Dialog
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
@@ -30,40 +28,22 @@ import space.foxness.snapwalls.Util.toast
 class ManualQueueFragment : QueueFragment()
 {
     override val allowIntendedSubmitDateEditing = true
-    
-    private lateinit var timerObject: CountDownTimer
 
-    private lateinit var settingsManager: SettingsManager
-    private lateinit var queue: Queue
-    private lateinit var reddit: Reddit
-    private lateinit var imgurAccount: ImgurAccount
-
-    private lateinit var postScheduler: PostScheduler
-
-    private var redditTokenFetching = false
-
-    private var receiverRegistered = false
-
-    private val submitReceiver = object : BroadcastReceiver()
+    override fun onSubmitReceived()
     {
-        override fun onReceive(context: Context?, intent: Intent?)
+        val scheduledPosts = queue.posts.onlyScheduled()
+
+        if (scheduledPosts.isEmpty())
         {
-            toast("post submitted :O")
-
-            val scheduledPosts = queue.posts.onlyScheduled()
-
-            if (scheduledPosts.isEmpty())
-            {
-                updateTimerText(null)
-            }
-            else
-            {
-                val timeLeft = timeLeftUntil(scheduledPosts.earliest()!!.intendedSubmitDate!!)
-                startTimer(timeLeft)
-            }
-
-            updatePostList()
+            updateTimerText(null)
         }
+        else
+        {
+            val timeLeft = timeLeftUntil(scheduledPosts.earliest()!!.intendedSubmitDate!!)
+            startTimer(timeLeft)
+        }
+
+        updatePostList()
     }
 
     override fun onCreate(savedInstanceState: Bundle?)
