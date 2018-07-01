@@ -9,7 +9,6 @@ import android.os.Bundle
 import android.os.CountDownTimer
 import android.support.v4.app.Fragment
 import android.support.v4.content.LocalBroadcastManager
-import android.support.v7.preference.PreferenceManager
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -104,8 +103,6 @@ abstract class QueueFragment : Fragment()
         postScheduler = PostScheduler.getInstance(ctx)
         reddit = Autoreddit.getInstance(ctx).reddit
         imgurAccount = Autoimgur.getInstance(ctx).imgurAccount
-
-        PreferenceManager.setDefaultValues(ctx, R.xml.preferences, false)
     }
 
     final override fun onCreateView(inflater: LayoutInflater,

@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.preference.PreferenceManager
 import space.foxness.snapwalls.Util.toast
 
 class QueueActivity : AppCompatActivity()
@@ -18,6 +19,8 @@ class QueueActivity : AppCompatActivity()
         super.onCreate(savedInstanceState)
         
         setContentView(SINGLE_FRAGMENT_LAYOUT)
+
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false)
 
         settingsManager = SettingsManager.getInstance(this)
 
