@@ -108,8 +108,10 @@ class ImgurAccount(private val callbacks: Callbacks)
         updateRefreshToken(newRefreshToken)
         updateAccessToken(newAccessToken, expiresIn)
     }
+    
+    data class ImgurImage(val link: String, val width: Int, val height: Int)
 
-    fun uploadImage(url: String): String
+    fun uploadImage(url: String): ImgurImage
     {
         if (!isValidUrl(url))
         {
@@ -136,9 +138,14 @@ class ImgurAccount(private val callbacks: Callbacks)
         {
             throw Exception("JSON response success: false; JSON: $json")
         }
+        
+        val jsonData = json.getJSONObject("data")
 
-        val link = json.getJSONObject("data").getString("link")
-        return link
+        val link = jsonData.getString("link")
+        val width = jsonData.getInt("width")
+        val height = jsonData.getInt("height")
+        
+        return ImgurImage(link, width, height)
     }
 
     companion object

@@ -45,6 +45,10 @@ class SettingsManager private constructor(context: Context)
         get() = getDateTime(PREF_IMGUR_ACCESS_TOKEN_EXPIRATION_DATE)
         set(value) = setDateTime(PREF_IMGUR_ACCESS_TOKEN_EXPIRATION_DATE, value)
 
+    var wallpaperMode: Boolean
+        get() = getBool(PREF_WALLPAPER_MODE)
+        set(value) = setBool(PREF_WALLPAPER_MODE, value)
+
     // SETTINGS ------
 
     val period get() = Duration(getInt(PREF_PERIOD_MINUTES)!! * MILLIS_IN_MINUTE)
@@ -136,6 +140,7 @@ class SettingsManager private constructor(context: Context)
         private const val PREF_PERIOD_MINUTES = "period_minutes"
         private const val PREF_DEBUG_DONT_POST = "debug_dont_post"
         private const val PREF_AUTOSUBMIT_TYPE = "autosubmit_type"
+        private const val PREF_WALLPAPER_MODE = "wallpaper_mode"
 
         private const val PREFVAL_MANUAL_AUTOSUBMIT = "0"
         private const val PREFVAL_PERIODIC_AUTOSUBMIT = "1"

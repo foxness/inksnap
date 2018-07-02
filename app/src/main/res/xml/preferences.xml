@@ -26,5 +26,12 @@
         android:summary="Set the timer period in minutes"
         android:defaultValue="180"
         />
+
+    <SwitchPreference
+        android:key="wallpaper_mode"
+        android:title="Wallpaper mode"
+        android:summary="Add image dimensions in title"
+        android:defaultValue="false"
+        />
     
 </PreferenceScreen>

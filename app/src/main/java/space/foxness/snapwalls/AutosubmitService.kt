@@ -10,8 +10,8 @@ import android.os.*
 import android.support.annotation.RequiresApi
 import android.support.v4.app.NotificationCompat
 import android.support.v4.content.LocalBroadcastManager
-import space.foxness.snapwalls.Queue.Companion.onlyScheduled
 import space.foxness.snapwalls.Queue.Companion.earliest
+import space.foxness.snapwalls.Queue.Companion.onlyScheduled
 import space.foxness.snapwalls.Util.isImageUrl
 import space.foxness.snapwalls.Util.log
 
@@ -46,7 +46,10 @@ class AutosubmitService : Service()
             val networkAvailable = isNetworkAvailable()
 
             val readyToPost = signedIn && notRatelimited && networkAvailable
-            val debugDontPost = SettingsManager.getInstance(this@AutosubmitService).debugDontPost
+            
+            val sm = SettingsManager.getInstance(this@AutosubmitService)
+            
+            val debugDontPost = sm.debugDontPost
 
             val imgurAccount = Autoimgur.getInstance(this@AutosubmitService).imgurAccount
 
@@ -58,10 +61,10 @@ class AutosubmitService : Service()
             {
                 log("Uploading ${post.content} to imgur...")
 
-                val newLink: String?
+                val imgurImg: ImgurAccount.ImgurImage?
                 try
                 {
-                    newLink = imgurAccount.uploadImage(post.content)
+                    imgurImg = imgurAccount.uploadImage(post.content)
                 }
                 catch (error: Exception)
                 {
@@ -69,8 +72,16 @@ class AutosubmitService : Service()
                     throw error
                 }
 
-                log("Success. New link: $newLink")
-                post.content = newLink
+                log("Success. New link: ${imgurImg.link}")
+                post.content = imgurImg.link
+                
+                if (sm.wallpaperMode)
+                {
+                    val oldTitle = post.title
+                    post.title += " [${imgurImg.width}×${imgurImg.height}]"
+                    
+                    log("Changed post title from \"$oldTitle\" to \"${post.title}\" before posting")
+                }
             }
             else
             {
