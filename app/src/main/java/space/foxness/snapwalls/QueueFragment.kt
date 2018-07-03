@@ -218,7 +218,7 @@ abstract class QueueFragment : Fragment()
 
     protected fun testButton()
     {
-        toast(Util.randomState())
+        toast(VariantVariables.VARIANT_NAME)
     }
 
     protected fun showImgurLoginDialog()
