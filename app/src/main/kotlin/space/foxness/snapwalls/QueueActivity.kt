@@ -23,13 +23,13 @@ class QueueActivity : AppCompatActivity()
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false)
 
         settingsManager = SettingsManager.getInstance(this)
-
+        updateCurrentType()
+        
         fragmentManager = supportFragmentManager
         var fragment: Fragment? = fragmentManager.findFragmentById(FRAGMENT_CONTAINER)
-
+        
         if (fragment == null)
         {
-            currentType = settingsManager.autosubmitType
             fragment = createFragment()
             fragmentManager.beginTransaction().add(FRAGMENT_CONTAINER, fragment).commit()
         }
@@ -42,7 +42,7 @@ class QueueActivity : AppCompatActivity()
             // doing this before super.onStart() to prevent the execution of the old fragment's onStart()
             
             val oldType = currentType
-            currentType = settingsManager.autosubmitType
+            updateCurrentType()
             val fragment = createFragment()
             fragmentManager.beginTransaction().replace(FRAGMENT_CONTAINER, fragment).commit()
 
@@ -59,6 +59,11 @@ class QueueActivity : AppCompatActivity()
             SettingsManager.AutosubmitType.Manual -> ManualQueueFragment()
             SettingsManager.AutosubmitType.Periodic -> PeriodicQueueFragment()
         }
+    }
+    
+    private fun updateCurrentType()
+    {
+        currentType = settingsManager.autosubmitType
     }
 
     companion object
