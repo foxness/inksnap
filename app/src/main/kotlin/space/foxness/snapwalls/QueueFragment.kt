@@ -218,7 +218,13 @@ abstract class QueueFragment : Fragment()
 
     protected fun testButton()
     {
-        toast(VariantVariables.VARIANT_NAME)
+//        toast(VariantVariables.VARIANT_NAME)
+        
+        doAsync {
+            val url = UrlProcessor.process("https://alpha.wallhaven.cc/wallpaper/599344")
+            
+            uiThread { toast(url) }
+        }
     }
 
     protected fun showImgurLoginDialog()

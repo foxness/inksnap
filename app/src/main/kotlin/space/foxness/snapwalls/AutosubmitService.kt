@@ -54,8 +54,21 @@ class AutosubmitService : Service()
             val imgurAccount = Autoimgur.getInstance(this@AutosubmitService).imgurAccount
 
             val type = post.type
-            val isImageUrl = post.content.isImageUrl()
             val loggedIntoImgur = imgurAccount.isLoggedIn
+            
+            if (type)
+            {
+                val oldUrl = post.content
+                post.content = UrlProcessor.process(post.content)
+                val newUrl = post.content
+                
+                if (oldUrl != newUrl)
+                {
+                    log("Recognized url. Old: \"$oldUrl\"\nNew: \"$newUrl\"")
+                }
+            }
+
+            val isImageUrl = post.content.isImageUrl()
 
             if (type && isImageUrl && loggedIntoImgur)
             {
