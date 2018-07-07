@@ -154,56 +154,51 @@ class PostFragment : Fragment()
 
             // todo: fix the '59 minutes' bug
             val timeDialog = TimePickerDialog(activity!!,
-                                              TimePickerDialog.OnTimeSetListener(
-                                                      { view, hour, minute ->
+                                              TimePickerDialog.OnTimeSetListener { view, hour, minute ->
+                                                  newHour = hour
+                                                  newMinute =
+                                                          minute
 
-                                                          newHour = hour
-                                                          newMinute =
-                                                                  minute
-
-                                                      }),
+                                              },
                                               dialogDatetime.hourOfDay,
                                               dialogDatetime.minuteOfDay,
                                               DateFormat.is24HourFormat(activity!!))
 
             timeDialog.setOnCancelListener { timeDialogCanceled = true }
 
-            timeDialog.setOnDismissListener(
-                    {
-                        if (!timeDialogCanceled)
-                        {
-                            intendedSubmitDate = DateTime(newYear!!,
-                                                          newMonth!!,
-                                                          newDay!!,
-                                                          newHour!!,
-                                                          newMinute!!)
-                            updateIntendedSubmitDateButtonText()
-                        }
-                    })
+            timeDialog.setOnDismissListener {
+                if (!timeDialogCanceled)
+                {
+                    intendedSubmitDate = DateTime(newYear!!,
+                                                  newMonth!!,
+                                                  newDay!!,
+                                                  newHour!!,
+                                                  newMinute!!)
+                    updateIntendedSubmitDateButtonText()
+                }
+            }
 
             var dateDialogCanceled = false
 
             val dateDialog = DatePickerDialog(activity!!,
-                                              DatePickerDialog.OnDateSetListener(
-                                                      { view, year, month, day ->
-                                                          newYear = year
-                                                          newMonth = month +
-                                                                  1 // DatePicker months start at 0
-                                                          newDay = day
-                                                      }),
+                                              DatePickerDialog.OnDateSetListener { view, year, month, day ->
+                                                  newYear = year
+                                                  newMonth = month +
+                                                          1 // DatePicker months start at 0
+                                                  newDay = day
+                                              },
                                               dialogDatetime.year,
                                               dialogDatetime.monthOfYear - 1, // same ^
                                               dialogDatetime.dayOfMonth)
 
             dateDialog.setOnCancelListener { dateDialogCanceled = true }
 
-            dateDialog.setOnDismissListener(
-                    {
-                        if (!dateDialogCanceled)
-                        {
-                            timeDialog.show()
-                        }
-                    })
+            dateDialog.setOnDismissListener {
+                if (!dateDialogCanceled)
+                {
+                    timeDialog.show()
+                }
+            }
 
             dateDialog.show()
         }
@@ -211,39 +206,38 @@ class PostFragment : Fragment()
         // SAVE BUTTON ------------------------
 
         val saveButton = v.findViewById<Button>(R.id.save_button)
-        saveButton.setOnClickListener(
+        saveButton.setOnClickListener {
+            unloadViewsToPost()
+
+            val notEmptyTitle = !post.title.isEmpty()
+            val notEmptySubreddit = !post.subreddit.isEmpty()
+            val validContent =
+                    !(post.type && !isValidUrl(post.content))
+
+            val isPostValid =
+                    notEmptyTitle && validContent && notEmptySubreddit
+
+            if (isPostValid)
+            {
+                if (newPost)
                 {
-                    unloadViewsToPost()
+                    setNewPostResult()
+                }
+                else
+                {
+                    queue.updatePost(post)
+                }
 
-                    val notEmptyTitle = !post.title.isEmpty()
-                    val notEmptySubreddit = !post.subreddit.isEmpty()
-                    val validContent =
-                            !(post.type && !isValidUrl(post.content))
-
-                    val isPostValid =
-                            notEmptyTitle && validContent && notEmptySubreddit
-
-                    if (isPostValid)
-                    {
-                        if (newPost)
-                        {
-                            setNewPostResult()
-                        }
-                        else
-                        {
-                            queue.updatePost(post)
-                        }
-
-                        activity!!.finish()
-                    }
-                    else
-                    {
-                        toast(constructDenyMessage(notEmptyTitle,
-                                                   post.content,
-                                                   notEmptySubreddit,
-                                                   post.type))
-                    }
-                })
+                activity!!.finish()
+            }
+            else
+            {
+                toast(constructDenyMessage(notEmptyTitle,
+                                           post.content,
+                                           notEmptySubreddit,
+                                           post.type))
+            }
+        }
 
         return v
     }
