@@ -26,7 +26,6 @@ class PostFragment : Fragment()
 
     private var intendedSubmitDate: DateTime? = null
 
-    private lateinit var queue: Queue
     private lateinit var post: Post
     private var newPost = false
     private var allowIntendedSubmitDateEditing = false
@@ -40,8 +39,6 @@ class PostFragment : Fragment()
     {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
-
-        queue = Queue.getInstance(context!!)
 
         val args = arguments!!
         if (args.getBoolean(ARG_NEW_POST))
@@ -83,11 +80,13 @@ class PostFragment : Fragment()
     {
         if (newPost)
         {
-            clearResult()
+            activity!!.setResult(Activity.RESULT_CANCELED)
         }
         else
         {
-            queue.deletePost(post.id)
+            val i = Intent()
+            i.putExtra(RESULT_DELETED_POST_ID, post.id)
+            activity!!.setResult(RESULT_CODE_DELETED, i)
         }
 
         activity!!.finish()
@@ -210,31 +209,20 @@ class PostFragment : Fragment()
 
             val notEmptyTitle = !post.title.isEmpty()
             val notEmptySubreddit = !post.subreddit.isEmpty()
-            val validContent =
-                    !(post.type && !isValidUrl(post.content))
+            val validContent = !(post.type && !isValidUrl(post.content))
 
-            val isPostValid =
-                    notEmptyTitle && validContent && notEmptySubreddit
+            val isPostValid = notEmptyTitle && validContent && notEmptySubreddit
 
             if (isPostValid)
             {
-                if (newPost)
-                {
-                    setNewPostResult()
-                }
-                else
-                {
-                    queue.updatePost(post)
-                }
-
+                val data = Intent()
+                data.putExtra(RESULT_POST, post)
+                activity!!.setResult(Activity.RESULT_OK, data)
                 activity!!.finish()
             }
             else
             {
-                toast(constructDenyMessage(notEmptyTitle,
-                                           post.content,
-                                           notEmptySubreddit,
-                                           post.type))
+                toast(constructDenyMessage(notEmptyTitle, post.content, notEmptySubreddit, post.type))
             }
         }
 
@@ -250,28 +238,19 @@ class PostFragment : Fragment()
         post.intendedSubmitDate = intendedSubmitDate
     }
 
-    private fun setNewPostResult()
-    {
-        val data = Intent()
-        data.putExtra(RESULT_NEW_POST, post)
-        activity!!.setResult(Activity.RESULT_OK, data)
-    }
-
-    private fun clearResult()
-    {
-        activity!!.setResult(Activity.RESULT_CANCELED)
-    }
-
     companion object
     {
         private const val ARG_POST = "post"
         private const val ARG_NEW_POST = "new_post"
         private const val ARG_ALLOW_INTENDED_SUBMIT_DATE_EDITING =
                 "allow_intended_submit_date_editing"
-        private const val RESULT_NEW_POST = "new_post"
+        private const val RESULT_POST = "post"
+        private const val RESULT_DELETED_POST_ID = "deleted_post_id"
 
         private const val DATETIME_FORMAT =
                 "yyyy/MM/dd EEE HH:mm" // todo: make dependent on region/locale
+        
+        const val RESULT_CODE_DELETED = 5
 
         private fun constructDenyMessage(notEmptyTitle: Boolean,
                                          content: String,
@@ -296,7 +275,9 @@ class PostFragment : Fragment()
             throw Exception("Bad logic somewhere in SaveButton.Click") // this should never happen
         }
 
-        fun getNewPostFromResult(data: Intent) = data.getSerializableExtra(RESULT_NEW_POST) as? Post
+        fun getPostFromResult(data: Intent) = data.getSerializableExtra(RESULT_POST) as? Post
+
+        fun getDeletedPostIdFromResult(data: Intent) = data.getIntExtra(RESULT_DELETED_POST_ID, -1)
 
         fun newInstance(post: Post?, allowIntendedSubmitDateEditing: Boolean): PostFragment
         {

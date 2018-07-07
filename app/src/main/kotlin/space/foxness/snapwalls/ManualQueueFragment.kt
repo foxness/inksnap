@@ -161,20 +161,51 @@ class ManualQueueFragment : QueueFragment()
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
     {
-        if (resultCode != Activity.RESULT_OK)
+        // TODO: UPDATE THIS
+        
+        when (requestCode)
         {
-            return
-        }
-
-        if (requestCode == REQUEST_CODE_NEW_POST)
-        {
-            val newPost = PostFragment.getNewPostFromResult(data!!)!!
-
-            queue.addPost(newPost)
-
-            if (settingsManager.autosubmitEnabled && newPost.intendedSubmitDate != null)
+            REQUEST_CODE_NEW_POST ->
             {
-                postScheduler.schedulePost(newPost)
+                if (resultCode == Activity.RESULT_OK)
+                {
+                    val newPost = PostFragment.getPostFromResult(data!!)!!
+
+                    queue.addPost(newPost)
+
+                    if (settingsManager.autosubmitEnabled && newPost.intendedSubmitDate != null)
+                    {
+                        postScheduler.schedulePost(newPost)
+                    }
+                }
+            }
+            
+            REQUEST_CODE_EDIT_POST ->
+            {
+                when (resultCode)
+                {
+                    Activity.RESULT_OK ->
+                    {
+                        val changedPost = PostFragment.getPostFromResult(data!!)!!
+                        
+                        
+                        
+                        if (settingsManager.autosubmitEnabled)
+                        {
+                            
+                            
+
+                            // todo: handle this (when autosubmit is on)
+                        }
+                    }
+                    
+                    PostFragment.RESULT_CODE_DELETED ->
+                    {
+                        val deletedPostId = PostFragment.getDeletedPostIdFromResult(data!!)
+                        
+                        
+                    }
+                }
             }
         }
     }

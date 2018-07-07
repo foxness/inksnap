@@ -346,7 +346,7 @@ abstract class QueueFragment : Fragment()
         {
             itemView.setOnClickListener {
                 val i = PostActivity.newIntent(context!!, post, allowIntendedSubmitDateEditing)
-                startActivity(i)
+                startActivityForResult(i, REQUEST_CODE_EDIT_POST)
             }
 
             titleTextView = itemView.findViewById(R.id.queue_post_title)
@@ -366,5 +366,6 @@ abstract class QueueFragment : Fragment()
     // protected vals in companion are not yet supported
     
     protected val REQUEST_CODE_NEW_POST = 0
+    protected val REQUEST_CODE_EDIT_POST = 1
     protected val TIMER_UPDATE_INTERVAL_MS: Long = 100 // 0.1 seconds
 }

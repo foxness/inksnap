@@ -220,6 +220,8 @@ class PeriodicQueueFragment : QueueFragment()
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
     {
+        // TODO: UPDATE THIS
+        
         if (resultCode != Activity.RESULT_OK)
         {
             return
@@ -227,7 +229,7 @@ class PeriodicQueueFragment : QueueFragment()
 
         if (requestCode == REQUEST_CODE_NEW_POST)
         {
-            val newPost = PostFragment.getNewPostFromResult(data!!)!!
+            val newPost = PostFragment.getPostFromResult(data!!)!!
 
             queue.addPost(newPost)
 
