@@ -25,13 +25,13 @@
             
         </activity>
         
-        <activity
-            android:name=".PostPagerActivity"
-            android:parentActivityName=".QueueActivity"
-            />
+        <!--<activity-->
+            <!--android:name=".PostPagerActivity"-->
+            <!--android:parentActivityName=".QueueActivity"-->
+            <!--/>-->
         
         <activity
-            android:name=".NewPostActivity"
+            android:name=".PostActivity"
             android:parentActivityName=".QueueActivity"
             />
         

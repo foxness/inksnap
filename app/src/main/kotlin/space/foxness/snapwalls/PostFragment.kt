@@ -54,8 +54,7 @@ class PostFragment : Fragment()
         }
         else
         {
-            val postId = args.getInt(ARG_POST_ID)
-            post = queue.getPost(postId)!!
+            post = args.getSerializable(ARG_POST) as Post
         }
 
         allowIntendedSubmitDateEditing = args.getBoolean(ARG_ALLOW_INTENDED_SUBMIT_DATE_EDITING)
@@ -265,7 +264,7 @@ class PostFragment : Fragment()
 
     companion object
     {
-        private const val ARG_POST_ID = "post_id"
+        private const val ARG_POST = "post"
         private const val ARG_NEW_POST = "new_post"
         private const val ARG_ALLOW_INTENDED_SUBMIT_DATE_EDITING =
                 "allow_intended_submit_date_editing"
@@ -299,13 +298,13 @@ class PostFragment : Fragment()
 
         fun getNewPostFromResult(data: Intent) = data.getSerializableExtra(RESULT_NEW_POST) as? Post
 
-        fun newInstance(postId: Int?, allowIntendedSubmitDateEditing: Boolean): PostFragment
+        fun newInstance(post: Post?, allowIntendedSubmitDateEditing: Boolean): PostFragment
         {
             val args = Bundle()
 
-            if (postId != null)
+            if (post != null)
             {
-                args.putInt(ARG_POST_ID, postId)
+                args.putSerializable(ARG_POST, post)
                 args.putBoolean(ARG_NEW_POST, false)
             }
             else

@@ -135,7 +135,7 @@ abstract class QueueFragment : Fragment()
 
     protected fun createNewPost()
     {
-        val i = NewPostActivity.newIntent(context!!, false)
+        val i = PostActivity.newIntent(context!!, null,false)
         startActivityForResult(i, REQUEST_CODE_NEW_POST)
     }
 
@@ -345,7 +345,7 @@ abstract class QueueFragment : Fragment()
         init
         {
             itemView.setOnClickListener {
-                val i = PostPagerActivity.newIntent(context!!, post.id, allowIntendedSubmitDateEditing)
+                val i = PostActivity.newIntent(context!!, post, allowIntendedSubmitDateEditing)
                 startActivity(i)
             }
 
