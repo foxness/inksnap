@@ -135,7 +135,7 @@ abstract class QueueFragment : Fragment()
 
     protected fun createNewPost()
     {
-        val i = PostActivity.newIntent(context!!, null,false)
+        val i = PostActivity.newIntent(context!!, null, false)
         startActivityForResult(i, REQUEST_CODE_NEW_POST)
     }
 
