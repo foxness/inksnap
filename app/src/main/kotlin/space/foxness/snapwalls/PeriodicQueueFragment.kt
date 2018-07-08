@@ -238,7 +238,16 @@ class PeriodicQueueFragment : QueueFragment()
             val timeLeft = timeLeftUntil(queue.posts.earliest()!!.intendedSubmitDate!!)
             postScheduler.cancelScheduledPosts(queue.posts)
             queue.deletePost(deletedPostId)
-            postScheduler.schedulePeriodicPosts(queue.posts, settingsManager.period, timeLeft)
+            
+            if (queue.posts.isEmpty())
+            {
+                settingsManager.autosubmitEnabled = false
+                settingsManager.timeLeft = settingsManager.period
+            }
+            else
+            {
+                postScheduler.schedulePeriodicPosts(queue.posts, settingsManager.period, timeLeft)
+            }
 
             // todo: why is settingsManager.timeLeft nullable? maybe make it non-nullable?
         }
