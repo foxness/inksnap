@@ -161,8 +161,6 @@ class ManualQueueFragment : QueueFragment()
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
     {
-        // TODO: UPDATE THIS
-        
         when (requestCode)
         {
             REQUEST_CODE_NEW_POST ->
@@ -184,18 +182,40 @@ class ManualQueueFragment : QueueFragment()
             {
                 when (resultCode)
                 {
-                    Activity.RESULT_OK ->
+                    Activity.RESULT_OK -> // ok means the post was saved
                     {
                         val changedPost = PostFragment.getPostFromResult(data!!)!!
                         
-                        
-                        
                         if (settingsManager.autosubmitEnabled)
                         {
+                            val oldPost = queue.getPost(changedPost.id)!!
                             
-                            
-
-                            // todo: handle this (when autosubmit is on)
+                            if (oldPost.intendedSubmitDate == null)
+                            {
+                                if (changedPost.intendedSubmitDate != null)
+                                {
+                                    queue.updatePost(changedPost)
+                                    postScheduler.schedulePost(changedPost)
+                                }
+                            }
+                            else
+                            {
+                                if (changedPost.intendedSubmitDate == null)
+                                {
+                                    postScheduler.cancelScheduledPost(oldPost)
+                                    queue.updatePost(changedPost)
+                                }
+                                else if (!changedPost.intendedSubmitDate!!.isEqual(oldPost.intendedSubmitDate))
+                                {
+                                    postScheduler.cancelScheduledPost(oldPost)
+                                    queue.updatePost(changedPost)
+                                    postScheduler.schedulePost(changedPost)
+                                }
+                            }
+                        }
+                        else
+                        {
+                            queue.updatePost(changedPost)
                         }
                     }
                     
@@ -203,7 +223,13 @@ class ManualQueueFragment : QueueFragment()
                     {
                         val deletedPostId = PostFragment.getDeletedPostIdFromResult(data!!)
                         
-                        
+                        if (settingsManager.autosubmitEnabled)
+                        {
+                            val deletedPost = queue.getPost(deletedPostId)!!
+                            postScheduler.cancelScheduledPost(deletedPost)
+                        }
+
+                        queue.deletePost(deletedPostId)
                     }
                 }
             }
