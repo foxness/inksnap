@@ -25,7 +25,7 @@ class PostScheduler private constructor(context: Context)
     // this method expects the queue to be divided into 2 segments
     // the first segment is the scheduled segment at the beginning
     // the last segment is the segment that will be scheduled
-    fun scheduleUnscheduledPostsPeriodic(period: Duration) // todo: refactor this to use schedulePost()
+    fun scheduleUnscheduledPostsPeriodic(period: Duration)
     {
         val posts = queue.posts
 
@@ -45,10 +45,10 @@ class PostScheduler private constructor(context: Context)
             if (posts[i].intendedSubmitDate == null)
             {
                 posts[i].intendedSubmitDate = posts[i - 1].intendedSubmitDate!! + period
-                posts[i].scheduled = true
-                queue.updatePost(posts[i])
+                
+                schedulePost(posts[i])
+                
                 onlyUnscheduledNow = true
-
             }
             else if (onlyUnscheduledNow)
             {

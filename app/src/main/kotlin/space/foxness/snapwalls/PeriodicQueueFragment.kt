@@ -220,22 +220,51 @@ class PeriodicQueueFragment : QueueFragment()
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
     {
-        // TODO: UPDATE THIS
-        
-        if (resultCode != Activity.RESULT_OK)
+        when (requestCode)
         {
-            return
-        }
-
-        if (requestCode == REQUEST_CODE_NEW_POST)
-        {
-            val newPost = PostFragment.getPostFromResult(data!!)!!
-
-            queue.addPost(newPost)
-
-            if (settingsManager.autosubmitEnabled)
+            REQUEST_CODE_NEW_POST ->
             {
-                postScheduler.scheduleUnscheduledPostsPeriodic(settingsManager.period)
+                if (resultCode == Activity.RESULT_OK)
+                {
+                    val newPost = PostFragment.getPostFromResult(data!!)!!
+
+                    queue.addPost(newPost)
+
+                    if (settingsManager.autosubmitEnabled)
+                    {
+                        postScheduler.scheduleUnscheduledPostsPeriodic(settingsManager.period)
+                    }
+                }
+            }
+
+            REQUEST_CODE_EDIT_POST ->
+            {
+                when (resultCode)
+                {
+                    Activity.RESULT_OK -> // ok means the post was saved
+                    {
+                        val changedPost = PostFragment.getPostFromResult(data!!)!!
+                        queue.updatePost(changedPost)
+                    }
+
+                    PostFragment.RESULT_CODE_DELETED ->
+                    {
+                        val deletedPostId = PostFragment.getDeletedPostIdFromResult(data!!)
+                        
+                        if (settingsManager.autosubmitEnabled)
+                        {
+                            postScheduler.cancelScheduledPosts(queue.posts)
+                            queue.deletePost(deletedPostId)
+                            postScheduler.schedulePeriodicPosts(queue.posts, settingsManager.period, settingsManager.timeLeft!!)
+                            
+                            // todo: why is settingsManager.timeLeft nullable? make it non-nullable
+                        }
+                        else
+                        {
+                            queue.deletePost(deletedPostId)
+                        }
+                    }
+                }
             }
         }
     }
