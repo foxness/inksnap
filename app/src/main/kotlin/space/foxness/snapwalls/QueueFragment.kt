@@ -1,5 +1,6 @@
 package space.foxness.snapwalls
 
+import android.app.Activity
 import android.app.Dialog
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -46,6 +47,12 @@ abstract class QueueFragment : Fragment()
     protected abstract val fragmentLayoutId: Int
     
     protected abstract fun toggleAutosubmit(on: Boolean)
+    
+    protected abstract fun onNewPostAdded(newPost: Post)
+    
+    protected abstract fun onPostEdited(editedPost: Post)
+    
+    protected abstract fun onPostDeleted(deletedPostId: Int)
 
     protected open fun onSubmitReceived()
     {
@@ -308,6 +315,41 @@ abstract class QueueFragment : Fragment()
 
         val lbm = LocalBroadcastManager.getInstance(activity!!)
         lbm.unregisterReceiver(submitReceiver)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
+    {
+        when (requestCode)
+        {
+            REQUEST_CODE_NEW_POST ->
+            {
+                if (resultCode == Activity.RESULT_OK)
+                {
+                    val newPost = PostFragment.getPostFromResult(data!!)!!
+                    onNewPostAdded(newPost)
+                }
+            }
+
+            REQUEST_CODE_EDIT_POST ->
+            {
+                when (resultCode)
+                {
+                    Activity.RESULT_OK -> // ok means the post was saved
+                    {
+                        val editedPost = PostFragment.getPostFromResult(data!!)!!
+                        onPostEdited(editedPost)
+                    }
+
+                    PostFragment.RESULT_CODE_DELETED ->
+                    {
+                        val deletedPostId = PostFragment.getDeletedPostIdFromResult(data!!)
+                        onPostDeleted(deletedPostId)
+                    }
+                }
+            }
+            
+            else -> super.onActivityResult(requestCode, resultCode, data)
+        }
     }
 
     protected inner class PostAdapter(private var posts: List<Post>) : RecyclerView.Adapter<PostHolder>()

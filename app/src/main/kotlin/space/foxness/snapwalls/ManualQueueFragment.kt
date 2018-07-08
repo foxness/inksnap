@@ -1,8 +1,6 @@
 package space.foxness.snapwalls
 
 import android.annotation.SuppressLint
-import android.app.Activity
-import android.content.Intent
 import org.joda.time.Duration
 import space.foxness.snapwalls.Queue.Companion.earliest
 import space.foxness.snapwalls.Queue.Companion.onlyScheduled
@@ -159,80 +157,59 @@ class ManualQueueFragment : QueueFragment()
         updateTimerText(Duration(millisUntilFinished))
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
+    override fun onNewPostAdded(newPost: Post)
     {
-        when (requestCode)
+        queue.addPost(newPost)
+
+        if (settingsManager.autosubmitEnabled && newPost.intendedSubmitDate != null)
         {
-            REQUEST_CODE_NEW_POST ->
+            postScheduler.schedulePost(newPost)
+        }
+    }
+
+    override fun onPostEdited(editedPost: Post)
+    {
+        if (settingsManager.autosubmitEnabled)
+        {
+            val oldPost = queue.getPost(editedPost.id)!!
+
+            if (oldPost.intendedSubmitDate == null)
             {
-                if (resultCode == Activity.RESULT_OK)
+                if (editedPost.intendedSubmitDate != null)
                 {
-                    val newPost = PostFragment.getPostFromResult(data!!)!!
-
-                    queue.addPost(newPost)
-
-                    if (settingsManager.autosubmitEnabled && newPost.intendedSubmitDate != null)
-                    {
-                        postScheduler.schedulePost(newPost)
-                    }
+                    queue.updatePost(editedPost)
+                    postScheduler.schedulePost(editedPost)
                 }
             }
-            
-            REQUEST_CODE_EDIT_POST ->
+            else
             {
-                when (resultCode)
+                if (editedPost.intendedSubmitDate == null)
                 {
-                    Activity.RESULT_OK -> // ok means the post was saved
-                    {
-                        val changedPost = PostFragment.getPostFromResult(data!!)!!
-                        
-                        if (settingsManager.autosubmitEnabled)
-                        {
-                            val oldPost = queue.getPost(changedPost.id)!!
-                            
-                            if (oldPost.intendedSubmitDate == null)
-                            {
-                                if (changedPost.intendedSubmitDate != null)
-                                {
-                                    queue.updatePost(changedPost)
-                                    postScheduler.schedulePost(changedPost)
-                                }
-                            }
-                            else
-                            {
-                                if (changedPost.intendedSubmitDate == null)
-                                {
-                                    postScheduler.cancelScheduledPost(oldPost)
-                                    queue.updatePost(changedPost)
-                                }
-                                else if (!changedPost.intendedSubmitDate!!.isEqual(oldPost.intendedSubmitDate))
-                                {
-                                    postScheduler.cancelScheduledPost(oldPost)
-                                    queue.updatePost(changedPost)
-                                    postScheduler.schedulePost(changedPost)
-                                }
-                            }
-                        }
-                        else
-                        {
-                            queue.updatePost(changedPost)
-                        }
-                    }
-                    
-                    PostFragment.RESULT_CODE_DELETED ->
-                    {
-                        val deletedPostId = PostFragment.getDeletedPostIdFromResult(data!!)
-                        
-                        if (settingsManager.autosubmitEnabled)
-                        {
-                            val deletedPost = queue.getPost(deletedPostId)!!
-                            postScheduler.cancelScheduledPost(deletedPost)
-                        }
-
-                        queue.deletePost(deletedPostId)
-                    }
+                    postScheduler.cancelScheduledPost(oldPost)
+                    queue.updatePost(editedPost)
+                }
+                else if (!editedPost.intendedSubmitDate!!.isEqual(oldPost.intendedSubmitDate))
+                {
+                    postScheduler.cancelScheduledPost(oldPost)
+                    queue.updatePost(editedPost)
+                    postScheduler.schedulePost(editedPost)
                 }
             }
         }
+        else
+        {
+            queue.updatePost(editedPost)
+        }
+    }
+
+    override fun onPostDeleted(deletedPostId: Int)
+    {
+        if (settingsManager.autosubmitEnabled)
+        {
+            val deletedPost = queue.getPost(deletedPostId)!!
+            postScheduler.cancelScheduledPost(deletedPost)
+        }
+
+        queue.deletePost(deletedPostId)
     }
 }

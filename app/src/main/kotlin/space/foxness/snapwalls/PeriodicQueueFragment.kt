@@ -1,8 +1,6 @@
 package space.foxness.snapwalls
 
 import android.annotation.SuppressLint
-import android.app.Activity
-import android.content.Intent
 import android.view.View
 import android.widget.SeekBar
 import org.joda.time.Duration
@@ -218,54 +216,34 @@ class PeriodicQueueFragment : QueueFragment()
         unregisterSubmitReceiver() // maybe move this into the if?
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
+    override fun onNewPostAdded(newPost: Post)
     {
-        when (requestCode)
+        queue.addPost(newPost)
+
+        if (settingsManager.autosubmitEnabled)
         {
-            REQUEST_CODE_NEW_POST ->
-            {
-                if (resultCode == Activity.RESULT_OK)
-                {
-                    val newPost = PostFragment.getPostFromResult(data!!)!!
+            postScheduler.scheduleUnscheduledPostsPeriodic(settingsManager.period)
+        }
+    }
 
-                    queue.addPost(newPost)
+    override fun onPostEdited(editedPost: Post)
+    {
+        queue.updatePost(editedPost)
+    }
 
-                    if (settingsManager.autosubmitEnabled)
-                    {
-                        postScheduler.scheduleUnscheduledPostsPeriodic(settingsManager.period)
-                    }
-                }
-            }
+    override fun onPostDeleted(deletedPostId: Int)
+    {
+        if (settingsManager.autosubmitEnabled)
+        {
+            postScheduler.cancelScheduledPosts(queue.posts)
+            queue.deletePost(deletedPostId)
+            postScheduler.schedulePeriodicPosts(queue.posts, settingsManager.period, settingsManager.timeLeft!!)
 
-            REQUEST_CODE_EDIT_POST ->
-            {
-                when (resultCode)
-                {
-                    Activity.RESULT_OK -> // ok means the post was saved
-                    {
-                        val changedPost = PostFragment.getPostFromResult(data!!)!!
-                        queue.updatePost(changedPost)
-                    }
-
-                    PostFragment.RESULT_CODE_DELETED ->
-                    {
-                        val deletedPostId = PostFragment.getDeletedPostIdFromResult(data!!)
-                        
-                        if (settingsManager.autosubmitEnabled)
-                        {
-                            postScheduler.cancelScheduledPosts(queue.posts)
-                            queue.deletePost(deletedPostId)
-                            postScheduler.schedulePeriodicPosts(queue.posts, settingsManager.period, settingsManager.timeLeft!!)
-                            
-                            // todo: why is settingsManager.timeLeft nullable? make it non-nullable
-                        }
-                        else
-                        {
-                            queue.deletePost(deletedPostId)
-                        }
-                    }
-                }
-            }
+            // todo: why is settingsManager.timeLeft nullable? make it non-nullable
+        }
+        else
+        {
+            queue.deletePost(deletedPostId)
         }
     }
 
