@@ -39,6 +39,7 @@
             android:name=".SettingsActivity"
             android:parentActivityName=".QueueActivity"
             />
+        <activity android:name=".LogActivity" />
 
         <service android:name=".AutosubmitService" />
         

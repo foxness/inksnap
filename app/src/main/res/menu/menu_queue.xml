@@ -32,5 +32,10 @@
         android:id="@+id/menu_queue_settings"
         android:title="@string/menu_settings"
         />
+
+    <item
+        android:id="@+id/menu_queue_log"
+        android:title="@string/menu_log"
+        />
     
 </menu>

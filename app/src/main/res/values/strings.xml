@@ -16,4 +16,5 @@
     <string name="menu_reddit_login">Log into Reddit</string>
     <string name="menu_imgur_login">Log into Imgur</string>
     <string name="intended_submit_date_label">Date and time</string>
+    <string name="menu_log">Log</string>
 </resources>

@@ -175,8 +175,19 @@ abstract class QueueFragment : Fragment()
                 openSettings()
                 true
             }
+            R.id.menu_queue_log ->
+            {
+                openLog()
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+    
+    protected fun openLog()
+    {
+        val i = LogActivity.newIntent(context!!)
+        startActivity(i)
     }
 
     protected fun showRedditLoginDialog()
