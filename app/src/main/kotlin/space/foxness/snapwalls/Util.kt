@@ -14,6 +14,8 @@ import java.util.*
 object Util
 {
     const val APPNAME = "Snapwalls"
+    
+    const val USER_AGENT = "Snapwalls by /u/foxneZz"
 
     const val STATE_LENGTH = 10
 

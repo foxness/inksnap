@@ -8,8 +8,7 @@ object UrlProcessor
     {
         if (wallhavenRegex.matches(url))
         {
-            val userAgent = "Snapwalls by /u/foxneZz" // todo: refactor all useragents into util or smth
-            val headers = mapOf("User-Agent" to userAgent)
+            val headers = mapOf("User-Agent" to Util.USER_AGENT)
             val response = khttp.get(url = url, headers = headers)
             
             if (response.statusCode != 200)

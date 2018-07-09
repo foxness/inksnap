@@ -161,30 +161,30 @@ class ImgurAccount(private val callbacks: Callbacks)
         private const val AUTHORIZATION_ENDPOINT = "https://api.imgur.com/oauth2/authorize"
         private const val ACCESS_TOKEN_ENDPOINT = "https://api.imgur.com/oauth2/token"
 
-        private const val USER_AGENT = "Snapwalls by /u/foxneZz" // todo: extract this to util?
+        private const val USER_AGENT = Util.USER_AGENT
 
-        fun uploadAnonymously(url: String): String // warning: heavily compresses the image
-        {
-            val headers =
-                    mapOf("User-Agent" to USER_AGENT, "Authorization" to "Client-ID $APP_CLIENT_ID")
-
-            val data = mapOf("image" to url, "type" to "URL")
-
-            val response = khttp.post(url = IMAGE_UPLOAD_ENDPOINT, headers = headers, data = data)
-
-            if (response.statusCode != 200)
-            {
-                throw Exception("Response code: ${response.statusCode}, response: $response")
-            }
-
-            val json = response.jsonObject
-            if (!json.getBoolean("success"))
-            {
-                throw Exception("JSON response success: false; JSON: $json")
-            }
-
-            val link = json.getJSONObject("data").getString("link")
-            return link
-        }
+//        fun uploadAnonymously(url: String): String // warning: heavily compresses the image
+//        {
+//            val headers =
+//                    mapOf("User-Agent" to USER_AGENT, "Authorization" to "Client-ID $APP_CLIENT_ID")
+//
+//            val data = mapOf("image" to url, "type" to "URL")
+//
+//            val response = khttp.post(url = IMAGE_UPLOAD_ENDPOINT, headers = headers, data = data)
+//
+//            if (response.statusCode != 200)
+//            {
+//                throw Exception("Response code: ${response.statusCode}, response: $response")
+//            }
+//
+//            val json = response.jsonObject
+//            if (!json.getBoolean("success"))
+//            {
+//                throw Exception("JSON response success: false; JSON: $json")
+//            }
+//
+//            val link = json.getJSONObject("data").getString("link")
+//            return link
+//        }
     }
 }

@@ -218,7 +218,7 @@ class Reddit private constructor(private val callbacks: Callbacks)
         private const val AUTH_DURATION = "permanent"
         private const val AUTH_SCOPE = "submit"
         private const val AUTH_RESPONSE_TYPE = "code"
-        private const val USER_AGENT = "Snapwalls by /u/foxneZz"
+        private const val USER_AGENT = Util.USER_AGENT
 
         private const val RATELIMIT_MS: Long = 10 * 60 * 1000 // 10 minutes, required to be long
     }
