@@ -6,11 +6,12 @@
     android:layout_height="match_parent"
     >
     
-    <EditText
+    <TextView
+        android:id="@+id/log_textview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:inputType="textMultiLine"
         android:text="hi"
+        android:padding="10dp"
         />
 
 </LinearLayout>
