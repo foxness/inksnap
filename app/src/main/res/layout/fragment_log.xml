@@ -18,6 +18,8 @@
             android:layout_height="wrap_content"
             android:text="hi"
             android:padding="10dp"
+            android:typeface="monospace"
+            android:textSize="12sp"
             />
         
     </ScrollView>
