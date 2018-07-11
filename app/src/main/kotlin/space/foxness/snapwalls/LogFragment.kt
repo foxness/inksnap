@@ -5,6 +5,7 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
 
 class LogFragment : Fragment()
@@ -13,10 +14,18 @@ class LogFragment : Fragment()
     {
         val ctx = context!!
         
+        Log.log(ctx, "create!")
+        
         val v = inflater.inflate(R.layout.fragment_log, container, false)
         
         val log = v.findViewById<TextView>(R.id.log_textview)
         log.text = Log.get(ctx)
+        
+        val clearButton = v.findViewById<Button>(R.id.log_clear)
+        clearButton.setOnClickListener { 
+            Log.clear(ctx)
+            log.text = ""
+        }
         
         return v
     }
