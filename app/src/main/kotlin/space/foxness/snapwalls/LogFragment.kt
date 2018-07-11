@@ -13,8 +13,6 @@ class LogFragment : Fragment()
     {
         val ctx = context!!
         
-        Log.log(ctx, "I am in onCreateView()")
-        
         val v = inflater.inflate(R.layout.fragment_log, container, false)
         
         val log = v.findViewById<TextView>(R.id.log_textview)
