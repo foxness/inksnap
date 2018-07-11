@@ -14,7 +14,7 @@ class LogFragment : Fragment()
     {
         val ctx = context!!
         
-        Log.log(ctx, "create!")
+        Log.log(ctx, "cre\nate!")
         
         val v = inflater.inflate(R.layout.fragment_log, container, false)
         
