@@ -13,7 +13,8 @@ import android.support.v4.content.LocalBroadcastManager
 import space.foxness.snapwalls.Queue.Companion.earliest
 import space.foxness.snapwalls.Queue.Companion.onlyScheduled
 import space.foxness.snapwalls.Util.isImageUrl
-import space.foxness.snapwalls.Util.log
+import java.io.PrintWriter
+import java.io.StringWriter
 
 // todo: add all posts that failed to be submitted to a 'failed' list
 // todo: add network safeguard to auth
@@ -27,138 +28,156 @@ class AutosubmitService : Service()
     {
         override fun handleMessage(msg: Message)
         {
-            log("I am trying to submit...")
-
-            val queue = Queue.getInstance(this@AutosubmitService)
-            val scheduledPosts = queue.posts.onlyScheduled()
-
-            if (scheduledPosts.isEmpty())
+            val ctx = this@AutosubmitService
+            
+            try
             {
-                throw Exception("No scheduled posts found")
-            }
-
-            val post = scheduledPosts.earliest()!!
-
-            val reddit = Autoreddit.getInstance(this@AutosubmitService).reddit
-
-            val signedIn = reddit.isLoggedIn
-            val notRatelimited = !reddit.isRestrictedByRatelimit
-            val networkAvailable = isNetworkAvailable()
-
-            val readyToPost = signedIn && notRatelimited && networkAvailable
-            
-            val sm = SettingsManager.getInstance(this@AutosubmitService)
-            
-            val debugDontPost = sm.debugDontPost
-
-            val imgurAccount = Autoimgur.getInstance(this@AutosubmitService).imgurAccount
-
-            val type = post.type
-            val loggedIntoImgur = imgurAccount.isLoggedIn
-            
-            if (type)
-            {
-                val oldUrl = post.content
-                post.content = UrlProcessor.process(post.content)
-                val newUrl = post.content
+                Log.log(ctx, "Autosubmit service has awoken")
                 
-                if (oldUrl != newUrl)
-                {
-                    log("Recognized url. Old: \"$oldUrl\"\nNew: \"$newUrl\"")
-                }
-            }
+                val queue = Queue.getInstance(ctx)
+                val scheduledPosts = queue.posts.onlyScheduled()
 
-            val isImageUrl = post.content.isImageUrl()
-
-            if (type && isImageUrl && loggedIntoImgur)
-            {
-                log("Uploading ${post.content} to imgur...")
-
-                val imgurImg: ImgurAccount.ImgurImage?
-                try
+                if (scheduledPosts.isEmpty())
                 {
-                    imgurImg = imgurAccount.uploadImage(post.content)
-                }
-                catch (error: Exception)
-                {
-                    // todo: handle this
-                    throw error
+                    throw Exception("001: No scheduled posts found")
                 }
 
-                log("Success. New link: ${imgurImg.link}")
-                post.content = imgurImg.link
-                
-                if (sm.wallpaperMode)
+                val post = scheduledPosts.earliest()!!
+
+                val reddit = Autoreddit.getInstance(ctx).reddit
+
+                val signedIn = reddit.isLoggedIn
+                val notRatelimited = !reddit.isRestrictedByRatelimit
+                val networkAvailable = isNetworkAvailable()
+
+                val readyToPost = signedIn && notRatelimited && networkAvailable
+
+                val sm = SettingsManager.getInstance(ctx)
+
+                val debugDontPost = sm.debugDontPost
+
+                val imgurAccount = Autoimgur.getInstance(ctx).imgurAccount
+
+                val type = post.type
+                val loggedIntoImgur = imgurAccount.isLoggedIn
+
+                if (type)
                 {
-                    val oldTitle = post.title
-                    post.title += " [${imgurImg.width}×${imgurImg.height}]"
+                    val oldUrl = post.content
+                    post.content = UrlProcessor.process(post.content)
+                    val newUrl = post.content
+
+                    if (oldUrl != newUrl)
+                    {
+                        Log.log(ctx, "Recognized url:\nOld: \"$oldUrl\"\nNew: \"$newUrl\"")
+                    }
+                }
+
+                val isImageUrl = post.content.isImageUrl()
+
+                if (type && isImageUrl && loggedIntoImgur)
+                {
+                    Log.log(ctx, "Uploading ${post.content} to imgur...")
+
+                    val imgurImg = imgurAccount.uploadImage(post.content)
+
+                    Log.log(ctx, "Success. New link: ${imgurImg.link}")
                     
-                    log("Changed post title from \"$oldTitle\" to \"${post.title}\" before posting")
-                }
-            }
-            else
-            {
-                if (!type)
-                {
-                    log("Not uploading to imgur because it's not a link")
-                }
+                    post.content = imgurImg.link
 
-                if (!isImageUrl)
-                {
-                    log("Not uploading to imgur because it's not an image url")
-                }
+                    if (sm.wallpaperMode)
+                    {
+                        val oldTitle = post.title
+                        post.title += " [${imgurImg.width}×${imgurImg.height}]"
 
-                if (!loggedIntoImgur)
-                {
-                    log("Not uploading to imgur because not logged into imgur")
-                }
-            }
-
-            if (readyToPost || debugDontPost)
-            {
-                val link: String?
-                try
-                {
-                    link = reddit.submit(post, debugDontPost, RESUBMIT, SEND_REPLIES)
-                }
-                catch (error: Exception)
-                {
-                    // todo: handle this
-                    throw error
-                }
-
-                log("Successfully submitted a post. Link: $link")
-
-                queue.deletePost(post.id) // todo: move to archive or something
-                log("Deleted the submitted post from the database")
-
-                val submittedAllPosts = queue.posts.isEmpty()
-                if (submittedAllPosts)
-                {
-                    SettingsManager.getInstance(this@AutosubmitService).autosubmitEnabled = false
-                    log("Ran out of posts and disabled autosubmit")
+                        Log.log(ctx, "Changed post title from \"$oldTitle\" to \"${post.title}\" before posting")
+                    }
                 }
                 else
                 {
-                    val ps = PostScheduler.getInstance(this@AutosubmitService)
-                    ps.scheduleServiceForNextPost()
-                    log("Scheduled service for the next post")
+                    if (!type)
+                    {
+                        Log.log(ctx, "Not uploading to imgur because it's not a link")
+                    }
+
+                    if (!isImageUrl)
+                    {
+                        Log.log(ctx, "Not uploading to imgur because it's not an image url")
+                    }
+
+                    if (!loggedIntoImgur)
+                    {
+                        Log.log(ctx, "Not uploading to imgur because not logged into imgur")
+                    }
                 }
 
-                val broadcastIntent = Intent(POST_SUBMITTED)
-                broadcastIntent.putExtra(EXTRA_SUBMITTED_ALL_POSTS, submittedAllPosts)
-                LocalBroadcastManager.getInstance(this@AutosubmitService)
-                        .sendBroadcast(broadcastIntent)
+                if (readyToPost || debugDontPost)
+                {
+                    val link: String?
+                    try
+                    {
+                        link = reddit.submit(post, debugDontPost, RESUBMIT, SEND_REPLIES)
+                    }
+                    catch (error: Exception)
+                    {
+                        // todo: handle this
+                        throw error
+                    }
+
+                    Log.log(ctx, "Successfully submitted a post. Link: $link")
+
+                    queue.deletePost(post.id) // todo: move to archive or something
+                    Log.log(ctx, "Deleted the submitted post from the database")
+
+                    val submittedAllPosts = queue.posts.isEmpty()
+                    if (submittedAllPosts)
+                    {
+                        SettingsManager.getInstance(ctx).autosubmitEnabled = false
+                        Log.log(ctx, "Ran out of posts and disabled autosubmit")
+                    }
+                    else
+                    {
+                        val ps = PostScheduler.getInstance(ctx)
+                        ps.scheduleServiceForNextPost()
+                        Log.log(ctx, "Scheduled service for the next post")
+                    }
+
+                    val broadcastIntent = Intent(POST_SUBMITTED)
+                    broadcastIntent.putExtra(EXTRA_SUBMITTED_ALL_POSTS, submittedAllPosts)
+                    LocalBroadcastManager.getInstance(ctx)
+                            .sendBroadcast(broadcastIntent)
+                }
+                else
+                {
+                    Log.log(ctx, constructErrorMessage(post, signedIn, notRatelimited, networkAvailable))
+                }
             }
-            else
+            catch (exception: Exception)
             {
-                log(constructErrorMessage(post, signedIn, notRatelimited, networkAvailable))
+                val errors = StringWriter()
+                exception.printStackTrace(PrintWriter(errors))
+                val stacktrace = errors.toString()
+                
+                val errorMsg = "AN EXCEPTION HAS OCCURED. STACKTRACE:\n$stacktrace"
+                Log.log(ctx, errorMsg)
+
+                val builder = NotificationCompat.Builder(ctx, NOTIFICATION_CHANNEL_ID) // todo: use different notification channel here
+                val notification = builder
+                        .setContentTitle("An exception has occurred")
+                        .setContentText("An exception has occurred while submitting")
+                        .setSmallIcon(R.drawable.snapwalls_icon)
+                        .build()
+
+                val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                nm.notify(ERROR_NOTIFICATION_ID, notification)
             }
+            finally
+            {
+                stopSelf(msg.arg1)
 
-            stopSelf(msg.arg1)
-
-            // BIG NOTE: stopSelf(msg.arg1) MUST BE CALLED BEFORE RETURNING
-            // DON'T RETURN WITHOUT CALLING IT
+                // BIG NOTE: stopSelf(msg.arg1) MUST BE CALLED BEFORE RETURNING
+                // DON'T RETURN WITHOUT CALLING IT
+            }
         }
     }
 
@@ -203,7 +222,7 @@ class AutosubmitService : Service()
         val notification = builder.setContentTitle(getString(R.string.app_name))
                 .setContentText("Submitting...").setSmallIcon(R.drawable.snapwalls_icon).build()
 
-        startForeground(NOTIFICATION_ID, notification)
+        startForeground(SERVICE_NOTIFICATION_ID, notification)
 
         val msg = mServiceHandler.obtainMessage()
         msg.arg1 = startId
@@ -223,7 +242,8 @@ class AutosubmitService : Service()
         private const val SEND_REPLIES = true
         private const val RESUBMIT = true
 
-        private const val NOTIFICATION_ID = 1 // must not be 0
+        private const val SERVICE_NOTIFICATION_ID = 1 // must not be 0
+        private const val ERROR_NOTIFICATION_ID = 2
         private const val NOTIFICATION_CHANNEL_NAME = "Main"
         private const val NOTIFICATION_CHANNEL_ID = NOTIFICATION_CHANNEL_NAME
 

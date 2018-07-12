@@ -12,6 +12,7 @@ object Log
     {
         val entry = "[${DateTime.now()}] $message\n"
         context.openFileOutput(FILE_NAME, Context.MODE_APPEND).write(entry.toByteArray())
+        // todo: log to debug console too
     }
     
     fun clear(context: Context)

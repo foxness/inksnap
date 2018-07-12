@@ -14,8 +14,6 @@ class LogFragment : Fragment()
     {
         val ctx = context!!
         
-        Log.log(ctx, "cre\nate!")
-        
         val v = inflater.inflate(R.layout.fragment_log, container, false)
         
         val log = v.findViewById<TextView>(R.id.log_textview)
