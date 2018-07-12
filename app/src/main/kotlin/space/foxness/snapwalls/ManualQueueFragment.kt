@@ -38,7 +38,7 @@ class ManualQueueFragment : QueueFragment()
     {
         if (on == settingsManager.autosubmitEnabled) // this should never happen
         {
-            throw RuntimeException("Can't change autosubmit to state it's already in")
+            throw Exception("Can't change autosubmit to state it's already in")
         }
 
         if (on)
