@@ -11,6 +11,7 @@ import android.view.*
 import android.webkit.URLUtil.isValidUrl
 import android.widget.Button
 import android.widget.EditText
+import android.widget.LinearLayout
 import android.widget.Switch
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
@@ -109,6 +110,11 @@ class PostFragment : Fragment()
                               savedInstanceState: Bundle?): View?
     {
         val v = inflater.inflate(R.layout.fragment_post, container, false)
+        
+        // LAYOUT -----------------------------
+        
+        val layout = v.findViewById<LinearLayout>(R.id.post_layout)
+        layout.requestFocus()
 
         // TITLE EDIT -------------------------
 
