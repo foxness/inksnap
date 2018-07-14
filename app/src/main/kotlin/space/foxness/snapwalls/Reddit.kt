@@ -208,7 +208,7 @@ class Reddit private constructor(private val callbacks: Callbacks)
     companion object : SingletonHolder<Reddit, Callbacks>(::Reddit)
     {
         private const val APP_CLIENT_ID = VariantVariables.REDDIT_CLIENT_ID
-        private const val APP_CLIENT_SECRET = "" // installed apps have no secrets
+        private const val APP_CLIENT_SECRET = VariantVariables.REDDIT_CLIENT_SECRET
         private const val APP_REDIRECT_URI = "http://localhost"
 
         private const val AUTORIZE_ENDPOINT = "https://www.reddit.com/api/v1/authorize.compact"

@@ -151,8 +151,8 @@ class ImgurAccount(private val callbacks: Callbacks)
 
     companion object
     {
-        private const val APP_CLIENT_ID = "f74e1f0ca375c60"
-        private const val APP_CLIENT_SECRET = "9d7910e7976b44b36feaafdd7e0cd3e74daad29a"
+        private const val APP_CLIENT_ID = VariantVariables.IMGUR_CLIENT_ID
+        private const val APP_CLIENT_SECRET = VariantVariables.IMGUR_CLIENT_SECRET
         private const val APP_REDIRECT_URI = "https://localhost/"
 
         private const val AUTH_RESPONSE_TYPE = "token"
