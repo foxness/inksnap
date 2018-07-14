@@ -59,10 +59,10 @@ class AutosubmitService : Service()
 
                 val imgurAccount = Autoimgur.getInstance(ctx).imgurAccount
 
-                val type = post.type
+                val isLinkPost = post.isLink
                 val loggedIntoImgur = imgurAccount.isLoggedIn
 
-                if (type)
+                if (isLinkPost)
                 {
                     val oldUrl = post.content
                     post.content = UrlProcessor.process(post.content)
@@ -76,7 +76,7 @@ class AutosubmitService : Service()
 
                 val isImageUrl = post.content.isImageUrl()
 
-                if (type && isImageUrl && loggedIntoImgur)
+                if (isLinkPost && isImageUrl && loggedIntoImgur)
                 {
                     log.log("Uploading ${post.content} to imgur...")
 
@@ -96,7 +96,7 @@ class AutosubmitService : Service()
                 }
                 else
                 {
-                    if (!type)
+                    if (!isLinkPost)
                     {
                         log.log("Not uploading to imgur because it's not a link")
                     }

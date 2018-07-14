@@ -22,7 +22,7 @@ class PostFragment : Fragment()
     private lateinit var titleEdit: EditText
     private lateinit var contentEdit: EditText
     private lateinit var subredditEdit: EditText
-    private lateinit var typeSwitch: Switch
+    private lateinit var linkSwitch: Switch
     private lateinit var intendedSubmitDateButton: Button
 
     private var intendedSubmitDate: DateTime? = null
@@ -131,10 +131,10 @@ class PostFragment : Fragment()
         subredditEdit = v.findViewById(R.id.post_subreddit)
         subredditEdit.setText(post.subreddit)
 
-        // TYPE SWITCH ------------------------
+        // LINK SWITCH ------------------------
 
-        typeSwitch = v.findViewById(R.id.post_type)
-        typeSwitch.isChecked = post.type
+        linkSwitch = v.findViewById(R.id.post_link)
+        linkSwitch.isChecked = post.isLink
 
         // INTENDED SUBMIT DATE BUTTON --------------
 
@@ -213,7 +213,7 @@ class PostFragment : Fragment()
 
             val notEmptyTitle = !post.title.isEmpty()
             val notEmptySubreddit = !post.subreddit.isEmpty()
-            val validContent = !(post.type && !isValidUrl(post.content))
+            val validContent = !(post.isLink && !isValidUrl(post.content))
 
             val isPostValid = notEmptyTitle && validContent && notEmptySubreddit
 
@@ -226,7 +226,7 @@ class PostFragment : Fragment()
             }
             else
             {
-                toast(constructDenyMessage(notEmptyTitle, post.content, notEmptySubreddit, post.type))
+                toast(constructDenyMessage(notEmptyTitle, post.content, notEmptySubreddit, post.isLink))
             }
         }
 
@@ -238,7 +238,7 @@ class PostFragment : Fragment()
         post.title = titleEdit.text.toString()
         post.content = contentEdit.text.toString()
         post.subreddit = subredditEdit.text.toString()
-        post.type = typeSwitch.isChecked
+        post.isLink = linkSwitch.isChecked
         post.intendedSubmitDate = intendedSubmitDate
     }
 
@@ -259,7 +259,7 @@ class PostFragment : Fragment()
         private fun constructDenyMessage(notEmptyTitle: Boolean,
                                          content: String,
                                          notEmptySubreddit: Boolean,
-                                         type: Boolean): String
+                                         isLink: Boolean): String
         {
             if (!notEmptyTitle)
             {
@@ -271,7 +271,7 @@ class PostFragment : Fragment()
                 return "Subreddit must not be empty"
             }
 
-            if (type && !isValidUrl(content))
+            if (isLink && !isValidUrl(content))
             {
                 return "Url must be valid"
             }

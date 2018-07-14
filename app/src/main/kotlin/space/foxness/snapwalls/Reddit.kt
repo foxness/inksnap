@@ -51,7 +51,7 @@ class Reddit private constructor(private val callbacks: Callbacks)
                sendReplies: Boolean = true): String
     {
         // todo: use postfragment's definition of bad post
-        if (post.title.isEmpty() || (post.type && post.content.isEmpty()) || post.subreddit.isEmpty())
+        if (post.title.isEmpty() || (post.isLink && post.content.isEmpty()) || post.subreddit.isEmpty())
         {
             throw Exception("Bad post")
         }
@@ -69,11 +69,11 @@ class Reddit private constructor(private val callbacks: Callbacks)
 
         val data = mapOf(
                 "api_type" to "json",
-                "kind" to if (post.type) "link" else "self",
+                "kind" to if (post.isLink) "link" else "self",
                 "resubmit" to if (resubmit) "true" else "false",
                 "sendreplies" to if (sendReplies) "true" else "false",
                 "sr" to post.subreddit,
-                (if (post.type) "url" else "text") to post.content,
+                (if (post.isLink) "url" else "text") to post.content,
                 "title" to post.title)
 
         val response = khttp.post(url = SUBMIT_ENDPOINT, headers = headers, data = data)

@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "086dd156c833ce67ba3020ae320d80da",
+    "identityHash": "842243172428246dc717de2ea282dfb6",
     "entities": [
       {
         "tableName": "queue",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `subreddit` TEXT NOT NULL, `content` TEXT NOT NULL, `intended_submit_date` INTEGER, `type` INTEGER NOT NULL, `scheduled` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `subreddit` TEXT NOT NULL, `content` TEXT NOT NULL, `intended_submit_date` INTEGER, `isLink` INTEGER NOT NULL, `scheduled` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -39,8 +39,8 @@
             "notNull": false
           },
           {
-            "fieldPath": "type",
-            "columnName": "type",
+            "fieldPath": "isLink",
+            "columnName": "isLink",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -63,7 +63,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"086dd156c833ce67ba3020ae320d80da\")"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"842243172428246dc717de2ea282dfb6\")"
     ]
   }
 }

@@ -391,7 +391,7 @@ abstract class QueueFragment : Fragment()
     {
         private val titleTextView: TextView
         private val contentTextView: TextView
-        private val typeCheckBox: CheckBox
+        private val linkCheckBox: CheckBox
 
         private lateinit var post: Post
 
@@ -404,7 +404,7 @@ abstract class QueueFragment : Fragment()
 
             titleTextView = itemView.findViewById(R.id.queue_post_title)
             contentTextView = itemView.findViewById(R.id.queue_post_content)
-            typeCheckBox = itemView.findViewById(R.id.queue_post_type)
+            linkCheckBox = itemView.findViewById(R.id.queue_post_link)
         }
 
         fun bindPost(p: Post)
@@ -412,7 +412,7 @@ abstract class QueueFragment : Fragment()
             post = p
             titleTextView.text = post.title
             contentTextView.text = post.content
-            typeCheckBox.isChecked = post.type
+            linkCheckBox.isChecked = post.isLink
         }
     }
 

@@ -21,7 +21,7 @@ class Post : Serializable
     @ColumnInfo(name = "intended_submit_date")
     var intendedSubmitDate: DateTime? = null
 
-    var type = false // true - link, false - self/text
+    var isLink = false
 
     var scheduled = false
 }
