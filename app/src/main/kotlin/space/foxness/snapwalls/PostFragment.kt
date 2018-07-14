@@ -160,9 +160,7 @@ class PostFragment : Fragment()
             val timeDialog = TimePickerDialog(activity!!,
                                               TimePickerDialog.OnTimeSetListener { view, hour, minute ->
                                                   newHour = hour
-                                                  newMinute =
-                                                          minute
-
+                                                  newMinute = minute
                                               },
                                               dialogDatetime.hourOfDay,
                                               dialogDatetime.minuteOfDay,

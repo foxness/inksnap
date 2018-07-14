@@ -4,32 +4,30 @@ import android.content.Context
 import org.joda.time.DateTime
 import java.io.File
 
-object Log
+class Log private constructor(private val context: Context)
 {
-    private const val FILE_NAME = "log"
-    
-    fun log(context: Context, message: String)
+    fun log(message: String)
     {
         val entry = "[${DateTime.now()}] $message\n"
         context.openFileOutput(FILE_NAME, Context.MODE_APPEND).write(entry.toByteArray())
         // todo: log to debug console too
     }
     
-    fun clear(context: Context)
+    fun clear()
     {
         context.openFileOutput(FILE_NAME, Context.MODE_PRIVATE).write("".toByteArray())
     }
     
-//    fun delete(context: Context)
+//    fun delete()
 //    {
 //        context.deleteFile(FILE_NAME)
 //    }
     
-    private fun exists(context: Context) = File(context.filesDir, FILE_NAME).exists()
+    private fun exists() = File(context.filesDir, FILE_NAME).exists()
     
-    fun get(context: Context): String
+    fun get(): String
     {
-        return if (exists(context))
+        return if (exists())
         {
             context.openFileInput(FILE_NAME).bufferedReader().readText()
         }
@@ -37,5 +35,10 @@ object Log
         {
             ""
         }
-    } 
+    }
+    
+    companion object : SingletonHolder<Log, Context>(::Log)
+    {
+        private const val FILE_NAME = "log"
+    }
 }

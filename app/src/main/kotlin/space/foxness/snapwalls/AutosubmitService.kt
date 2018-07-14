@@ -29,10 +29,11 @@ class AutosubmitService : Service()
         override fun handleMessage(msg: Message)
         {
             val ctx = this@AutosubmitService
+            val log = Log.getInstance(ctx)
             
             try
             {
-                Log.log(ctx, "Autosubmit service has awoken")
+                log.log("Autosubmit service has awoken")
                 
                 val queue = Queue.getInstance(ctx)
                 val scheduledPosts = queue.posts.onlyScheduled()
@@ -69,7 +70,7 @@ class AutosubmitService : Service()
 
                     if (oldUrl != newUrl)
                     {
-                        Log.log(ctx, "Recognized url:\nOld: \"$oldUrl\"\nNew: \"$newUrl\"")
+                        log.log("Recognized url:\nOld: \"$oldUrl\"\nNew: \"$newUrl\"")
                     }
                 }
 
@@ -77,11 +78,11 @@ class AutosubmitService : Service()
 
                 if (type && isImageUrl && loggedIntoImgur)
                 {
-                    Log.log(ctx, "Uploading ${post.content} to imgur...")
+                    log.log("Uploading ${post.content} to imgur...")
 
                     val imgurImg = imgurAccount.uploadImage(post.content)
 
-                    Log.log(ctx, "Success. New link: ${imgurImg.link}")
+                    log.log("Success. New link: ${imgurImg.link}")
                     
                     post.content = imgurImg.link
 
@@ -90,24 +91,24 @@ class AutosubmitService : Service()
                         val oldTitle = post.title
                         post.title += " [${imgurImg.width}×${imgurImg.height}]"
 
-                        Log.log(ctx, "Changed post title from \"$oldTitle\" to \"${post.title}\" before posting")
+                        log.log("Changed post title from \"$oldTitle\" to \"${post.title}\" before posting")
                     }
                 }
                 else
                 {
                     if (!type)
                     {
-                        Log.log(ctx, "Not uploading to imgur because it's not a link")
+                        log.log("Not uploading to imgur because it's not a link")
                     }
 
                     if (!isImageUrl)
                     {
-                        Log.log(ctx, "Not uploading to imgur because it's not an image url")
+                        log.log("Not uploading to imgur because it's not an image url")
                     }
 
                     if (!loggedIntoImgur)
                     {
-                        Log.log(ctx, "Not uploading to imgur because not logged into imgur")
+                        log.log("Not uploading to imgur because not logged into imgur")
                     }
                 }
 
@@ -124,22 +125,22 @@ class AutosubmitService : Service()
                         throw error
                     }
 
-                    Log.log(ctx, "Successfully submitted a post. Link: $link")
+                    log.log("Successfully submitted a post. Link: $link")
 
                     queue.deletePost(post.id) // todo: move to archive or something
-                    Log.log(ctx, "Deleted the submitted post from the database")
+                    log.log("Deleted the submitted post from the database")
 
                     val submittedAllPosts = queue.posts.isEmpty()
                     if (submittedAllPosts)
                     {
                         SettingsManager.getInstance(ctx).autosubmitEnabled = false
-                        Log.log(ctx, "Ran out of posts and disabled autosubmit")
+                        log.log("Ran out of posts and disabled autosubmit")
                     }
                     else
                     {
                         val ps = PostScheduler.getInstance(ctx)
                         ps.scheduleServiceForNextPost()
-                        Log.log(ctx, "Scheduled service for the next post")
+                        log.log("Scheduled service for the next post")
                     }
 
                     val broadcastIntent = Intent(POST_SUBMITTED)
@@ -149,7 +150,7 @@ class AutosubmitService : Service()
                 }
                 else
                 {
-                    Log.log(ctx, constructErrorMessage(post, signedIn, notRatelimited, networkAvailable))
+                    log.log(constructErrorMessage(post, signedIn, notRatelimited, networkAvailable))
                 }
             }
             catch (exception: Exception)
@@ -159,7 +160,7 @@ class AutosubmitService : Service()
                 val stacktrace = errors.toString()
                 
                 val errorMsg = "AN EXCEPTION HAS OCCURED. STACKTRACE:\n$stacktrace"
-                Log.log(ctx, errorMsg)
+                log.log(errorMsg)
 
                 val builder = NotificationCompat.Builder(ctx, NOTIFICATION_CHANNEL_ID) // todo: use different notification channel here
                 val notification = builder
