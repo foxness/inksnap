@@ -1,5 +1,8 @@
 package space.foxness.snapwalls
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
@@ -7,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import space.foxness.snapwalls.Util.toast
 
 class LogFragment : Fragment()
 {
@@ -22,6 +26,13 @@ class LogFragment : Fragment()
         clearButton.setOnClickListener { 
             log.clear()
             logView.text = ""
+        }
+        
+        val clipboard = context!!.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val logCopyButton = v.findViewById<Button>(R.id.log_copy)
+        logCopyButton.setOnClickListener {
+            clipboard.primaryClip = ClipData.newPlainText("Log", logView.text)
+            toast("Copied")
         }
         
         return v

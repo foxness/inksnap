@@ -17,4 +17,6 @@
     <string name="menu_imgur_login">Log into Imgur</string>
     <string name="intended_submit_date_label">Date and time</string>
     <string name="menu_log">Log</string>
+    <string name="log_clear">Clear</string>
+    <string name="log_copy">Copy</string>
 </resources>
