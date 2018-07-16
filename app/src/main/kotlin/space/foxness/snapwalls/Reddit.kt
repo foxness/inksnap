@@ -50,10 +50,9 @@ class Reddit private constructor(private val callbacks: Callbacks)
                resubmit: Boolean = true,
                sendReplies: Boolean = true): String
     {
-        // todo: use postfragment's definition of bad post
-        if (post.title.isEmpty() || (post.isLink && post.content.isEmpty()) || post.subreddit.isEmpty())
+        if (!post.isValid)
         {
-            throw Exception("Bad post")
+            throw Exception("Invalid post")
         }
 
         if (debugDontPost)

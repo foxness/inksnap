@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.text.format.DateFormat
 import android.view.*
-import android.webkit.URLUtil.isValidUrl
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
@@ -210,14 +209,8 @@ class PostFragment : Fragment()
         val saveButton = v.findViewById<Button>(R.id.save_button)
         saveButton.setOnClickListener {
             unloadViewsToPost()
-
-            val notEmptyTitle = !post.title.isEmpty()
-            val notEmptySubreddit = !post.subreddit.isEmpty()
-            val validContent = !(post.isLink && !isValidUrl(post.content))
-
-            val isPostValid = notEmptyTitle && validContent && notEmptySubreddit
-
-            if (isPostValid)
+            
+            if (post.isValid)
             {
                 val data = Intent()
                 data.putExtra(RESULT_POST, post)
@@ -226,7 +219,7 @@ class PostFragment : Fragment()
             }
             else
             {
-                toast(constructDenyMessage(notEmptyTitle, post.content, notEmptySubreddit, post.isLink))
+                toast(post.reasonWhyInvalid!!)
             }
         }
 
@@ -255,29 +248,6 @@ class PostFragment : Fragment()
                 "yyyy/MM/dd EEE HH:mm" // todo: make dependent on region/locale
         
         const val RESULT_CODE_DELETED = 5
-
-        private fun constructDenyMessage(notEmptyTitle: Boolean,
-                                         content: String,
-                                         notEmptySubreddit: Boolean,
-                                         isLink: Boolean): String
-        {
-            if (!notEmptyTitle)
-            {
-                return "Title must not be empty"
-            }
-
-            if (!notEmptySubreddit)
-            {
-                return "Subreddit must not be empty"
-            }
-
-            if (isLink && !isValidUrl(content))
-            {
-                return "Url must be valid"
-            }
-
-            throw Exception("Bad logic somewhere in SaveButton.Click") // this should never happen
-        }
 
         fun getPostFromResult(data: Intent) = data.getSerializableExtra(RESULT_POST) as? Post
 
