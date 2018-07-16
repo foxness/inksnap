@@ -390,10 +390,10 @@ abstract class QueueFragment : Fragment()
 
     protected inner class PostHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
     {
-        private val titleTextView: TextView
-        private val contentTextView: TextView
-        private val linkCheckBox: CheckBox
-        private val thumbImageView: ImageView
+        private val titleView: TextView
+        private val contentView: TextView
+        private val linkView: CheckBox
+        private val thumbnailView: ImageView
 
         private lateinit var post: Post
 
@@ -404,22 +404,22 @@ abstract class QueueFragment : Fragment()
                 startActivityForResult(i, REQUEST_CODE_EDIT_POST)
             }
 
-            titleTextView = itemView.findViewById(R.id.queue_post_title)
-            contentTextView = itemView.findViewById(R.id.queue_post_content)
-            linkCheckBox = itemView.findViewById(R.id.queue_post_link)
-            thumbImageView = itemView.findViewById(R.id.queue_post_thumbnail)
+            titleView = itemView.findViewById(R.id.queue_post_title)
+            contentView = itemView.findViewById(R.id.queue_post_content)
+            linkView = itemView.findViewById(R.id.queue_post_link)
+            thumbnailView = itemView.findViewById(R.id.queue_post_thumbnail)
         }
 
         fun bindPost(p: Post)
         {
             post = p
-            titleTextView.text = post.title
-            contentTextView.text = post.content
-            linkCheckBox.isChecked = post.isLink
+            titleView.text = post.title
+            contentView.text = post.content
+            linkView.isChecked = post.isLink
             
             val thumbId = if (post.isLink) R.drawable.link_thumb else R.drawable.self_thumb
             val thumb = resources.getDrawable(thumbId, context?.theme)
-            thumbImageView.setImageDrawable(thumb)
+            thumbnailView.setImageDrawable(thumb)
         }
     }
 
