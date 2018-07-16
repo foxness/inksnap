@@ -5,15 +5,24 @@
     xmlns:tools="http://schemas.android.com/tools"
     >
     
+    <ImageView
+        android:id="@+id/queue_post_thumbnail"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_margin="10dp"
+        android:contentDescription="@string/post_thumbnail"
+        android:layout_centerVertical="true"
+        android:src="@drawable/self_thumb"
+        />
+    
     <TextView
         android:id="@+id/queue_post_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_toStartOf="@id/queue_post_link"
+        android:layout_toEndOf="@id/queue_post_thumbnail"
         android:textStyle="bold"
         android:paddingTop="10dp"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp"
         tools:text="Post title"
         />
 
@@ -23,9 +32,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/queue_post_title"
         android:layout_toStartOf="@id/queue_post_link"
+        android:layout_toEndOf="@id/queue_post_thumbnail"
         android:paddingTop="4dp"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp"
         android:paddingBottom="10dp"
         tools:text="Post content"
         />
