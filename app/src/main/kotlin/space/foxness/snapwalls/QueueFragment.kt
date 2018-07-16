@@ -18,6 +18,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Button
 import android.widget.CheckBox
+import android.widget.ImageView
 import android.widget.TextView
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
@@ -392,6 +393,7 @@ abstract class QueueFragment : Fragment()
         private val titleTextView: TextView
         private val contentTextView: TextView
         private val linkCheckBox: CheckBox
+        private val thumbImageView: ImageView
 
         private lateinit var post: Post
 
@@ -405,6 +407,7 @@ abstract class QueueFragment : Fragment()
             titleTextView = itemView.findViewById(R.id.queue_post_title)
             contentTextView = itemView.findViewById(R.id.queue_post_content)
             linkCheckBox = itemView.findViewById(R.id.queue_post_link)
+            thumbImageView = itemView.findViewById(R.id.queue_post_thumbnail)
         }
 
         fun bindPost(p: Post)
@@ -413,6 +416,10 @@ abstract class QueueFragment : Fragment()
             titleTextView.text = post.title
             contentTextView.text = post.content
             linkCheckBox.isChecked = post.isLink
+            
+            val thumbId = if (post.isLink) R.drawable.link_thumb else R.drawable.self_thumb
+            val thumb = resources.getDrawable(thumbId, context?.theme)
+            thumbImageView.setImageDrawable(thumb)
         }
     }
 
