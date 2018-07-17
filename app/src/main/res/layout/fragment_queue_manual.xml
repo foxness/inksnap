@@ -12,13 +12,12 @@
         android:id="@+id/queue_recyclerview"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="85"
+        android:layout_weight="1"
         />
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="15"
+        android:layout_height="80dp"
         android:gravity="center"
         android:orientation="vertical"
         >
