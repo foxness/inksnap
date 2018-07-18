@@ -23,6 +23,7 @@ import android.widget.TextView
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 import org.joda.time.Duration
+import space.foxness.snapwalls.Util.log
 import space.foxness.snapwalls.Util.toast
 
 abstract class QueueFragment : Fragment()
@@ -54,6 +55,8 @@ abstract class QueueFragment : Fragment()
     protected abstract fun onPostEdited(editedPost: Post)
     
     protected abstract fun onPostDeleted(deletedPostId: Int)
+    
+    protected lateinit var thumbnailDownloader: ThumbnailDownloader<PostHolder>
 
     protected open fun onSubmitReceived()
     {
@@ -111,6 +114,18 @@ abstract class QueueFragment : Fragment()
         postScheduler = PostScheduler.getInstance(ctx)
         reddit = Autoreddit.getInstance(ctx).reddit
         imgurAccount = Autoimgur.getInstance(ctx).imgurAccount
+        
+        thumbnailDownloader = ThumbnailDownloader()
+        thumbnailDownloader.start()
+        thumbnailDownloader.getLooper()
+        log("Background thread started")
+    }
+
+    override fun onDestroy()
+    {
+        super.onDestroy()
+        thumbnailDownloader.quit()
+        log("Background thread stopped")
     }
 
     final override fun onCreateView(inflater: LayoutInflater,
@@ -237,13 +252,7 @@ abstract class QueueFragment : Fragment()
 
     protected fun testButton()
     {
-//        toast(VariantVariables.VARIANT_NAME)
-        
-        doAsync {
-            val url = UrlProcessor.process("https://alpha.wallhaven.cc/wallpaper/599344")
-            
-            uiThread { toast(url) }
-        }
+        toast(VariantVariables.VARIANT_NAME)
     }
 
     protected fun showImgurLoginDialog()
@@ -377,6 +386,15 @@ abstract class QueueFragment : Fragment()
         {
             val post = posts[position]
             holder.bindPost(post)
+            
+            if (post.isLink)
+            {
+                val thumbnailUrl = ServiceProcessor.tryGetThumbnailUrl(post.content)
+                if (thumbnailUrl != null)
+                {
+                    thumbnailDownloader.queueThumbnail(holder, thumbnailUrl)
+                }
+            }
         }
 
         fun setPosts(posts_: List<Post>)

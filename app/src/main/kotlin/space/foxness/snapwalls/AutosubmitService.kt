@@ -64,13 +64,12 @@ class AutosubmitService : Service()
 
                 if (isLinkPost)
                 {
-                    val oldUrl = post.content
-                    post.content = UrlProcessor.process(post.content)
-                    val newUrl = post.content
-
-                    if (oldUrl != newUrl)
+                    val directUrl = ServiceProcessor.tryGetDirectUrl(post.content)
+                    
+                    if (directUrl != null)
                     {
-                        log.log("Recognized url:\nOld: \"$oldUrl\"\nNew: \"$newUrl\"")
+                        log.log("Recognized url:\nOld: \"${post.content}\"\nNew: \"$directUrl\"")
+                        post.content = directUrl
                     }
                 }
 

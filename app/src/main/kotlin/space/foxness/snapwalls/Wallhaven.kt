@@ -4,7 +4,7 @@ object Wallhaven
 {
     private val wallhavenRegex = """https://alpha\.wallhaven\.cc/wallpaper/(?<id>\d+)/?""".toRegex()
     
-    fun tryGetDirectUrl(url: String): String
+    fun tryGetDirectUrl(url: String): String?
     {
         if (wallhavenRegex.matches(url))
         {
@@ -13,7 +13,7 @@ object Wallhaven
 
             if (response.statusCode != 200)
             {
-                return url
+                return null
             }
 
             val rawHtml = response.text
@@ -24,7 +24,7 @@ object Wallhaven
 
             if (startIndex == -1)
             {
-                return url
+                return null
             }
 
             startIndex += startTag.length
@@ -33,27 +33,26 @@ object Wallhaven
 
             if (endIndex == -1)
             {
-                return url
+                return null
             }
 
             val extractedUrl = rawHtml.substring(startIndex, endIndex)
-
             return "https:$extractedUrl"
         }
         else
         {
-            return url
+            return null
         }
     }
     
-    fun getThumbnailUrl(wallhavenUrl: String): String
+    fun tryGetThumbnailUrl(url: String): String?
     {
-        val id = getWallpaperId(wallhavenUrl)
+        val id = tryGetWallpaperId(url) ?: return null
         return "https://wallpapers.wallhaven.cc/wallpapers/thumb/small/th-$id.jpg"
     }
     
-    private fun getWallpaperId(wallhavenUrl: String): String
+    private fun tryGetWallpaperId(url: String): String?
     {
-        return wallhavenRegex.matchEntire(wallhavenUrl)!!.groups["id"]!!.value
+        return wallhavenRegex.matchEntire(url)?.groups?.get("id")?.value
     }
 }
