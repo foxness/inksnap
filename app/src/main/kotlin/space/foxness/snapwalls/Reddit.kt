@@ -8,7 +8,6 @@ import space.foxness.snapwalls.Util.randomState
 
 class Reddit private constructor(private val callbacks: Callbacks)
 {
-
     private var authState: String? = null
     private var authCode: String? = null
 

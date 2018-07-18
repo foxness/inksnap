@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.support.v4.app.Fragment
@@ -415,7 +416,12 @@ abstract class QueueFragment : Fragment()
             
             val thumbId = if (post.isLink) R.drawable.link_thumb else R.drawable.self_thumb
             val thumb = resources.getDrawable(thumbId, context?.theme)
-            thumbnailView.setImageDrawable(thumb)
+            setThumbnail(thumb)
+        }
+        
+        fun setThumbnail(thumbnail: Drawable)
+        {
+            thumbnailView.setImageDrawable(thumbnail)
         }
     }
 
