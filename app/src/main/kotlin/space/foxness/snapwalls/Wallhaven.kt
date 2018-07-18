@@ -53,6 +53,6 @@ object Wallhaven
     
     private fun tryGetWallpaperId(url: String): String?
     {
-        return wallhavenRegex.matchEntire(url)?.groups?.get("id")?.value
+        return wallhavenRegex.matchEntire(url)?.groups?.get(1)?.value
     }
 }
