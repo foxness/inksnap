@@ -2,7 +2,7 @@ package space.foxness.snapwalls
 
 object Wallhaven
 {
-    private val wallhavenRegex = """https://alpha\.wallhaven\.cc/wallpaper/\d+/?""".toRegex()
+    private val wallhavenRegex = """https://alpha\.wallhaven\.cc/wallpaper/(?<id>\d+)/?""".toRegex()
     
     fun tryGetDirectUrl(url: String): String
     {
@@ -44,5 +44,16 @@ object Wallhaven
         {
             return url
         }
+    }
+    
+    fun getThumbnailUrl(wallhavenUrl: String): String
+    {
+        val id = getWallpaperId(wallhavenUrl)
+        return "https://wallpapers.wallhaven.cc/wallpapers/thumb/small/th-$id.jpg"
+    }
+    
+    private fun getWallpaperId(wallhavenUrl: String): String
+    {
+        return wallhavenRegex.matchEntire(wallhavenUrl)!!.groups["id"]!!.value
     }
 }
