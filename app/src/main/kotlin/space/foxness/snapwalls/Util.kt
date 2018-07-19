@@ -11,6 +11,9 @@ import android.widget.Toast
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import org.joda.time.format.PeriodFormatterBuilder
+import java.io.ByteArrayOutputStream
+import java.net.HttpURLConnection
+import java.net.URL
 import java.util.*
 
 object Util
@@ -62,15 +65,50 @@ object Util
     
     fun downloadBytesFromUrl(url: String): ByteArray?
     {
-        val headers = mapOf("User-Agent" to USER_AGENT)
-        val response = khttp.get(url = url, headers = headers)
-
-        if (response.statusCode != 200)
+//        val headers = mapOf("User-Agent" to USER_AGENT)
+//        val response = khttp.get(url = url, headers = headers)
+//
+//        if (response.statusCode != 200)
+//        {
+//            return null
+//        }
+//
+//        return response.content
+        
+        val urlObj = URL(url)
+        val connection = urlObj.openConnection() as HttpURLConnection
+        
+        try
         {
-            return null
-        }
+            val out = ByteArrayOutputStream()
+            val inStream = connection.inputStream
+            
+            if (connection.responseCode != HttpURLConnection.HTTP_OK)
+            {
+                return null
+            }
+            
+            val buffer = ByteArray(1024)
 
-        return response.content
+            while (true)
+            {
+                val bytesRead = inStream.read(buffer)
+                
+                if (bytesRead == -1)
+                {
+                    break
+                }
+                
+                out.write(buffer, 0, bytesRead)
+            }
+            
+            out.close()
+            return out.toByteArray()
+        }
+        finally
+        {
+            connection.disconnect()
+        }
     }
     
     fun getBitmapFromBytes(bytes: ByteArray): Bitmap?
