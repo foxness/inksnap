@@ -1,6 +1,8 @@
 package space.foxness.snapwalls
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
@@ -57,4 +59,22 @@ object Util
     }
     
     fun timeLeftUntil(datetime: DateTime) = Duration(DateTime.now(), datetime)
+    
+    fun downloadBytesFromUrl(url: String): ByteArray?
+    {
+        val headers = mapOf("User-Agent" to USER_AGENT)
+        val response = khttp.get(url = url, headers = headers)
+
+        if (response.statusCode != 200)
+        {
+            return null
+        }
+
+        return response.content
+    }
+    
+    fun getBitmapFromBytes(bytes: ByteArray): Bitmap?
+    {
+        return BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+    }
 }

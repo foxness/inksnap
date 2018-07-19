@@ -6,9 +6,12 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.os.Handler
 import android.support.v4.app.Fragment
 import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.widget.DividerItemDecoration
@@ -23,8 +26,8 @@ import android.widget.TextView
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 import org.joda.time.Duration
-import space.foxness.snapwalls.Util.log
 import space.foxness.snapwalls.Util.toast
+import java.util.*
 
 abstract class QueueFragment : Fragment()
 {
@@ -115,17 +118,35 @@ abstract class QueueFragment : Fragment()
         reddit = Autoreddit.getInstance(ctx).reddit
         imgurAccount = Autoimgur.getInstance(ctx).imgurAccount
         
-        thumbnailDownloader = ThumbnailDownloader()
+        val responseHandler = Handler()
+        thumbnailDownloader = ThumbnailDownloader(responseHandler)
+        
+        val tdl = object : ThumbnailDownloader.ThumbnailDownloadListener<PostHolder>
+        {
+            override fun onThumbnailDownloaded(target: PostHolder, thumbnail: Bitmap)
+            {
+                toast("thumbnail downloaded ${Random().nextInt()}")
+                
+                val thumbnailDrawable = BitmapDrawable(resources, thumbnail)
+                target.setThumbnail(thumbnailDrawable)
+            }
+        }
+        
+        thumbnailDownloader.setThumbnailDownloadListener(tdl)
         thumbnailDownloader.start()
         thumbnailDownloader.getLooper()
-        log("Background thread started")
     }
 
     override fun onDestroy()
     {
         super.onDestroy()
         thumbnailDownloader.quit()
-        log("Background thread stopped")
+    }
+
+    override fun onDestroyView()
+    {
+        super.onDestroyView()
+        thumbnailDownloader.clearQueue()
     }
 
     final override fun onCreateView(inflater: LayoutInflater,
@@ -390,10 +411,19 @@ abstract class QueueFragment : Fragment()
             if (post.isLink)
             {
                 val thumbnailUrl = ServiceProcessor.tryGetThumbnailUrl(post.content)
-                if (thumbnailUrl != null)
+                
+                if (thumbnailUrl == null)
+                {
+                    thumbnailDownloader.unqueueThumbnail(holder)
+                }
+                else
                 {
                     thumbnailDownloader.queueThumbnail(holder, thumbnailUrl)
                 }
+            }
+            else
+            {
+                thumbnailDownloader.unqueueThumbnail(holder)
             }
         }
 
