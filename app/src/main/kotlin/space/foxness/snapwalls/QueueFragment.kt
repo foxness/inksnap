@@ -2,10 +2,7 @@ package space.foxness.snapwalls
 
 import android.app.Activity
 import android.app.Dialog
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
@@ -217,8 +214,21 @@ abstract class QueueFragment : Fragment()
                 openLog()
                 true
             }
+            R.id.menu_queue_extract ->
+            {
+                extractPosts()
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+    
+    protected fun extractPosts()
+    {
+        val result = queue.posts.joinToString(separator = "") { "${it.title}\n${it.content}\n\n" }.trimEnd()
+        val clipboard = context!!.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        clipboard.primaryClip = ClipData.newPlainText("Posts", result)
+        toast("Copied")
     }
     
     protected fun openLog()

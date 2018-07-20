@@ -38,4 +38,9 @@
         android:title="@string/menu_log"
         />
     
+    <item
+        android:id="@+id/menu_queue_extract"
+        android:title="@string/menu_extract"
+        />
+    
 </menu>

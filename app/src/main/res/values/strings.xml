@@ -20,4 +20,5 @@
     <string name="log_clear">Clear</string>
     <string name="log_copy">Copy</string>
     <string name="post_thumbnail">Post thumbnail</string>
+    <string name="menu_extract">Extract</string>
 </resources>
