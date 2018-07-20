@@ -24,7 +24,6 @@ import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 import org.joda.time.Duration
 import space.foxness.snapwalls.Util.toast
-import java.util.*
 
 abstract class QueueFragment : Fragment()
 {
@@ -39,6 +38,7 @@ abstract class QueueFragment : Fragment()
     protected lateinit var reddit: Reddit
     protected lateinit var imgurAccount: ImgurAccount
     protected lateinit var postScheduler: PostScheduler
+    protected lateinit var thumbnailCache: ThumbnailCache
 
     private var redditTokenFetching = false
 
@@ -114,6 +114,7 @@ abstract class QueueFragment : Fragment()
         postScheduler = PostScheduler.getInstance(ctx)
         reddit = Autoreddit.getInstance(ctx).reddit
         imgurAccount = Autoimgur.getInstance(ctx).imgurAccount
+        thumbnailCache = ThumbnailCache.getInstance(ctx)
         
         val responseHandler = Handler()
         thumbnailDownloader = ThumbnailDownloader(responseHandler)
@@ -122,10 +123,15 @@ abstract class QueueFragment : Fragment()
         {
             override fun onThumbnailDownloaded(target: PostHolder, thumbnail: Bitmap)
             {
-                toast("thumbnail downloaded ${Random().nextInt()}")
+                if (thumbnailCache.contains(target.getPostId()))
+                {
+                    throw Exception("How did this even happen?")
+                }
                 
-                val thumbnailDrawable = BitmapDrawable(resources, thumbnail)
-                target.setThumbnail(thumbnailDrawable)
+                thumbnailCache.add(target.getPostId(), thumbnail)
+                target.setThumbnail(thumbnail)
+
+                toast("used downloaded thumbnail")
             }
         }
         
@@ -395,6 +401,7 @@ abstract class QueueFragment : Fragment()
                     PostFragment.RESULT_CODE_DELETED ->
                     {
                         val deletedPostId = PostFragment.getDeletedPostIdFromResult(data!!)
+                        thumbnailCache.remove(deletedPostId)
                         onPostDeleted(deletedPostId)
                     }
                 }
@@ -420,15 +427,24 @@ abstract class QueueFragment : Fragment()
             
             if (post.isLink)
             {
-                val thumbnailUrl = ServiceProcessor.tryGetThumbnailUrl(post.content)
-                
-                if (thumbnailUrl == null)
+                val cachedThumbnail = thumbnailCache.get(post.id)
+                if (cachedThumbnail == null)
                 {
-                    thumbnailDownloader.unqueueThumbnail(holder)
+                    val thumbnailUrl = ServiceProcessor.tryGetThumbnailUrl(post.content)
+
+                    if (thumbnailUrl == null)
+                    {
+                        thumbnailDownloader.unqueueThumbnail(holder)
+                    }
+                    else
+                    {
+                        thumbnailDownloader.queueThumbnail(holder, thumbnailUrl)
+                    }
                 }
                 else
                 {
-                    thumbnailDownloader.queueThumbnail(holder, thumbnailUrl)
+                    holder.setThumbnail(cachedThumbnail)
+                    toast("used cached thumbnail")
                 }
             }
             else
@@ -473,8 +489,15 @@ abstract class QueueFragment : Fragment()
             contentView.text = post.content
             
             val thumbId = if (post.isLink) R.drawable.link_thumb else R.drawable.self_thumb
-            val thumb = resources.getDrawable(thumbId, context?.theme)
-            setThumbnail(thumb)
+            val thumbnail = resources.getDrawable(thumbId, context?.theme)
+            setThumbnail(thumbnail)
+        }
+        
+        fun getPostId() = post.id
+        
+        fun setThumbnail(thumbnail: Bitmap)
+        {
+            setThumbnail(BitmapDrawable(resources, thumbnail))
         }
         
         fun setThumbnail(thumbnail: Drawable)
