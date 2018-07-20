@@ -231,7 +231,7 @@ class PeriodicQueueFragment : QueueFragment()
         queue.updatePost(editedPost)
     }
 
-    override fun onPostDeleted(deletedPostId: Int)
+    override fun onPostDeleted(deletedPostId: String)
     {
         if (settingsManager.autosubmitEnabled)
         {

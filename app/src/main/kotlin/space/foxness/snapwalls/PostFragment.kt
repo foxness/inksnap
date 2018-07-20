@@ -44,7 +44,7 @@ class PostFragment : Fragment()
         if (args.getBoolean(ARG_NEW_POST))
         {
             newPost = true
-            post = Post()
+            post = Post.newInstance()
             post.title = "testy" // todo: remove on production
             post.content = "besty" // same ^
             post.subreddit = "test" // same ^
@@ -251,7 +251,7 @@ class PostFragment : Fragment()
 
         fun getPostFromResult(data: Intent) = data.getSerializableExtra(RESULT_POST) as? Post
 
-        fun getDeletedPostIdFromResult(data: Intent) = data.getIntExtra(RESULT_DELETED_POST_ID, -1)
+        fun getDeletedPostIdFromResult(data: Intent) = data.getStringExtra(RESULT_DELETED_POST_ID)!!
 
         fun newInstance(post: Post?, allowIntendedSubmitDateEditing: Boolean): PostFragment
         {

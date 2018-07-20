@@ -202,7 +202,7 @@ class ManualQueueFragment : QueueFragment()
         }
     }
 
-    override fun onPostDeleted(deletedPostId: Int)
+    override fun onPostDeleted(deletedPostId: String)
     {
         if (settingsManager.autosubmitEnabled)
         {

@@ -54,7 +54,7 @@ abstract class QueueFragment : Fragment()
     
     protected abstract fun onPostEdited(editedPost: Post)
     
-    protected abstract fun onPostDeleted(deletedPostId: Int)
+    protected abstract fun onPostDeleted(deletedPostId: String)
     
     protected lateinit var thumbnailDownloader: ThumbnailDownloader<PostHolder>
 

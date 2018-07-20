@@ -6,12 +6,13 @@ import android.arch.persistence.room.PrimaryKey
 import android.webkit.URLUtil.isValidUrl
 import org.joda.time.DateTime
 import java.io.Serializable
+import java.util.*
 
 @Entity(tableName = "queue")
 class Post : Serializable
 {
-    @PrimaryKey(autoGenerate = true)
-    var id = 0
+    @PrimaryKey
+    var id = ""
 
     var title = ""
 
@@ -52,6 +53,16 @@ class Post : Serializable
         else
         {
             null
+        }
+    }
+    
+    companion object
+    {
+        fun newInstance(): Post
+        {
+            val p = Post()
+            p.id = UUID.randomUUID().toString()
+            return p
         }
     }
 }
