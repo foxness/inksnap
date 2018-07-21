@@ -444,7 +444,6 @@ abstract class QueueFragment : Fragment()
                 else
                 {
                     holder.setThumbnail(cachedThumbnail)
-                    toast("used cached thumbnail")
                 }
             }
             else

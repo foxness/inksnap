@@ -10,9 +10,12 @@ import android.os.*
 import android.support.annotation.RequiresApi
 import android.support.v4.app.NotificationCompat
 import android.support.v4.content.LocalBroadcastManager
+import org.joda.time.DateTime
+import org.joda.time.Duration
 import space.foxness.snapwalls.Queue.Companion.earliest
 import space.foxness.snapwalls.Queue.Companion.onlyScheduled
 import space.foxness.snapwalls.Util.isImageUrl
+import space.foxness.snapwalls.Util.toNice
 import java.io.PrintWriter
 import java.io.StringWriter
 
@@ -123,8 +126,14 @@ class AutosubmitService : Service()
                         // todo: handle this
                         throw error
                     }
+                    
+                    val realSubmittedTime = DateTime.now()
 
                     log.log("Successfully submitted a post. Link: $link")
+                    
+                    val difference = Duration(post.intendedSubmitDate, realSubmittedTime)
+                    
+                    log.log("Real vs intended time difference: ${difference.toNice()}")
 
                     queue.deletePost(post.id) // todo: move to archive or something
                     log.log("Deleted the submitted post from the database")
