@@ -53,7 +53,14 @@ class ThumbnailCache private constructor(private val context: Context)
     fun remove(thumbnailId: String)
     {
         val file = getThumbnailFile(thumbnailId)
-        file.delete()
+        if (file.exists())
+        {
+            file.delete()
+        }
+        else
+        {
+            throw Exception("Thumbnail doesn't exist")
+        }
     }
     
     private fun getThumbnailFile(thumbnailId: String): File

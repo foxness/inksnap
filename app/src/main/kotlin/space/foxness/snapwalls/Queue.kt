@@ -2,11 +2,12 @@ package space.foxness.snapwalls
 
 import android.content.Context
 import space.foxness.snapwalls.database.AppDatabase
-import space.foxness.snapwalls.database.PostDao
 
 class Queue private constructor(context: Context)
 {
-    private val dbDao: PostDao = AppDatabase.getInstance(context).postDao()
+    private val dbDao = AppDatabase.getInstance(context).postDao()
+    
+    private val thumbnailCache = ThumbnailCache.getInstance(context)
 
     val posts: List<Post> get() = dbDao.posts
 
@@ -16,7 +17,15 @@ class Queue private constructor(context: Context)
 
     fun updatePost(post: Post) = dbDao.updatePost(post)
 
-    fun deletePost(id: String) = dbDao.deletePostbyId(id)
+    fun deletePost(id: String)
+    {
+        dbDao.deletePostbyId(id)
+        
+        if (thumbnailCache.contains(id))
+        {
+            thumbnailCache.remove(id)
+        }
+    }
 
     companion object : SingletonHolder<Queue, Context>(::Queue)
     {

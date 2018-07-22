@@ -405,7 +405,6 @@ abstract class QueueFragment : Fragment()
                     PostFragment.RESULT_CODE_DELETED ->
                     {
                         val deletedPostId = PostFragment.getDeletedPostIdFromResult(data!!)
-                        thumbnailCache.remove(deletedPostId)
                         onPostDeleted(deletedPostId)
                     }
                 }
