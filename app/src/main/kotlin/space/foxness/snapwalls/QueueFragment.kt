@@ -126,6 +126,10 @@ abstract class QueueFragment : Fragment()
                 if (thumbnailCache.contains(target.getPostId()))
                 {
                     throw Exception("How did this even happen?")
+                    // todo: have each thumbnail download request contain the post id
+                    // to compare it here
+                    
+                    // todo: also add url that corresponds to the thumbnail
                 }
                 
                 thumbnailCache.add(target.getPostId(), thumbnail)
@@ -425,30 +429,27 @@ abstract class QueueFragment : Fragment()
             val post = posts[position]
             holder.bindPost(post)
             
+            var thumbnailUrl: String? = null
             if (post.isLink)
             {
                 val cachedThumbnail = thumbnailCache.get(post.id)
                 if (cachedThumbnail == null)
                 {
-                    val thumbnailUrl = ServiceProcessor.tryGetThumbnailUrl(post.content)
-
-                    if (thumbnailUrl == null)
-                    {
-                        thumbnailDownloader.unqueueThumbnail(holder)
-                    }
-                    else
-                    {
-                        thumbnailDownloader.queueThumbnail(holder, thumbnailUrl)
-                    }
+                    thumbnailUrl = ServiceProcessor.tryGetThumbnailUrl(post.content)
                 }
                 else
                 {
                     holder.setThumbnail(cachedThumbnail)
                 }
             }
-            else
+            
+            if (thumbnailUrl == null)
             {
                 thumbnailDownloader.unqueueThumbnail(holder)
+            }
+            else
+            {
+                thumbnailDownloader.queueThumbnail(holder, thumbnailUrl)
             }
         }
 
