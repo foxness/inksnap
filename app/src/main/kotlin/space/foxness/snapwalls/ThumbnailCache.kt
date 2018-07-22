@@ -9,6 +9,15 @@ import java.io.FileOutputStream
 
 class ThumbnailCache private constructor(private val context: Context)
 {
+    init
+    {
+        val thumbnailDirectory = getThumbnailDirectory()
+        if (!thumbnailDirectory.exists())
+        {
+            thumbnailDirectory.mkdir()
+        }
+    }
+    
     fun add(thumbnailId: String, thumbnail: Bitmap)
     {
         val file = getThumbnailFile(thumbnailId)
@@ -16,12 +25,6 @@ class ThumbnailCache private constructor(private val context: Context)
         if (file.exists())
         {
             throw Exception("Thumbnail already in cache")
-        }
-        
-        val thumbnailDirectory = getThumbnailDirectory()
-        if (!thumbnailDirectory.exists())
-        {
-            thumbnailDirectory.mkdir()
         }
         
         file.createNewFile()
