@@ -8,6 +8,8 @@ import android.os.Build
 import android.support.annotation.RequiresApi
 import android.support.v4.app.NotificationCompat
 
+// todo: different notification ids for different posts
+
 class NotificationFactory private constructor(private val context: Context)
 {
     private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -48,6 +50,18 @@ class NotificationFactory private constructor(private val context: Context)
                 .build()
         
         notificationManager.notify(ERROR_NOTIFICATION_ID, notification)
+    }
+    
+    // todo: open post link upon clicking on the notification
+    fun showSuccessNotification(postTitle: String)
+    {
+        val notification = getBuilder(SUCCESS_CHANNEL_ID)
+                .setContentTitle("Your post has been submitted")
+                .setContentText("Your post \"$postTitle\" has succesfully been submitted")
+                .setSmallIcon(R.drawable.snapwalls_icon)
+                .build()
+
+        notificationManager.notify(SUCCESS_NOTIFICATION_ID, notification)
     }
     
     companion object : SingletonHolder<NotificationFactory, Context>(::NotificationFactory)

@@ -128,6 +128,8 @@ class AutosubmitService : Service()
                     
                     val realSubmittedTime = DateTime.now()
 
+                    notificationFactory.showSuccessNotification(post.title)
+                    
                     log.log("Successfully submitted a post. Link: $link")
                     
                     val difference = Duration(post.intendedSubmitDate, realSubmittedTime)
