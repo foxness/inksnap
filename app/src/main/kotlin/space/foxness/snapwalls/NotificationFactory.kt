@@ -30,42 +30,53 @@ class NotificationFactory private constructor(private val context: Context)
         }
     }
     
-    private fun getBuilder(channelId: String) = NotificationCompat.Builder(context, channelId)
+    private fun buildNotification(channelId: String, title: String, text: String): Notification
+    {
+        return NotificationCompat.Builder(context, channelId)
+                .setContentTitle(title)
+                .setContentText(text)
+                .setSmallIcon(ICON)
+                .build()
+    }
+    
+    private fun notify(notificationId: Int, notification: Notification)
+    {
+        notificationManager.notify(notificationId, notification)
+    }
     
     fun getServiceNotification(): Notification
     {
-        return getBuilder(SERVICE_CHANNEL_ID)
-                .setContentTitle("Submitting...")
-                .setContentText("Your post is being submitted...")
-                .setSmallIcon(R.drawable.snapwalls_icon)
-                .build()
+        return buildNotification(
+                SERVICE_CHANNEL_ID,
+                "Submitting...",
+                "Your post is being submitted...")
     }
     
     fun showErrorNotification()
     {
-        val notification = getBuilder(ERROR_CHANNEL_ID)
-                .setContentTitle("An error has occurred")
-                .setContentText("An error has occurred while submitting")
-                .setSmallIcon(R.drawable.snapwalls_icon)
-                .build()
+        val notification = buildNotification(
+                ERROR_CHANNEL_ID,
+                "An error has occurred",
+                "An error has occurred while submitting")
         
-        notificationManager.notify(ERROR_NOTIFICATION_ID, notification)
+        notify(ERROR_NOTIFICATION_ID, notification)
     }
     
     // todo: open post link upon clicking on the notification
     fun showSuccessNotification(postTitle: String)
     {
-        val notification = getBuilder(SUCCESS_CHANNEL_ID)
-                .setContentTitle("Your post has been submitted")
-                .setContentText("Your post \"$postTitle\" has succesfully been submitted")
-                .setSmallIcon(R.drawable.snapwalls_icon)
-                .build()
+        val notification = buildNotification(
+                SUCCESS_CHANNEL_ID,
+                "Your post has been submitted",
+                "Your post \"$postTitle\" has succesfully been submitted")
 
-        notificationManager.notify(SUCCESS_NOTIFICATION_ID, notification)
+        notify(SUCCESS_NOTIFICATION_ID, notification)
     }
     
     companion object : SingletonHolder<NotificationFactory, Context>(::NotificationFactory)
     {
+        private const val ICON = R.drawable.snapwalls_icon
+        
         const val SERVICE_NOTIFICATION_ID = 1 // must not be 0
         private const val ERROR_NOTIFICATION_ID = 2
         private const val SUCCESS_NOTIFICATION_ID = 3
