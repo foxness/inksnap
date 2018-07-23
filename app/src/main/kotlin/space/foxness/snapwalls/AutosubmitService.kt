@@ -1,12 +1,10 @@
 package space.foxness.snapwalls
 
-import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
 import android.os.*
-import android.support.v4.app.NotificationCompat
 import android.support.v4.content.LocalBroadcastManager
 import org.joda.time.DateTime
 import org.joda.time.Duration
@@ -170,16 +168,8 @@ class AutosubmitService : Service()
                 
                 val errorMsg = "AN EXCEPTION HAS OCCURED. STACKTRACE:\n$stacktrace"
                 log.log(errorMsg)
-
-                val builder = NotificationCompat.Builder(ctx, NOTIFICATION_CHANNEL_ID) // todo: use different notification channel here
-                val notification = builder
-                        .setContentTitle("An exception has occurred")
-                        .setContentText("An exception has occurred while submitting")
-                        .setSmallIcon(R.drawable.snapwalls_icon)
-                        .build()
-
-                val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                nm.notify(ERROR_NOTIFICATION_ID, notification)
+                
+                notificationFactory.showErrorNotification()
             }
             finally
             {
@@ -233,10 +223,6 @@ class AutosubmitService : Service()
 
         private const val SEND_REPLIES = true
         private const val RESUBMIT = true
-
-        private const val ERROR_NOTIFICATION_ID = 2
-        private const val NOTIFICATION_CHANNEL_NAME = "Main"
-        private const val NOTIFICATION_CHANNEL_ID = NOTIFICATION_CHANNEL_NAME
 
         fun newIntent(context: Context) = Intent(context, AutosubmitService::class.java)
 

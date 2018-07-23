@@ -39,6 +39,17 @@ class NotificationFactory private constructor(private val context: Context)
                 .build()
     }
     
+    fun showErrorNotification()
+    {
+        val notification = getBuilder(ERROR_CHANNEL_ID)
+                .setContentTitle("An error has occurred")
+                .setContentText("An error has occurred while submitting")
+                .setSmallIcon(R.drawable.snapwalls_icon)
+                .build()
+        
+        notificationManager.notify(ERROR_NOTIFICATION_ID, notification)
+    }
+    
     companion object : SingletonHolder<NotificationFactory, Context>(::NotificationFactory)
     {
         const val SERVICE_NOTIFICATION_ID = 1 // must not be 0
