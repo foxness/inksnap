@@ -6,7 +6,9 @@ import android.graphics.BitmapFactory
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import android.webkit.CookieManager
 import android.webkit.URLUtil.isValidUrl
+import android.webkit.WebView
 import android.widget.Toast
 import org.joda.time.DateTime
 import org.joda.time.Duration
@@ -15,6 +17,7 @@ import java.io.ByteArrayOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.*
+
 
 object Util
 {
@@ -114,5 +117,13 @@ object Util
     fun getBitmapFromBytes(bytes: ByteArray): Bitmap?
     {
         return BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+    }
+    
+    fun clearCookiesAndCache(webView: WebView)
+    {
+        val cm = CookieManager.getInstance()
+        cm.removeAllCookies(null)
+        cm.flush()
+        webView.clearCache(true)
     }
 }

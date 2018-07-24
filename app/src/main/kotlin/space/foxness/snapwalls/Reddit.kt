@@ -43,6 +43,20 @@ class Reddit private constructor(private val callbacks: Callbacks)
         fun onNewRefreshToken()
         fun onNewLastSubmissionDate()
     }
+    
+    fun logout()
+    {
+        // todo: properly logout by making a request to make the these tokens invalid
+        
+        accessToken = null
+        refreshToken = null
+        accessTokenExpirationDate = null
+        lastSubmissionDate = null
+        
+        callbacks.onNewAccessToken()
+        callbacks.onNewRefreshToken()
+        callbacks.onNewLastSubmissionDate()
+    }
 
     fun submit(post: Post,
                debugDontPost: Boolean = false,

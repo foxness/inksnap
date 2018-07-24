@@ -175,8 +175,11 @@ abstract class QueueFragment : Fragment()
         val redditLoginMenuItem = menu!!.findItem(R.id.menu_queue_reddit_login)!!
         val imgurLoginMenuItem = menu.findItem(R.id.menu_queue_imgur_login)!!
 
-        redditLoginMenuItem.isEnabled = !redditTokenFetching && !reddit.isLoggedIn
+        redditLoginMenuItem.isEnabled = !redditTokenFetching
         imgurLoginMenuItem.isEnabled = !imgurAccount.isLoggedIn
+        
+        // todo: extract hardcoded strings
+        redditLoginMenuItem.title = if (reddit.isLoggedIn) "Log out of Reddit" else "Log into Reddit"
     }
 
     protected fun updatePostList()
@@ -188,6 +191,26 @@ abstract class QueueFragment : Fragment()
     {
         val i = PostActivity.newIntent(context!!, null, allowIntendedSubmitDateEditing)
         startActivityForResult(i, REQUEST_CODE_NEW_POST)
+    }
+    
+    protected fun logoutReddit()
+    {
+        toggleAutosubmit(false)
+        reddit.logout()
+        activity!!.invalidateOptionsMenu()
+        toast("Logged out of Reddit")
+    }
+    
+    protected fun toggleRedditAccount()
+    {
+        if (reddit.isLoggedIn)
+        {
+            logoutReddit()
+        }
+        else
+        {
+            showRedditLoginDialog()
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean
@@ -206,7 +229,7 @@ abstract class QueueFragment : Fragment()
             }
             R.id.menu_queue_reddit_login ->
             {
-                showRedditLoginDialog()
+                toggleRedditAccount()
                 true
             }
             R.id.menu_queue_imgur_login ->
@@ -255,6 +278,11 @@ abstract class QueueFragment : Fragment()
         authDialog.setOnCancelListener { toast("Fail") }
 
         val authWebview = authDialog.findViewById<WebView>(R.id.auth_webview)
+        
+        authDialog.setOnDismissListener { 
+            Util.clearCookiesAndCache(authWebview)
+        }
+        
         authWebview.webViewClient = object : WebViewClient()
         {
             override fun onPageFinished(view: WebView, url: String)
@@ -301,12 +329,14 @@ abstract class QueueFragment : Fragment()
         val authDialog = Dialog(context!!)
         authDialog.setContentView(R.layout.dialog_auth)
 
+        val authWebview = authDialog.findViewById<WebView>(R.id.auth_webview)
+
         authDialog.setOnDismissListener {
             activity!!.invalidateOptionsMenu()
+            Util.clearCookiesAndCache(authWebview)
             toast(if (imgurAccount.isLoggedIn) "Success" else "Fail")
         }
-
-        val authWebview = authDialog.findViewById<WebView>(R.id.auth_webview)
+        
         authWebview.webViewClient = object : WebViewClient()
         {
             override fun onPageFinished(view: WebView, url: String)
