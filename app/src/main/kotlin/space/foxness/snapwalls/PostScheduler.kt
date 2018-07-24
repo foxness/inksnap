@@ -127,6 +127,12 @@ class PostScheduler private constructor(context: Context)
         val pi = getPendingIntent()!!
 
         val delay = timeLeftUntil(datetime)
+        
+        if (delay < Duration.ZERO)
+        {
+            throw Exception("Can't schedule the service to a past date")
+        }
+        
         val datetimeElapsed = Duration(SystemClock.elapsedRealtime()) + delay
 
         alarmManager.setExact(type, datetimeElapsed.millis, pi)
@@ -139,7 +145,7 @@ class PostScheduler private constructor(context: Context)
         pi.cancel()
     }
 
-    private fun isServiceScheduled() = getPendingIntent(PendingIntent.FLAG_NO_CREATE) != null
+    fun isServiceScheduled() = getPendingIntent(PendingIntent.FLAG_NO_CREATE) != null
 
     private fun getPendingIntent(flags: Int = 0): PendingIntent?
     {

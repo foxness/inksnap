@@ -6,6 +6,7 @@
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
     <application
         android:allowBackup="true"
@@ -25,11 +26,6 @@
             
         </activity>
         
-        <!--<activity-->
-            <!--android:name=".PostPagerActivity"-->
-            <!--android:parentActivityName=".QueueActivity"-->
-            <!--/>-->
-        
         <activity
             android:name=".PostActivity"
             android:parentActivityName=".QueueActivity"
@@ -39,9 +35,18 @@
             android:name=".SettingsActivity"
             android:parentActivityName=".QueueActivity"
             />
-        <activity android:name=".LogActivity" />
+        
+        <activity android:name=".LogActivity" /> <!-- todo: add parent activity name -->
 
         <service android:name=".AutosubmitService" />
+        
+        <receiver android:name=".StartupReceiver">
+            
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+            
+        </receiver>
         
     </application>
 
