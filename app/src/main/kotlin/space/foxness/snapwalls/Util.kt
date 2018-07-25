@@ -26,6 +26,30 @@ object Util
     const val USER_AGENT = "Snapwalls by /u/foxneZz"
 
     const val STATE_LENGTH = 10
+    
+    val titlePostComparator = Comparator { a: Post, b -> a.title.compareTo(b.title) }
+
+    val datePostComparator = Comparator { a: Post, b ->
+        val aNullDate = a.intendedSubmitDate == null
+        val bNullDate = b.intendedSubmitDate == null
+        
+        if (aNullDate && bNullDate)
+        {
+            0
+        }
+        else if (aNullDate && !bNullDate)
+        {
+            1
+        }
+        else if (!aNullDate && bNullDate)
+        {
+            -1
+        }
+        else
+        {
+            a.intendedSubmitDate!!.compareTo(b.intendedSubmitDate!!)
+        }
+    }
 
     private val periodformatter =
             PeriodFormatterBuilder().printZeroAlways().minimumPrintedDigits(2) // gives the '01'

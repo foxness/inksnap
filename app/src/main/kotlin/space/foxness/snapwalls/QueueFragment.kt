@@ -184,7 +184,14 @@ abstract class QueueFragment : Fragment()
 
     protected fun updatePostList()
     {
-        adapter.setPosts(queue.posts)
+        val comparator = when (settingsManager.sortBy)
+        {
+            SettingsManager.SortBy.Title -> Util.titlePostComparator
+            SettingsManager.SortBy.Date -> Util.datePostComparator
+        }
+
+        val sortedPosts = queue.posts.sortedWith(comparator)
+        adapter.setPosts(sortedPosts)
     }
 
     protected fun createNewPost()
@@ -211,6 +218,18 @@ abstract class QueueFragment : Fragment()
         {
             showRedditLoginDialog()
         }
+    }
+    
+    protected fun sortByTitle()
+    {
+        settingsManager.sortBy = SettingsManager.SortBy.Title
+        updatePostList()
+    }
+    
+    protected fun sortByDate()
+    {
+        settingsManager.sortBy = SettingsManager.SortBy.Date
+        updatePostList()
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean
@@ -250,6 +269,16 @@ abstract class QueueFragment : Fragment()
             R.id.menu_queue_extract ->
             {
                 extractPosts()
+                true
+            }
+            R.id.menu_queue_sort_by_title ->
+            {
+                sortByTitle()
+                true
+            }
+            R.id.menu_queue_sort_by_date ->
+            {
+                sortByDate()
                 true
             }
             else -> super.onOptionsItemSelected(item)

@@ -9,6 +9,20 @@ import org.joda.time.Duration
 
 class SettingsManager private constructor(context: Context)
 {
+//    fun initializeDefaultSettings()
+//    {
+//        redditAccessToken = null
+//        redditRefreshToken = null
+//        redditAccessTokenExpirationDate = null
+//        redditLastSubmissionDate = null
+//        autosubmitEnabled = false
+//        timeLeft = Duration.standardHours(3)
+//        imgurAccessToken = null
+//        imgurRefreshToken = null
+//        imgurAccessTokenExpirationDate = null
+//        wallpaperMode = false
+//    }
+    
     private val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 
     var redditAccessToken: String?
@@ -69,12 +83,13 @@ class SettingsManager private constructor(context: Context)
         }
     
     enum class SortBy
-    { AlphabeticalOrder, Date }
+    { Title, Date }
     
-    var sortBy: SortBy 
+    var sortBy: SortBy
         get() 
         {
-            return SortBy.values()[sharedPreferences.getInt(PREF_SORT_BY, -1)]
+            // default value 1 is sort by date
+            return SortBy.values()[sharedPreferences.getInt(PREF_SORT_BY, 1)]
         }
         set(value)
         {

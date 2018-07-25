@@ -22,6 +22,6 @@
     <string name="post_thumbnail">Post thumbnail</string>
     <string name="menu_extract">Extract</string>
     <string name="menu_sort_by">Sort By…</string>
-    <string name="sort_by_alphabetic_order">Alphabetic Order</string>
+    <string name="sort_by_title">Title</string>
     <string name="sort_by_date">Date</string>
 </resources>

@@ -22,8 +22,8 @@
         <menu>
 
             <item
-                android:id="@+id/menu_queue_sort_by_alphabetic_order"
-                android:title="@string/sort_by_alphabetic_order"
+                android:id="@+id/menu_queue_sort_by_title"
+                android:title="@string/sort_by_title"
                 />
 
             <item
