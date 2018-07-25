@@ -12,6 +12,29 @@
         app:showAsAction="ifRoom|withText"
         />
 
+    <item
+        android:id="@+id/menu_queue_sort_by"
+        android:title="@string/menu_sort_by"
+        android:icon="@drawable/menu_sort_by"
+        app:showAsAction="ifRoom|withText"
+        >
+        
+        <menu>
+
+            <item
+                android:id="@+id/menu_queue_sort_by_alphabetic_order"
+                android:title="@string/sort_by_alphabetic_order"
+                />
+
+            <item
+                android:id="@+id/menu_queue_sort_by_date"
+                android:title="@string/sort_by_date"
+                />
+            
+        </menu>
+        
+    </item>
+
     <!--todo: remove-->
     <item
         android:id="@+id/menu_queue_test"
