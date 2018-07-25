@@ -5,6 +5,8 @@ import android.support.v7.preference.PreferenceManager
 import org.joda.time.DateTime
 import org.joda.time.Duration
 
+// todo: add a method that initializes the settings with default values and call it early
+
 class SettingsManager private constructor(context: Context)
 {
     private val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
@@ -64,6 +66,19 @@ class SettingsManager private constructor(context: Context)
             PREFVAL_MANUAL_AUTOSUBMIT -> AutosubmitType.Manual
             PREFVAL_PERIODIC_AUTOSUBMIT -> AutosubmitType.Periodic
             else -> throw Exception("Unknown autosubmit type")
+        }
+    
+    enum class SortBy
+    { AlphabeticalOrder, Date }
+    
+    var sortBy: SortBy 
+        get() 
+        {
+            return SortBy.values()[sharedPreferences.getInt(PREF_SORT_BY, -1)]
+        }
+        set(value)
+        {
+            sharedPreferences.edit().putInt(PREF_SORT_BY, value.ordinal).apply()
         }
 
     private fun getString(key: String) = sharedPreferences.getString(key, null)
@@ -136,6 +151,7 @@ class SettingsManager private constructor(context: Context)
         private const val PREF_IMGUR_ACCESS_TOKEN = "imgurAccessToken"
         private const val PREF_IMGUR_REFRESH_TOKEN = "imgurRefreshToken"
         private const val PREF_IMGUR_ACCESS_TOKEN_EXPIRATION_DATE = "imgurAccessTokenExpirationDate"
+        private const val PREF_SORT_BY = "sortBy"
 
         private const val PREF_PERIOD_MINUTES = "period_minutes"
         private const val PREF_DEBUG_DONT_POST = "debug_dont_post"
