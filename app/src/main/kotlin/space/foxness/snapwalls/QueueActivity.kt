@@ -23,6 +23,13 @@ class QueueActivity : AppCompatActivity()
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false)
 
         settingsManager = SettingsManager.getInstance(this)
+        
+        if (!settingsManager.notFirstLaunch)
+        {
+            settingsManager.initializeDefaultSettings()
+            settingsManager.notFirstLaunch = true
+        }
+        
         updateCurrentType()
         
         fragmentManager = supportFragmentManager

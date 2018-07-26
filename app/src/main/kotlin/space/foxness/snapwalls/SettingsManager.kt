@@ -9,19 +9,22 @@ import org.joda.time.Duration
 
 class SettingsManager private constructor(context: Context)
 {
-//    fun initializeDefaultSettings()
-//    {
-//        redditAccessToken = null
-//        redditRefreshToken = null
-//        redditAccessTokenExpirationDate = null
-//        redditLastSubmissionDate = null
-//        autosubmitEnabled = false
-//        timeLeft = Duration.standardHours(3)
-//        imgurAccessToken = null
-//        imgurRefreshToken = null
-//        imgurAccessTokenExpirationDate = null
-//        wallpaperMode = false
-//    }
+    // these do not include Settings that are set by user in SettingsActivity
+    // those settings are set to default by a different method
+    fun initializeDefaultSettings()
+    {
+        redditAccessToken = null
+        redditRefreshToken = null
+        redditAccessTokenExpirationDate = null
+        redditLastSubmissionDate = null
+        autosubmitEnabled = false
+        timeLeft = Duration.standardHours(3)
+        imgurAccessToken = null
+        imgurRefreshToken = null
+        imgurAccessTokenExpirationDate = null
+        sortBy = SortBy.Date
+        notFirstLaunch = false
+    }
     
     private val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 
@@ -61,9 +64,23 @@ class SettingsManager private constructor(context: Context)
         get() = getDateTime(PREF_IMGUR_ACCESS_TOKEN_EXPIRATION_DATE)
         set(value) = setDateTime(PREF_IMGUR_ACCESS_TOKEN_EXPIRATION_DATE, value)
 
-    var wallpaperMode: Boolean
-        get() = getBool(PREF_WALLPAPER_MODE)
-        set(value) = setBool(PREF_WALLPAPER_MODE, value)
+    enum class SortBy
+    { Title, Date }
+
+    var sortBy: SortBy
+        get()
+        {
+            // default value 1 is sort by date
+            return SortBy.values()[sharedPreferences.getInt(PREF_SORT_BY, 1)]
+        }
+        set(value)
+        {
+            sharedPreferences.edit().putInt(PREF_SORT_BY, value.ordinal).apply()
+        }
+    
+    var notFirstLaunch: Boolean // getBool()'s default value should be false for this to work
+        get() = getBool(PREF_NOT_FIRST_LAUNCH)
+        set(value) = setBool(PREF_NOT_FIRST_LAUNCH, value)
 
     // SETTINGS ------
 
@@ -81,20 +98,9 @@ class SettingsManager private constructor(context: Context)
             PREFVAL_PERIODIC_AUTOSUBMIT -> AutosubmitType.Periodic
             else -> throw Exception("Unknown autosubmit type")
         }
-    
-    enum class SortBy
-    { Title, Date }
-    
-    var sortBy: SortBy
-        get() 
-        {
-            // default value 1 is sort by date
-            return SortBy.values()[sharedPreferences.getInt(PREF_SORT_BY, 1)]
-        }
-        set(value)
-        {
-            sharedPreferences.edit().putInt(PREF_SORT_BY, value.ordinal).apply()
-        }
+
+    val wallpaperMode: Boolean
+        get() = getBool(PREF_WALLPAPER_MODE)
 
     private fun getString(key: String) = sharedPreferences.getString(key, null)
 
@@ -167,6 +173,7 @@ class SettingsManager private constructor(context: Context)
         private const val PREF_IMGUR_REFRESH_TOKEN = "imgurRefreshToken"
         private const val PREF_IMGUR_ACCESS_TOKEN_EXPIRATION_DATE = "imgurAccessTokenExpirationDate"
         private const val PREF_SORT_BY = "sortBy"
+        private const val PREF_NOT_FIRST_LAUNCH = "notFirstLaunch"
 
         private const val PREF_PERIOD_MINUTES = "period_minutes"
         private const val PREF_DEBUG_DONT_POST = "debug_dont_post"
