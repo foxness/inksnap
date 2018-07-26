@@ -14,6 +14,7 @@ import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.SearchView
 import android.view.*
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -39,6 +40,8 @@ abstract class QueueFragment : Fragment()
     protected lateinit var imgurAccount: ImgurAccount
     protected lateinit var postScheduler: PostScheduler
     protected lateinit var thumbnailCache: ThumbnailCache
+    
+    protected var searchQuery: String? = null
 
     private var redditTokenFetching = false
 
@@ -167,12 +170,12 @@ abstract class QueueFragment : Fragment()
         return v
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?)
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater)
     {
         super.onCreateOptionsMenu(menu, inflater)
-        inflater!!.inflate(R.menu.menu_queue, menu)
+        inflater.inflate(R.menu.menu_queue, menu)
 
-        val redditLoginMenuItem = menu!!.findItem(R.id.menu_queue_reddit_login)!!
+        val redditLoginMenuItem = menu.findItem(R.id.menu_queue_reddit_login)!!
         val imgurLoginMenuItem = menu.findItem(R.id.menu_queue_imgur_login)!!
 
         redditLoginMenuItem.isEnabled = !redditTokenFetching
@@ -180,17 +183,71 @@ abstract class QueueFragment : Fragment()
         
         // todo: extract hardcoded strings
         redditLoginMenuItem.title = if (reddit.isLoggedIn) "Log out of Reddit" else "Log into Reddit"
+
+        val searchItem = menu.findItem(R.id.menu_queue_search)
+        val searchView = searchItem.actionView as SearchView
+        
+        val qtl = object : SearchView.OnQueryTextListener
+        {
+            override fun onQueryTextSubmit(query: String): Boolean
+            {
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String): Boolean
+            {
+                val query = if (newText.isEmpty())
+                {
+                    null
+                }
+                else
+                {
+                    newText
+                }
+                
+                searchQuery = query
+                updatePostList()
+                return true
+            }
+        }
+
+        val ael = object : MenuItem.OnActionExpandListener
+        {
+            override fun onMenuItemActionExpand(item: MenuItem?) = true
+
+            override fun onMenuItemActionCollapse(item: MenuItem?): Boolean
+            {
+                searchQuery = null
+                updatePostList()
+                return true
+            }
+        }
+        
+        searchView.setOnQueryTextListener(qtl)
+        searchItem.setOnActionExpandListener(ael)
     }
 
     protected fun updatePostList()
     {
+        var posts = queue.posts
+        
+        val sq = searchQuery
+        if (sq != null)
+        {
+            val query = sq.toRegex()
+            
+            posts = posts.filter { it.title.contains(query)
+                                   || it.content.contains(query)
+                                   || it.subreddit.contains(query) }
+        }
+        
         val comparator = when (settingsManager.sortBy)
         {
             SettingsManager.SortBy.Title -> Util.titlePostComparator
             SettingsManager.SortBy.Date -> Util.datePostComparator
         }
 
-        val sortedPosts = queue.posts.sortedWith(comparator)
+        val sortedPosts = posts.sortedWith(comparator)
         adapter.setPosts(sortedPosts)
     }
 

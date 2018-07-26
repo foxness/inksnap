@@ -13,6 +13,14 @@
         />
 
     <item
+        android:id="@+id/menu_queue_search"
+        android:title="@string/menu_search"
+        android:icon="@drawable/menu_search"
+        app:showAsAction="always|collapseActionView"
+        app:actionViewClass="android.support.v7.widget.SearchView"
+        />
+
+    <item
         android:id="@+id/menu_queue_sort_by"
         android:title="@string/menu_sort_by"
         android:icon="@drawable/menu_sort_by"
