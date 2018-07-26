@@ -191,14 +191,23 @@ abstract class QueueFragment : Fragment()
         {
             override fun onQueryTextSubmit(query: String): Boolean
             {
-                searchQuery = query
-                updatePostList()
-                return true
+                return false
             }
 
             override fun onQueryTextChange(newText: String): Boolean
             {
-                return false
+                val query = if (newText.isEmpty())
+                {
+                    null
+                }
+                else
+                {
+                    newText
+                }
+                
+                searchQuery = query
+                updatePostList()
+                return true
             }
         }
 
@@ -216,20 +225,6 @@ abstract class QueueFragment : Fragment()
         
         searchView.setOnQueryTextListener(qtl)
         searchItem.setOnActionExpandListener(ael)
-
-//        val ascl = object : View.OnAttachStateChangeListener // because OnCloseListener is bugged
-//        {
-//            override fun onViewDetachedFromWindow(v: View)
-//            {
-//                searchQuery = null
-//                updatePostList()
-//                toast("Emptied the search query")
-//            }
-//
-//            override fun onViewAttachedToWindow(v: View) { }
-//        }
-//        
-//        searchView.addOnAttachStateChangeListener(ascl)
     }
 
     protected fun updatePostList()
