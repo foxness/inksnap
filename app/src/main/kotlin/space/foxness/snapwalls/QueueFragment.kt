@@ -234,7 +234,7 @@ abstract class QueueFragment : Fragment()
         val sq = searchQuery
         if (sq != null)
         {
-            val query = sq.toRegex()
+            val query = sq.toRegex(RegexOption.IGNORE_CASE)
             
             posts = posts.filter { it.title.contains(query)
                                    || it.content.contains(query)
