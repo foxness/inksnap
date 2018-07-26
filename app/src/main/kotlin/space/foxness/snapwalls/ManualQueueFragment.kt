@@ -3,7 +3,6 @@ package space.foxness.snapwalls
 import android.annotation.SuppressLint
 import org.joda.time.Duration
 import space.foxness.snapwalls.Queue.Companion.earliest
-import space.foxness.snapwalls.Queue.Companion.onlyScheduled
 import space.foxness.snapwalls.Util.log
 import space.foxness.snapwalls.Util.timeLeftUntil
 import space.foxness.snapwalls.Util.toNice
@@ -15,19 +14,24 @@ class ManualQueueFragment : QueueFragment()
 
     override val allowIntendedSubmitDateEditing = true
 
-    override fun onSubmitReceived()
+    override fun onSubmitReceived() // assumes that autosubmit is on
     {
         super.onSubmitReceived()
         
-        val scheduledPosts = queue.posts.onlyScheduled()
+        if (!settingsManager.autosubmitEnabled)
+        {
+            throw Exception("How the hey did this even happen?")
+            // hint: it must have happened when autosubmitEnabled was turned off right before
+            // the submit service started
+        }
 
-        if (scheduledPosts.isEmpty())
+        if (queue.posts.isEmpty())
         {
             updateTimerText(null)
         }
         else
         {
-            val timeLeft = timeLeftUntil(scheduledPosts.earliest()!!.intendedSubmitDate!!)
+            val timeLeft = timeLeftUntil(queue.posts.earliest()!!.intendedSubmitDate!!)
             startTimer(timeLeft)
         }
 
@@ -51,35 +55,31 @@ class ManualQueueFragment : QueueFragment()
 
             settingsManager.autosubmitEnabled = true
 
-            val manualPosts = queue.posts.filter { it.intendedSubmitDate != null }
-
-            if (manualPosts.isNotEmpty())
+            if (queue.posts.isNotEmpty())
             {
-                val earliestPost = manualPosts.earliest()!!
+                val earliestPost = queue.posts.earliest()!!
                 val timeLeft = timeLeftUntil(earliestPost.intendedSubmitDate!!)
 
                 startTimerAndRegisterReceiver(timeLeft)
 
-                postScheduler.scheduleManualPosts(manualPosts)
+                postScheduler.scheduleManualPosts(queue.posts)
 
-                log("Scheduled ${manualPosts.size} post(s)")
+                log("Scheduled ${queue.posts.size} post(s)")
             }
         }
         else
         {
             settingsManager.autosubmitEnabled = false
 
-            val scheduledPosts = queue.posts.onlyScheduled()
-
-            if (scheduledPosts.isNotEmpty())
+            if (queue.posts.isNotEmpty())
             {
                 unregisterSubmitReceiver()
 
                 timerObject.cancel()
 
-                postScheduler.cancelScheduledPosts(scheduledPosts.reversed()) // ...its for optimization
+                postScheduler.cancelScheduledPosts(queue.posts.reversed()) // ...its for optimization
 
-                log("Canceled ${scheduledPosts.size} scheduled post(s)")
+                log("Canceled ${queue.posts.size} scheduled post(s)")
             }
         }
 
@@ -93,7 +93,7 @@ class ManualQueueFragment : QueueFragment()
 
         var timeLeft: Duration? = null
 
-        val earliestPost = queue.posts.onlyScheduled().earliest()
+        val earliestPost = queue.posts.earliest()
         if (autosubmitEnabled && earliestPost != null)
         {
             timeLeft = timeLeftUntil(earliestPost.intendedSubmitDate!!)
@@ -121,10 +121,14 @@ class ManualQueueFragment : QueueFragment()
             settingsManager.timeLeft = settingsManager.period
         }
 
-        val scheduledPosts = queue.posts.onlyScheduled()
-        if (scheduledPosts.isNotEmpty())
+        if (queue.posts.isNotEmpty())
         {
-            val timeLeft = timeLeftUntil(scheduledPosts.earliest()!!.intendedSubmitDate!!)
+            val earliestPost = queue.posts.earliest()!!
+            
+            // todo: handle the case where the earliest date is earlier than now
+            // todo: on timer finish start the next earliest post timer
+            
+            val timeLeft = timeLeftUntil(earliestPost.intendedSubmitDate!!)
             startTimerAndRegisterReceiver(timeLeft)
         }
 
@@ -136,8 +140,7 @@ class ManualQueueFragment : QueueFragment()
     {
         super.onStop()
 
-        val scheduledPosts = queue.posts.onlyScheduled()
-        if (scheduledPosts.isNotEmpty())
+        if (queue.posts.isNotEmpty())
         {
             timerObject.cancel()
         }
@@ -161,7 +164,7 @@ class ManualQueueFragment : QueueFragment()
     {
         queue.addPost(newPost)
 
-        if (settingsManager.autosubmitEnabled && newPost.intendedSubmitDate != null)
+        if (settingsManager.autosubmitEnabled)
         {
             postScheduler.schedulePost(newPost)
         }
@@ -169,36 +172,20 @@ class ManualQueueFragment : QueueFragment()
 
     override fun onPostEdited(editedPost: Post)
     {
-        if (settingsManager.autosubmitEnabled)
-        {
-            val oldPost = queue.getPost(editedPost.id)!!
+        val oldPost = queue.getPost(editedPost.id)!!
+        val shouldBeRescheduled = settingsManager.autosubmitEnabled
+                && !editedPost.intendedSubmitDate!!.isEqual(oldPost.intendedSubmitDate)
 
-            if (oldPost.intendedSubmitDate == null)
-            {
-                if (editedPost.intendedSubmitDate != null)
-                {
-                    queue.updatePost(editedPost)
-                    postScheduler.schedulePost(editedPost)
-                }
-            }
-            else
-            {
-                if (editedPost.intendedSubmitDate == null)
-                {
-                    postScheduler.cancelScheduledPost(oldPost)
-                    queue.updatePost(editedPost)
-                }
-                else if (!editedPost.intendedSubmitDate!!.isEqual(oldPost.intendedSubmitDate))
-                {
-                    postScheduler.cancelScheduledPost(oldPost)
-                    queue.updatePost(editedPost)
-                    postScheduler.schedulePost(editedPost)
-                }
-            }
-        }
-        else
+        if (shouldBeRescheduled)
         {
-            queue.updatePost(editedPost)
+            postScheduler.cancelScheduledPost(oldPost)
+        }
+
+        queue.updatePost(editedPost)
+        
+        if (shouldBeRescheduled)
+        {
+            postScheduler.schedulePost(editedPost)
         }
     }
 
