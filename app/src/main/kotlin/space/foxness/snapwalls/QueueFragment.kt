@@ -14,7 +14,6 @@ import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.SearchView
 import android.view.*
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -182,28 +181,28 @@ abstract class QueueFragment : Fragment()
         // todo: extract hardcoded strings
         redditLoginMenuItem.title = if (reddit.isLoggedIn) "Log out of Reddit" else "Log into Reddit"
         
-        val searchItem = menu.findItem(R.id.menu_queue_search)
-        
-        fun setMenuVisibility(visible: Boolean)
-        {
-            for (i in 0 until menu.size())
-            {
-                val item = menu.getItem(i)
-                if (item != searchItem)
-                {
-                    item.isVisible = visible
-                }
-            }
-        }
-        
-        val searchView = searchItem.actionView as SearchView
-        searchView.setOnSearchClickListener { 
-            setMenuVisibility(false)
-        }
-        searchView.setOnCloseListener { 
-            setMenuVisibility(true)
-            false
-        }
+//        val searchItem = menu.findItem(R.id.menu_queue_search)
+//        
+//        fun setMenuVisibility(visible: Boolean)
+//        {
+//            for (i in 0 until menu.size())
+//            {
+//                val item = menu.getItem(i)
+//                if (item != searchItem)
+//                {
+//                    item.isVisible = visible
+//                }
+//            }
+//        }
+//        
+//        val searchView = searchItem.actionView as SearchView
+//        searchView.setOnSearchClickListener { 
+//            setMenuVisibility(false)
+//        }
+//        searchView.setOnCloseListener { 
+//            setMenuVisibility(true)
+//            false
+//        }
     }
 
     protected fun updatePostList()
