@@ -27,16 +27,17 @@ class Post : Serializable
 
     var scheduled = false
     
-    val isValid: Boolean get()
+    fun isValid(dateMustBeValidForPostToBeValid: Boolean): Boolean
     {
         val notBlankTitle = title.isNotBlank()
         val notBlankSubreddit = subreddit.isNotBlank()
         val validContent = !isLink || isValidUrl(content)
+        val validDate = !dateMustBeValidForPostToBeValid || intendedSubmitDate != null
 
-        return notBlankTitle && notBlankSubreddit && validContent
+        return notBlankTitle && notBlankSubreddit && validContent && validDate
     }
     
-    val reasonWhyInvalid: String? get()
+    fun reasonWhyInvalid(dateMustBeValidForPostToBeValid: Boolean): String?
     {
         return if (title.isBlank())
         {
@@ -49,6 +50,10 @@ class Post : Serializable
         else if (isLink && !isValidUrl(content))
         {
             "Link posts must have a valid url"
+        }
+        else if (dateMustBeValidForPostToBeValid && intendedSubmitDate == null)
+        {
+            "Date should be set"
         }
         else
         {

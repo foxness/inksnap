@@ -5,8 +5,6 @@ import android.support.v7.preference.PreferenceManager
 import org.joda.time.DateTime
 import org.joda.time.Duration
 
-// todo: add a method that initializes the settings with default values and call it early
-
 class SettingsManager private constructor(context: Context)
 {
     // these do not include Settings that are set by user in SettingsActivity

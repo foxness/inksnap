@@ -8,10 +8,7 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.text.format.DateFormat
 import android.view.*
-import android.widget.Button
-import android.widget.EditText
-import android.widget.LinearLayout
-import android.widget.Switch
+import android.widget.*
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import space.foxness.snapwalls.Util.toast
@@ -139,69 +136,78 @@ class PostFragment : Fragment()
 
         intendedSubmitDate = post.intendedSubmitDate
         intendedSubmitDateButton = v.findViewById(R.id.intended_submit_date_button)
-        updateIntendedSubmitDateButtonText()
-        intendedSubmitDateButton.isEnabled = allowIntendedSubmitDateEditing
+        
+        if (allowIntendedSubmitDateEditing)
+        {
+            updateIntendedSubmitDateButtonText()
 
-        intendedSubmitDateButton.setOnClickListener {
+            intendedSubmitDateButton.setOnClickListener {
 
-            // todo: maybe show now + 1 hour or something?
-            val dialogDatetime = intendedSubmitDate ?: DateTime.now()
+                // todo: maybe show now + 1 hour or something?
+                val dialogDatetime = intendedSubmitDate ?: DateTime.now()
 
-            var newYear: Int? = null
-            var newMonth: Int? = null
-            var newDay: Int? = null
-            var newHour: Int? = null
-            var newMinute: Int? = null
+                var newYear: Int? = null
+                var newMonth: Int? = null
+                var newDay: Int? = null
+                var newHour: Int? = null
+                var newMinute: Int? = null
 
-            var timeDialogCanceled = false
+                var timeDialogCanceled = false
 
-            // todo: fix the '59 minutes' bug
-            val timeDialog = TimePickerDialog(activity!!,
-                                              TimePickerDialog.OnTimeSetListener { view, hour, minute ->
-                                                  newHour = hour
-                                                  newMinute = minute
-                                              },
-                                              dialogDatetime.hourOfDay,
-                                              dialogDatetime.minuteOfDay,
-                                              DateFormat.is24HourFormat(activity!!))
+                // todo: fix the '59 minutes' bug
+                val timeDialog = TimePickerDialog(activity!!,
+                                                  TimePickerDialog.OnTimeSetListener { view, hour, minute ->
+                                                      newHour = hour
+                                                      newMinute = minute
+                                                  },
+                                                  dialogDatetime.hourOfDay,
+                                                  dialogDatetime.minuteOfDay,
+                                                  DateFormat.is24HourFormat(activity!!))
 
-            timeDialog.setOnCancelListener { timeDialogCanceled = true }
+                timeDialog.setOnCancelListener { timeDialogCanceled = true }
 
-            timeDialog.setOnDismissListener {
-                if (!timeDialogCanceled)
-                {
-                    intendedSubmitDate = DateTime(newYear!!,
-                                                  newMonth!!,
-                                                  newDay!!,
-                                                  newHour!!,
-                                                  newMinute!!)
-                    updateIntendedSubmitDateButtonText()
+                timeDialog.setOnDismissListener {
+                    if (!timeDialogCanceled)
+                    {
+                        intendedSubmitDate = DateTime(newYear!!,
+                                                      newMonth!!,
+                                                      newDay!!,
+                                                      newHour!!,
+                                                      newMinute!!)
+                        updateIntendedSubmitDateButtonText()
+                    }
                 }
-            }
 
-            var dateDialogCanceled = false
+                var dateDialogCanceled = false
 
-            val dateDialog = DatePickerDialog(activity!!,
-                                              DatePickerDialog.OnDateSetListener { view, year, month, day ->
-                                                  newYear = year
-                                                  newMonth = month +
-                                                          1 // DatePicker months start at 0
-                                                  newDay = day
-                                              },
-                                              dialogDatetime.year,
-                                              dialogDatetime.monthOfYear - 1, // same ^
-                                              dialogDatetime.dayOfMonth)
+                val dateDialog = DatePickerDialog(activity!!,
+                                                  DatePickerDialog.OnDateSetListener { view, year, month, day ->
+                                                      newYear = year
+                                                      newMonth = month +
+                                                              1 // DatePicker months start at 0
+                                                      newDay = day
+                                                  },
+                                                  dialogDatetime.year,
+                                                  dialogDatetime.monthOfYear - 1, // same ^
+                                                  dialogDatetime.dayOfMonth)
 
-            dateDialog.setOnCancelListener { dateDialogCanceled = true }
+                dateDialog.setOnCancelListener { dateDialogCanceled = true }
 
-            dateDialog.setOnDismissListener {
-                if (!dateDialogCanceled)
-                {
-                    timeDialog.show()
+                dateDialog.setOnDismissListener {
+                    if (!dateDialogCanceled)
+                    {
+                        timeDialog.show()
+                    }
                 }
-            }
 
-            dateDialog.show()
+                dateDialog.show()
+            }
+        }
+        else
+        {
+            intendedSubmitDateButton.visibility = View.GONE
+            val label = v.findViewById<TextView>(R.id.intended_submit_date_label)
+            label.visibility = View.GONE
         }
 
         // SAVE BUTTON ------------------------
@@ -210,7 +216,7 @@ class PostFragment : Fragment()
         saveButton.setOnClickListener {
             unloadViewsToPost()
             
-            if (post.isValid)
+            if (post.isValid(allowIntendedSubmitDateEditing))
             {
                 val data = Intent()
                 data.putExtra(RESULT_POST, post)
@@ -219,7 +225,7 @@ class PostFragment : Fragment()
             }
             else
             {
-                toast(post.reasonWhyInvalid!!)
+                toast(post.reasonWhyInvalid(allowIntendedSubmitDateEditing)!!)
             }
         }
 

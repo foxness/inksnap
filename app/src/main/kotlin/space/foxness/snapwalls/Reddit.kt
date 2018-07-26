@@ -63,9 +63,9 @@ class Reddit private constructor(private val callbacks: Callbacks)
                resubmit: Boolean = true,
                sendReplies: Boolean = true): String
     {
-        if (!post.isValid)
+        if (!post.isValid(false))
         {
-            throw Exception("Invalid post")
+            throw Exception("Invalid post: ${post.reasonWhyInvalid(false)!!}")
         }
 
         if (debugDontPost)
