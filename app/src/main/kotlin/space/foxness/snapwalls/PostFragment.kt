@@ -190,6 +190,8 @@ class PostFragment : Fragment()
             updateIntendedSubmitDateButtonText()
 
             intendedSubmitDateButton.setOnClickListener {
+                val context = context!!
+                val is24HourFormat = DateFormat.is24HourFormat(context)
 
                 // todo: maybe show now + 1 hour or something?
                 val dialogDatetime = intendedSubmitDate ?: DateTime.now()
@@ -199,47 +201,48 @@ class PostFragment : Fragment()
                 var newDay: Int? = null
                 var newHour: Int? = null
                 var newMinute: Int? = null
+                
+                val tsl = TimePickerDialog.OnTimeSetListener { view, hour, minute -> 
+                    newHour = hour
+                    newMinute = minute
+                }
+                
+                val dialogHour = dialogDatetime.hourOfDay
+                val dialogMinute = dialogDatetime.minuteOfHour
+                
+                val timeDialog = TimePickerDialog(context, tsl, dialogHour, dialogMinute, is24HourFormat)
 
                 var timeDialogCanceled = false
-
-                // todo: fix the '59 minutes' bug
-                val timeDialog = TimePickerDialog(activity!!,
-                                                  TimePickerDialog.OnTimeSetListener { view, hour, minute ->
-                                                      newHour = hour
-                                                      newMinute = minute
-                                                  },
-                                                  dialogDatetime.hourOfDay,
-                                                  dialogDatetime.minuteOfDay,
-                                                  DateFormat.is24HourFormat(activity!!))
-
-                timeDialog.setOnCancelListener { timeDialogCanceled = true }
+                
+                timeDialog.setOnCancelListener {
+                    timeDialogCanceled = true
+                }
 
                 timeDialog.setOnDismissListener {
                     if (!timeDialogCanceled)
                     {
-                        intendedSubmitDate = DateTime(newYear!!,
-                                                      newMonth!!,
-                                                      newDay!!,
-                                                      newHour!!,
-                                                      newMinute!!)
+                        intendedSubmitDate = DateTime(newYear!!, newMonth!!, newDay!!, newHour!!, newMinute!!)
                         updateIntendedSubmitDateButtonText()
                     }
                 }
+                
+                val dsl = DatePickerDialog.OnDateSetListener { view, year, month, day ->
+                    newYear = year
+                    newMonth = month + 1 // DatePicker months start at 0
+                    newDay = day
+                }
+                
+                val dialogYear = dialogDatetime.year
+                val dialogMonth = dialogDatetime.monthOfYear - 1 // reason = above
+                val dialogDay = dialogDatetime.dayOfMonth
+                
+                val dateDialog = DatePickerDialog(context, dsl, dialogYear, dialogMonth, dialogDay)
 
                 var dateDialogCanceled = false
-
-                val dateDialog = DatePickerDialog(activity!!,
-                                                  DatePickerDialog.OnDateSetListener { view, year, month, day ->
-                                                      newYear = year
-                                                      newMonth = month +
-                                                              1 // DatePicker months start at 0
-                                                      newDay = day
-                                                  },
-                                                  dialogDatetime.year,
-                                                  dialogDatetime.monthOfYear - 1, // same ^
-                                                  dialogDatetime.dayOfMonth)
-
-                dateDialog.setOnCancelListener { dateDialogCanceled = true }
+                
+                dateDialog.setOnCancelListener {
+                    dateDialogCanceled = true
+                }
 
                 dateDialog.setOnDismissListener {
                     if (!dateDialogCanceled)
