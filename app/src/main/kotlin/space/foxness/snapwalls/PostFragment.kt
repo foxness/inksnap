@@ -10,6 +10,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.text.InputType
 import android.text.format.DateFormat
 import android.view.*
 import android.widget.*
@@ -115,12 +116,14 @@ class PostFragment : Fragment()
             contentLabel.text = "URL"
             contentEdit.hint = "Enter the url of the post"
             pasteButton.visibility = View.VISIBLE
+            contentEdit.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI
         }
         else
         {
             contentLabel.text = "Content"
             contentEdit.hint = "Enter the content of the post"
             pasteButton.visibility = View.GONE
+            contentEdit.inputType = InputType.TYPE_CLASS_TEXT // todo: multiline content input
         }
     }
 
