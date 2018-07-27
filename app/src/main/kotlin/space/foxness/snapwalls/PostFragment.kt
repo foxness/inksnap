@@ -1,5 +1,6 @@
 package space.foxness.snapwalls
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
@@ -17,6 +18,7 @@ class PostFragment : Fragment()
 {
     private lateinit var titleEdit: EditText
     private lateinit var contentEdit: EditText
+    private lateinit var contentLabel: TextView
     private lateinit var subredditEdit: EditText
     private lateinit var linkSwitch: Switch
     private lateinit var intendedSubmitDateButton: Button
@@ -100,6 +102,21 @@ class PostFragment : Fragment()
             DateTimeFormat.forPattern(DATETIME_FORMAT).print(intendedSubmitDate)
         }
     }
+    
+    @SuppressLint("SetTextI18n") // todo: fix this, extract hardcoded strings
+    private fun updatePostType(isLink: Boolean)
+    {
+        if (isLink)
+        {
+            contentLabel.text = "URL"
+            contentEdit.hint = "Enter the url of the post"
+        }
+        else
+        {
+            contentLabel.text = "Content"
+            contentEdit.hint = "Enter the content of the post"
+        }
+    }
 
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
@@ -121,6 +138,10 @@ class PostFragment : Fragment()
 
         contentEdit = v.findViewById(R.id.post_content)
         contentEdit.setText(post.content)
+        
+        // CONTENT LABEL
+        
+        contentLabel = v.findViewById(R.id.content_label)
 
         // SUBREDDIT EDIT ---------------------
 
@@ -131,6 +152,9 @@ class PostFragment : Fragment()
 
         linkSwitch = v.findViewById(R.id.post_link)
         linkSwitch.isChecked = post.isLink
+        linkSwitch.setOnCheckedChangeListener { cb: CompoundButton, checked: Boolean ->
+            updatePostType(checked)
+        }
 
         // INTENDED SUBMIT DATE BUTTON --------------
 
@@ -228,6 +252,8 @@ class PostFragment : Fragment()
                 toast(post.reasonWhyInvalid(allowIntendedSubmitDateEditing)!!)
             }
         }
+        
+        updatePostType(post.isLink)
 
         return v
     }
