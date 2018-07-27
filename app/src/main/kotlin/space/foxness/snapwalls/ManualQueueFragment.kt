@@ -1,8 +1,9 @@
 package space.foxness.snapwalls
 
 import android.annotation.SuppressLint
+import org.joda.time.DateTime
 import org.joda.time.Duration
-import space.foxness.snapwalls.Queue.Companion.earliest
+import space.foxness.snapwalls.Util.earliestFromNow
 import space.foxness.snapwalls.Util.log
 import space.foxness.snapwalls.Util.timeLeftUntil
 import space.foxness.snapwalls.Util.toNice
@@ -25,20 +26,32 @@ class ManualQueueFragment : QueueFragment()
             // the submit service started
         }
 
-        if (queue.posts.isEmpty())
+        val earliestFromNow = getEarliestPostDateFromNow()
+        if (earliestFromNow == null)
         {
             updateTimerText(null)
         }
         else
         {
-            val timeLeft = timeLeftUntil(queue.posts.earliest()!!.intendedSubmitDate!!)
+            val timeLeft = timeLeftUntil(earliestFromNow)
             startTimer(timeLeft)
         }
 
         updatePostList()
     }
+    
+    private fun getEarliestPostDateFromNow(): DateTime? // todo: move to util?
+    {
+        return queue.posts.map { it.intendedSubmitDate!! }.earliestFromNow()
+    }
+    
+    private fun getFuturePosts(): List<Post> // todo: move to util?
+    {
+        val now = DateTime.now()
+        return queue.posts.filter { it.intendedSubmitDate!! > now }
+    }
 
-    override fun toggleAutosubmit(on: Boolean)
+    override fun toggleAutosubmit(on: Boolean) // todo: handle posts that are earlier than now (prohibit them in post fragment and handle here)
     {
         if (on == settingsManager.autosubmitEnabled) // this should never happen
         {
@@ -55,31 +68,32 @@ class ManualQueueFragment : QueueFragment()
 
             settingsManager.autosubmitEnabled = true
 
-            if (queue.posts.isNotEmpty())
+            val futurePosts = getFuturePosts()
+            if (futurePosts.isNotEmpty())
             {
-                val earliestPost = queue.posts.earliest()!!
-                val timeLeft = timeLeftUntil(earliestPost.intendedSubmitDate!!)
-
+                val earliest = getEarliestPostDateFromNow()!!
+                val timeLeft = timeLeftUntil(earliest)
                 startTimerAndRegisterReceiver(timeLeft)
 
-                postScheduler.scheduleManualPosts(queue.posts)
+                postScheduler.scheduleManualPosts(futurePosts)
 
-                log("Scheduled ${queue.posts.size} post(s)")
+                log("Scheduled ${futurePosts.size} post(s)")
             }
         }
         else
         {
             settingsManager.autosubmitEnabled = false
 
-            if (queue.posts.isNotEmpty())
+            val futurePosts = getFuturePosts()
+            if (futurePosts.isNotEmpty())
             {
                 unregisterSubmitReceiver()
 
                 timerObject.cancel()
 
-                postScheduler.cancelScheduledPosts(queue.posts.reversed()) // ...its for optimization
+                postScheduler.cancelScheduledPosts(futurePosts)
 
-                log("Canceled ${queue.posts.size} scheduled post(s)")
+                log("Canceled ${futurePosts.size} scheduled post(s)")
             }
         }
 
@@ -92,11 +106,10 @@ class ManualQueueFragment : QueueFragment()
         timerToggle.text = if (autosubmitEnabled) "Turn off" else "Turn on"
 
         var timeLeft: Duration? = null
-
-        val earliestPost = queue.posts.earliest()
-        if (autosubmitEnabled && earliestPost != null)
+        val earliestFromNow = getEarliestPostDateFromNow()
+        if (autosubmitEnabled && earliestFromNow != null)
         {
-            timeLeft = timeLeftUntil(earliestPost.intendedSubmitDate!!)
+            timeLeft = timeLeftUntil(earliestFromNow)
         }
 
         updateTimerText(timeLeft)
@@ -121,15 +134,18 @@ class ManualQueueFragment : QueueFragment()
             settingsManager.timeLeft = settingsManager.period
         }
 
-        if (queue.posts.isNotEmpty())
+        val earliestFromNow = getEarliestPostDateFromNow()
+        if (earliestFromNow != null)
         {
-            val earliestPost = queue.posts.earliest()!!
-            
-            // todo: handle the case where the earliest date is earlier than now
             // todo: on timer finish start the next earliest post timer
-            
-            val timeLeft = timeLeftUntil(earliestPost.intendedSubmitDate!!)
-            startTimerAndRegisterReceiver(timeLeft)
+
+            val timeLeft = timeLeftUntil(earliestFromNow)
+            startTimer(timeLeft)
+
+            if (settingsManager.autosubmitEnabled)
+            {
+                registerSubmitReceiver()
+            }
         }
 
         updateToggleViews(settingsManager.autosubmitEnabled)
@@ -139,8 +155,9 @@ class ManualQueueFragment : QueueFragment()
     override fun onStop()
     {
         super.onStop()
-
-        if (queue.posts.isNotEmpty())
+        
+        val timerIsTicking = getFuturePosts().isNotEmpty()
+        if (timerIsTicking)
         {
             timerObject.cancel()
         }

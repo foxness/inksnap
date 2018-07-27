@@ -150,4 +150,10 @@ object Util
         cm.flush()
         webView.clearCache(true)
     }
+    
+    fun List<DateTime>.earliestFromNow(): DateTime?
+    {
+        val now = DateTime.now()
+        return sorted().firstOrNull { it > now }
+    }
 }
