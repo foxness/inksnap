@@ -10,8 +10,8 @@ class ImgurAccount(private val callbacks: Callbacks)
 {
     interface Callbacks
     {
-        fun onNewAccessToken(newAccessToken: String, newAccessTokenExpirationDate: DateTime)
-        fun onNewRefreshToken(newRefreshToken: String)
+        fun onNewAccessToken(newAccessToken: String?, newAccessTokenExpirationDate: DateTime?)
+        fun onNewRefreshToken(newRefreshToken: String?)
     }
 
     private var authState: String? = null
@@ -31,6 +31,18 @@ class ImgurAccount(private val callbacks: Callbacks)
                     .appendQueryParameter("response_type", AUTH_RESPONSE_TYPE)
                     .appendQueryParameter("state", authState).build().toString()
         }
+    
+    fun logout()
+    {
+        // todo: properly logout by making a request to make the these tokens invalid
+        
+        accessToken = null
+        refreshToken = null
+        accessTokenExpirationDate = null
+        
+        callbacks.onNewAccessToken(accessToken, accessTokenExpirationDate)
+        callbacks.onNewRefreshToken(refreshToken)
+    }
 
     fun tryExtractTokens(url: String): Boolean
     {

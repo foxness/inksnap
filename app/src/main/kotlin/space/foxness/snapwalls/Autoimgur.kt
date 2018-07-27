@@ -25,14 +25,14 @@ class Autoimgur private constructor(context: Context)
 
     private inner class Saver : ImgurAccount.Callbacks
     {
-        override fun onNewAccessToken(newAccessToken: String,
-                                      newAccessTokenExpirationDate: DateTime)
+        override fun onNewAccessToken(newAccessToken: String?,
+                                      newAccessTokenExpirationDate: DateTime?)
         {
             settingsManager.imgurAccessToken = newAccessToken
             settingsManager.imgurAccessTokenExpirationDate = newAccessTokenExpirationDate
         }
 
-        override fun onNewRefreshToken(newRefreshToken: String)
+        override fun onNewRefreshToken(newRefreshToken: String?)
         {
             settingsManager.imgurRefreshToken = newRefreshToken
         }

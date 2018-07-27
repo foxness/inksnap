@@ -39,7 +39,7 @@ class Reddit private constructor(private val callbacks: Callbacks)
 
     interface Callbacks
     {
-        fun onNewAccessToken()
+        fun onNewAccessToken() // todo: make these pass args like imgur's callbacks
         fun onNewRefreshToken()
         fun onNewLastSubmissionDate()
     }

@@ -179,10 +179,10 @@ abstract class QueueFragment : Fragment()
         val imgurLoginMenuItem = menu.findItem(R.id.menu_queue_imgur_login)!!
 
         redditLoginMenuItem.isEnabled = !redditTokenFetching
-        imgurLoginMenuItem.isEnabled = !imgurAccount.isLoggedIn
         
         // todo: extract hardcoded strings
         redditLoginMenuItem.title = if (reddit.isLoggedIn) "Log out of Reddit" else "Log into Reddit"
+        imgurLoginMenuItem.title = if (imgurAccount.isLoggedIn) "Log out of Imgur" else "Log into Imgur"
 
         val searchItem = menu.findItem(R.id.menu_queue_search)
         val searchView = searchItem.actionView as SearchView
@@ -277,6 +277,25 @@ abstract class QueueFragment : Fragment()
         }
     }
     
+    protected fun logoutImgur()
+    {
+        imgurAccount.logout()
+        activity!!.invalidateOptionsMenu()
+        toast("Logged out of Imgur")
+    }
+    
+    protected fun toggleImgurAccount()
+    {
+        if (imgurAccount.isLoggedIn)
+        {
+            logoutImgur()
+        }
+        else
+        {
+            showImgurLoginDialog()
+        }
+    }
+    
     protected fun sortByTitle()
     {
         settingsManager.sortBy = SettingsManager.SortBy.Title
@@ -310,7 +329,7 @@ abstract class QueueFragment : Fragment()
             }
             R.id.menu_queue_imgur_login ->
             {
-                showImgurLoginDialog()
+                toggleImgurAccount()
                 true
             }
             R.id.menu_queue_settings ->
