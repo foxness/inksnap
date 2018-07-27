@@ -4,6 +4,9 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.content.ClipDescription.MIMETYPE_TEXT_PLAIN
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -22,6 +25,7 @@ class PostFragment : Fragment()
     private lateinit var subredditEdit: EditText
     private lateinit var linkSwitch: Switch
     private lateinit var intendedSubmitDateButton: Button
+    private lateinit var pasteButton: Button
 
     private var intendedSubmitDate: DateTime? = null
 
@@ -110,11 +114,13 @@ class PostFragment : Fragment()
         {
             contentLabel.text = "URL"
             contentEdit.hint = "Enter the url of the post"
+            pasteButton.visibility = View.VISIBLE
         }
         else
         {
             contentLabel.text = "Content"
             contentEdit.hint = "Enter the content of the post"
+            pasteButton.visibility = View.GONE
         }
     }
 
@@ -139,9 +145,24 @@ class PostFragment : Fragment()
         contentEdit = v.findViewById(R.id.post_content)
         contentEdit.setText(post.content)
         
-        // CONTENT LABEL
+        // CONTENT LABEL ----------------------
         
         contentLabel = v.findViewById(R.id.content_label)
+        
+        // PASTE BUTTON -----------------------
+        
+        pasteButton = v.findViewById(R.id.paste_button)
+        val clipboard = context!!.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        pasteButton.setOnClickListener {
+            if (clipboard.hasPrimaryClip() && clipboard.primaryClipDescription.hasMimeType(MIMETYPE_TEXT_PLAIN))
+            {
+                val pasteData = clipboard.primaryClip.getItemAt(0).text
+                if (pasteData != null)
+                {
+                    contentEdit.setText(pasteData)
+                }
+            }
+        }
 
         // SUBREDDIT EDIT ---------------------
 
