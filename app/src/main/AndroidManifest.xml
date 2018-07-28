@@ -36,7 +36,10 @@
             android:parentActivityName=".QueueActivity"
             />
         
-        <activity android:name=".LogActivity" /> <!-- todo: add parent activity name -->
+        <activity
+            android:name=".LogActivity"
+            android:parentActivityName=".QueueActivity"
+            />
 
         <service android:name=".AutosubmitService" />
         
