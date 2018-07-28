@@ -4,11 +4,11 @@ import android.annotation.SuppressLint
 import android.view.View
 import android.widget.SeekBar
 import org.joda.time.Duration
+import space.foxness.snapwalls.Util.earliestPostDate
 import space.foxness.snapwalls.Util.log
 import space.foxness.snapwalls.Util.timeLeftUntil
 import space.foxness.snapwalls.Util.toNice
 import space.foxness.snapwalls.Util.toast
-import space.foxness.snapwalls.Util.earliest
 
 class PeriodicQueueFragment : QueueFragment()
 {
@@ -32,7 +32,8 @@ class PeriodicQueueFragment : QueueFragment()
         }
         else
         {
-            val unpausedTimeLeft = timeLeftUntil(queue.posts.earliest()!!.intendedSubmitDate!!)
+            val earliestPostDate = queue.posts.earliestPostDate()!!
+            val unpausedTimeLeft = timeLeftUntil(earliestPostDate)
             startTimer(unpausedTimeLeft)
         }
 
@@ -101,9 +102,7 @@ class PeriodicQueueFragment : QueueFragment()
 
             startTimerAndRegisterReceiver(timeLeft)
 
-            postScheduler.schedulePeriodicPosts(queue.posts,
-                                                settingsManager.period,
-                                                timeLeft)
+            postScheduler.schedulePeriodicPosts(queue.posts, settingsManager.period, timeLeft)
 
             log("Scheduled ${queue.posts.size} post(s)")
         }
@@ -115,7 +114,8 @@ class PeriodicQueueFragment : QueueFragment()
 
             timerObject.cancel()
 
-            settingsManager.timeLeft = timeLeftUntil(queue.posts.earliest()!!.intendedSubmitDate!!)
+            val earliestPostDate = queue.posts.earliestPostDate()!!
+            settingsManager.timeLeft = timeLeftUntil(earliestPostDate)
 
             postScheduler.cancelScheduledPosts(queue.posts.reversed()) // ...its for optimization
 
@@ -188,7 +188,8 @@ class PeriodicQueueFragment : QueueFragment()
             }
             else
             {
-                val unpausedTimeLeft = timeLeftUntil(queue.posts.earliest()!!.intendedSubmitDate!!)
+                val earliestPostDate = queue.posts.earliestPostDate()!!
+                val unpausedTimeLeft = timeLeftUntil(earliestPostDate)
                 startTimerAndRegisterReceiver(unpausedTimeLeft)
             }
         }
@@ -235,7 +236,8 @@ class PeriodicQueueFragment : QueueFragment()
     {
         if (settingsManager.autosubmitEnabled)
         {
-            val timeLeft = timeLeftUntil(queue.posts.earliest()!!.intendedSubmitDate!!)
+            val earliestPostDate = queue.posts.earliestPostDate()!!
+            val timeLeft = timeLeftUntil(earliestPostDate)
             postScheduler.cancelScheduledPosts(queue.posts)
             queue.deletePost(deletedPostId)
             

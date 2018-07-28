@@ -7,9 +7,9 @@ import android.os.Build
 import android.os.SystemClock
 import org.joda.time.DateTime
 import org.joda.time.Duration
-import space.foxness.snapwalls.Util.timeLeftUntil
 import space.foxness.snapwalls.Util.earliest
 import space.foxness.snapwalls.Util.onlyScheduled
+import space.foxness.snapwalls.Util.timeLeftUntil
 
 // todo: make reddit not a singleton and rename it to reddit account
 
