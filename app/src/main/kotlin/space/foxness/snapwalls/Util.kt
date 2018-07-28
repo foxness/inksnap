@@ -156,4 +156,24 @@ object Util
         val now = DateTime.now()
         return sorted().firstOrNull { it > now }
     }
+
+    fun List<Post>.earliestPostDateFromNow(): DateTime?
+    {
+        return map { it.intendedSubmitDate!! }.earliestFromNow()
+    }
+
+    fun List<Post>.onlyFuture(): List<Post>
+    {
+        val now = DateTime.now()
+        return filter { it.intendedSubmitDate!! > now }
+    }
+
+    fun List<Post>.onlyScheduled() = filter { it.scheduled }
+
+    fun List<Post>.earliest() = minBy { it.intendedSubmitDate!! }
+
+    fun List<Post>.earliestPostDate(): DateTime?
+    {
+        return map { it.intendedSubmitDate!! }.min()
+    }
 }

@@ -8,10 +8,10 @@ import android.os.*
 import android.support.v4.content.LocalBroadcastManager
 import org.joda.time.DateTime
 import org.joda.time.Duration
-import space.foxness.snapwalls.Queue.Companion.earliest
-import space.foxness.snapwalls.Queue.Companion.onlyScheduled
 import space.foxness.snapwalls.Util.isImageUrl
 import space.foxness.snapwalls.Util.toNice
+import space.foxness.snapwalls.Util.earliest
+import space.foxness.snapwalls.Util.onlyScheduled
 import java.io.PrintWriter
 import java.io.StringWriter
 

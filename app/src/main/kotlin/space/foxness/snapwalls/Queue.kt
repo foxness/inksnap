@@ -28,9 +28,4 @@ class Queue private constructor(context: Context)
     }
 
     companion object : SingletonHolder<Queue, Context>(::Queue)
-    {
-        fun List<Post>.onlyScheduled() = filter { it.scheduled } // todo: move these to Util?
-        
-        fun List<Post>.earliest() = minBy { it.intendedSubmitDate!!.millis }
-    }
 }

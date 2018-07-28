@@ -4,11 +4,11 @@ import android.annotation.SuppressLint
 import android.view.View
 import android.widget.SeekBar
 import org.joda.time.Duration
-import space.foxness.snapwalls.Queue.Companion.earliest
 import space.foxness.snapwalls.Util.log
 import space.foxness.snapwalls.Util.timeLeftUntil
 import space.foxness.snapwalls.Util.toNice
 import space.foxness.snapwalls.Util.toast
+import space.foxness.snapwalls.Util.earliest
 
 class PeriodicQueueFragment : QueueFragment()
 {
