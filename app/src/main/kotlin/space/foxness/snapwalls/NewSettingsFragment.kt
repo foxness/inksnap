@@ -17,6 +17,7 @@ import space.foxness.snapwalls.Util.toast
 class NewSettingsFragment : Fragment()
 {
     private lateinit var redditButton: Button
+    private lateinit var imgurButton: Button
     
     private lateinit var settingsManager: SettingsManager
     private lateinit var redditAccount: Reddit
@@ -41,11 +42,62 @@ class NewSettingsFragment : Fragment()
         
         // REDDIT ACCOUNT --------------------
         
-        redditButton = v.findViewById(R.id.reddit_toggle)
+        redditButton = v.findViewById(R.id.reddit_toggle) // todo: set enabled only if autosubmit is off
         redditButton.text = if (redditAccount.isLoggedIn) "Log out" else "Log in"
         redditButton.setOnClickListener { onRedditButtonClick() }
+
+        // IMGUR ACCOUNT --------------------
+
+        imgurButton = v.findViewById(R.id.imgur_toggle)
+        imgurButton.text = if (imgurAccount.isLoggedIn) "Log out" else "Log in"
+        imgurButton.setOnClickListener { onImgurButtonClick() }
         
         return v
+    }
+    
+    @SuppressLint("SetTextI18n") // todo: fixeroni
+    private fun onImgurButtonClick()
+    {
+        if (imgurAccount.isLoggedIn)
+        {
+            imgurAccount.logout()
+            imgurButton.text = "Log in"
+            toast("Logged out of Imgur")
+        }
+        else
+        {
+            showImgurLoginDialog()
+        }
+    }
+    
+    private fun showImgurLoginDialog()
+    {
+        val authDialog = Dialog(context!!)
+        authDialog.setContentView(R.layout.dialog_auth)
+
+        val authWebview = authDialog.findViewById<WebView>(R.id.auth_webview)
+
+        authDialog.setOnDismissListener {
+            Util.clearCookiesAndCache(authWebview)
+            imgurButton.text = if (imgurAccount.isLoggedIn) "Log out" else "Log in"
+            toast(if (imgurAccount.isLoggedIn) "Success" else "Fail")
+        }
+
+        authWebview.webViewClient = object : WebViewClient()
+        {
+            override fun onPageFinished(view: WebView, url: String)
+            {
+                super.onPageFinished(view, url)
+
+                if (imgurAccount.tryExtractTokens(url))
+                {
+                    authDialog.dismiss()
+                }
+            }
+        }
+
+        authWebview.loadUrl(imgurAccount.authorizationUrl)
+        authDialog.show()
     }
     
     @SuppressLint("SetTextI18n") // todo: fixeroni
