@@ -23,6 +23,7 @@ class SettingsManager private constructor(context: Context)
         sortBy = SortBy.Date
         notFirstLaunch = false
         debugDontPost = false
+        autosubmitType = AutosubmitType.Manual
     }
     
     private val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
@@ -67,15 +68,8 @@ class SettingsManager private constructor(context: Context)
     { Title, Date }
 
     var sortBy: SortBy
-        get()
-        {
-            // default value 1 is sort by date
-            return SortBy.values()[sharedPreferences.getInt(PREF_SORT_BY, 1)]
-        }
-        set(value)
-        {
-            sharedPreferences.edit().putInt(PREF_SORT_BY, value.ordinal).apply()
-        }
+        get() = SortBy.values()[getInt(PREF_SORT_BY)!!]
+        set(value) = setInt(PREF_SORT_BY, value.ordinal)
     
     var notFirstLaunch: Boolean // getBool()'s default value should be false for this to work
         get() = getBool(PREF_NOT_FIRST_LAUNCH)
@@ -85,20 +79,16 @@ class SettingsManager private constructor(context: Context)
         get() = getBool(PREF_DEBUG_DONT_POST)
         set(value) = setBool(PREF_DEBUG_DONT_POST, value)
 
-    // SETTINGS ------
-
-    val period get() = Duration(getInt(PREF_PERIOD_MINUTES)!! * MILLIS_IN_MINUTE)
-
     enum class AutosubmitType
     { Manual, Periodic }
 
-    val autosubmitType: AutosubmitType
-        get() = when (sharedPreferences.getString(PREF_AUTOSUBMIT_TYPE, ""))
-        {
-            PREFVAL_MANUAL_AUTOSUBMIT -> AutosubmitType.Manual
-            PREFVAL_PERIODIC_AUTOSUBMIT -> AutosubmitType.Periodic
-            else -> throw Exception("Unknown autosubmit type")
-        }
+    var autosubmitType: AutosubmitType
+        get() = AutosubmitType.values()[getInt(PREF_AUTOSUBMIT_TYPE)!!]
+        set(value) = setInt(PREF_AUTOSUBMIT_TYPE, value.ordinal)
+
+    // SETTINGS ------
+
+    val period get() = Duration(getInt(PREF_PERIOD_MINUTES)!! * MILLIS_IN_MINUTE)
 
     val wallpaperMode: Boolean
         get() = getBool(PREF_WALLPAPER_MODE)
@@ -176,13 +166,10 @@ class SettingsManager private constructor(context: Context)
         private const val PREF_SORT_BY = "sortBy"
         private const val PREF_NOT_FIRST_LAUNCH = "notFirstLaunch"
         private const val PREF_DEBUG_DONT_POST = "debug_dont_post"
+        private const val PREF_AUTOSUBMIT_TYPE = "autosubmit_type"
         
         private const val PREF_PERIOD_MINUTES = "period_minutes"
-        private const val PREF_AUTOSUBMIT_TYPE = "autosubmit_type"
         private const val PREF_WALLPAPER_MODE = "wallpaper_mode"
-
-        private const val PREFVAL_MANUAL_AUTOSUBMIT = "0"
-        private const val PREFVAL_PERIODIC_AUTOSUBMIT = "1"
 
         private const val LONG_NULL_SUBSTITUTE = Long.MIN_VALUE
         private const val INT_NULL_SUBSTITUTE = Int.MIN_VALUE

@@ -2,8 +2,10 @@ package space.foxness.snapwalls
 
 import android.annotation.SuppressLint
 import android.app.Dialog
+import android.content.DialogInterface
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v7.app.AlertDialog
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,6 +21,7 @@ class NewSettingsFragment : Fragment()
 {
     private lateinit var redditButton: Button
     private lateinit var imgurButton: Button
+    private lateinit var autosubmitTypeButton: Button
     
     private lateinit var settingsManager: SettingsManager
     private lateinit var redditAccount: Reddit
@@ -43,7 +46,7 @@ class NewSettingsFragment : Fragment()
         
         // REDDIT ACCOUNT --------------------
         
-        redditButton = v.findViewById(R.id.reddit_toggle) // todo: set enabled only if autosubmit is off
+        redditButton = v.findViewById(R.id.reddit_toggle)
         redditButton.text = if (redditAccount.isLoggedIn) "Log out" else "Log in"
         redditButton.setOnClickListener { onRedditButtonClick() }
 
@@ -53,13 +56,44 @@ class NewSettingsFragment : Fragment()
         imgurButton.text = if (imgurAccount.isLoggedIn) "Log out" else "Log in"
         imgurButton.setOnClickListener { onImgurButtonClick() }
         
-        // DEBUG DONT POST SWITCH -----------
+        // DEBUG DONT POST ------------------
         
         val debugDontPostSwitch = v.findViewById<Switch>(R.id.debug_dont_post_switch)
         debugDontPostSwitch.isChecked = settingsManager.debugDontPost
         debugDontPostSwitch.setOnCheckedChangeListener { buttonView, isChecked -> onDebugDontPostCheckedChanged(isChecked) }
         
+        // AUTOSUBMIT TYPE ------------------
+        
+        autosubmitTypeButton = v.findViewById(R.id.autosubmit_button)
+        autosubmitTypeButton.setOnClickListener { onAutosubmitTypeButtonClick() }
+        
         return v
+    }
+
+    override fun onStart()
+    {
+        super.onStart()
+        autosubmitTypeButton.isEnabled = !settingsManager.autosubmitEnabled
+        redditButton.isEnabled = !settingsManager.autosubmitEnabled
+    }
+    
+    private fun onAutosubmitTypeButtonClick()
+    {
+        val types = arrayOf("Manual", "Periodic") // todo: extract hardcoded strings
+        val checkedItem = settingsManager.autosubmitType.ordinal
+        
+        val adb = AlertDialog.Builder(context!!)
+        
+        adb.setTitle("Autosubmit type") // todo: same ^
+        adb.setNegativeButton("Cancel") { dialog: DialogInterface, which: Int ->
+            dialog.dismiss()
+        }
+        adb.setSingleChoiceItems(types, checkedItem) { dialog: DialogInterface, which: Int ->
+            settingsManager.autosubmitType = SettingsManager.AutosubmitType.values()[which]
+            dialog.dismiss()
+        }
+        
+        adb.show()
     }
     
     private fun onDebugDontPostCheckedChanged(checked: Boolean)
