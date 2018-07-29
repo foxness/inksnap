@@ -32,32 +32,33 @@ class Post : Serializable
         val notBlankTitle = title.isNotBlank()
         val notBlankSubreddit = subreddit.isNotBlank()
         val validContent = !isLink || isValidUrl(content)
-        val validDate = !dateMustBeValidForPostToBeValid || intendedSubmitDate != null
+        
+        val isd = intendedSubmitDate
+        // && has higher precedence than ||
+        val validDate = !dateMustBeValidForPostToBeValid || isd != null && isd > DateTime.now()
 
         return notBlankTitle && notBlankSubreddit && validContent && validDate
     }
     
-    fun reasonWhyInvalid(dateMustBeValidForPostToBeValid: Boolean): String?
+    fun reasonWhyInvalid(dateMustBeValidForPostToBeValid: Boolean): String
     {
-        return if (title.isBlank())
+        val ex = Exception("The post was not invalid")
+        return when
         {
-            "Title must not be blank"
-        }
-        else if (subreddit.isBlank())
-        {
-            "Subreddit must not be blank"
-        }
-        else if (isLink && !isValidUrl(content))
-        {
-            "Link posts must have a valid url"
-        }
-        else if (dateMustBeValidForPostToBeValid && intendedSubmitDate == null)
-        {
-            "Date should be set"
-        }
-        else
-        {
-            null
+            title.isBlank() -> "Title must not be blank"
+            subreddit.isBlank() -> "Subreddit must not be blank"
+            isLink && !isValidUrl(content) -> "Link posts must have a valid url"
+            dateMustBeValidForPostToBeValid ->
+            {
+                val isd = intendedSubmitDate
+                when
+                {
+                    isd == null -> "Date should be set"
+                    isd <= DateTime.now() -> "Date should not be in the past"
+                    else -> throw ex
+                }
+            }
+            else -> throw ex
         }
     }
     

@@ -65,7 +65,7 @@ class Reddit private constructor(private val callbacks: Callbacks)
     {
         if (!post.isValid(false))
         {
-            throw Exception("Invalid post: ${post.reasonWhyInvalid(false)!!}")
+            throw Exception("Invalid post: ${post.reasonWhyInvalid(false)}")
         }
 
         if (debugDontPost)

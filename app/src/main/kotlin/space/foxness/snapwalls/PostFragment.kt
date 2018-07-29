@@ -276,7 +276,7 @@ class PostFragment : Fragment()
             }
             else
             {
-                toast(post.reasonWhyInvalid(allowIntendedSubmitDateEditing)!!)
+                toast(post.reasonWhyInvalid(allowIntendedSubmitDateEditing))
             }
         }
         
