@@ -40,6 +40,11 @@
             android:name=".LogActivity"
             android:parentActivityName=".QueueActivity"
             />
+        
+        <activity
+            android:name=".NewSettingsActivity"
+            android:parentActivityName=".QueueActivity"
+            />
 
         <service android:name=".AutosubmitService" />
         

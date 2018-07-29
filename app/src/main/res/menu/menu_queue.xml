@@ -65,6 +65,11 @@
         />
 
     <item
+        android:id="@+id/menu_queue_new_settings"
+        android:title="@string/new_settings"
+        />
+
+    <item
         android:id="@+id/menu_queue_log"
         android:title="@string/menu_log"
         />

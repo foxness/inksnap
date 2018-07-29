@@ -33,7 +33,7 @@ class ManualQueueFragment : QueueFragment()
         updatePostList()
     }
 
-    override fun toggleAutosubmit(on: Boolean) // todo: handle posts that are earlier than now (prohibit them in post fragment and handle here)
+    override fun toggleAutosubmit(on: Boolean)
     {
         if (on == settingsManager.autosubmitEnabled) // this should never happen
         {

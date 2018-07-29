@@ -26,4 +26,5 @@
     <string name="sort_by_date">Date</string>
     <string name="menu_search">Search</string>
     <string name="paste">Paste</string>
+    <string name="new_settings">New settings</string>
 </resources>

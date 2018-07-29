@@ -327,56 +327,27 @@ abstract class QueueFragment : Fragment()
         settingsManager.sortBy = SettingsManager.SortBy.Date
         updatePostList()
     }
+    
+    protected fun openNewSettings()
+    {
+        val i = NewSettingsActivity.newIntent(context!!)
+        startActivity(i)
+    }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean
     {
         return when (item!!.itemId)
         {
-            R.id.menu_queue_add ->
-            {
-                createNewPost()
-                true
-            }
-            R.id.menu_queue_test ->
-            {
-                testButton()
-                true
-            }
-            R.id.menu_queue_reddit_login ->
-            {
-                toggleRedditAccount()
-                true
-            }
-            R.id.menu_queue_imgur_login ->
-            {
-                toggleImgurAccount()
-                true
-            }
-            R.id.menu_queue_settings ->
-            {
-                openSettings()
-                true
-            }
-            R.id.menu_queue_log ->
-            {
-                openLog()
-                true
-            }
-            R.id.menu_queue_extract ->
-            {
-                extractPosts()
-                true
-            }
-            R.id.menu_queue_sort_by_title ->
-            {
-                sortByTitle()
-                true
-            }
-            R.id.menu_queue_sort_by_date ->
-            {
-                sortByDate()
-                true
-            }
+            R.id.menu_queue_add -> { createNewPost(); true }
+            R.id.menu_queue_test -> { testButton(); true }
+            R.id.menu_queue_reddit_login -> { toggleRedditAccount(); true }
+            R.id.menu_queue_imgur_login -> { toggleImgurAccount(); true }
+            R.id.menu_queue_settings -> { openSettings(); true }
+            R.id.menu_queue_log -> { openLog(); true }
+            R.id.menu_queue_extract -> { extractPosts(); true }
+            R.id.menu_queue_sort_by_title -> { sortByTitle(); true }
+            R.id.menu_queue_sort_by_date -> { sortByDate(); true }
+            R.id.menu_queue_new_settings -> { openNewSettings(); true }
             else -> super.onOptionsItemSelected(item)
         }
     }
