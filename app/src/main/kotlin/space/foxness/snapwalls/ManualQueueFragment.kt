@@ -61,7 +61,7 @@ class ManualQueueFragment : QueueFragment()
             {
                 val earliest = futurePosts.earliestPostDate()!!
                 val timeLeft = timeLeftUntil(earliest)
-                startTimerAndRegisterReceiver(timeLeft)
+                startTimerAndRegisterReceiver(timeLeft) // todo: don't touch the timer because it's already running
 
                 postScheduler.scheduleManualPosts(futurePosts)
 
