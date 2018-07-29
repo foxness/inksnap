@@ -94,7 +94,7 @@ abstract class QueueFragment : Fragment()
     
     protected open fun onTimerTick(millisUntilFinished: Long) { }
 
-    private val submitReceiver = object : BroadcastReceiver()
+    private val submitReceiver: BroadcastReceiver = object : BroadcastReceiver()
     {
         override fun onReceive(context: Context?, intent: Intent?)
         {
