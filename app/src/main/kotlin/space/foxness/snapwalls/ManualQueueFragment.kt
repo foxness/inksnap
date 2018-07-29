@@ -27,16 +27,7 @@ class ManualQueueFragment : QueueFragment()
             // the submit service started
         }
 
-        val earliestFromNow = queue.posts.earliestPostDateFromNow()
-        if (earliestFromNow == null)
-        {
-            updateTimerText(null)
-        }
-        else
-        {
-            val timeLeft = timeLeftUntil(earliestFromNow)
-            startTimer(timeLeft)
-        }
+        startTimerForEarliestPostDateFromNow()
 
         updatePostList()
     }
@@ -154,11 +145,30 @@ class ManualQueueFragment : QueueFragment()
 
         unregisterSubmitReceiver() // maybe move this into the if?
     }
+    
+    fun startTimerForEarliestPostDateFromNow()
+    {
+        val earliestFromNow = queue.posts.earliestPostDateFromNow()
+        if (earliestFromNow == null)
+        {
+            updateTimerText(null)
+        }
+        else
+        {
+            val timeLeft = timeLeftUntil(earliestFromNow)
+            startTimer(timeLeft)
+        }
+    }
 
     override fun onTimerFinish()
     {
         super.onTimerFinish()
         // todo: remove the submitted item from post list?
+        
+        if (!settingsManager.autosubmitEnabled)
+        {
+            startTimerForEarliestPostDateFromNow()
+        }
     }
 
     override fun onTimerTick(millisUntilFinished: Long)
