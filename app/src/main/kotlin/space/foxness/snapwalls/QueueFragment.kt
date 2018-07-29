@@ -21,8 +21,6 @@ import android.webkit.WebViewClient
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
-import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.uiThread
 import org.joda.time.Duration
 import space.foxness.snapwalls.Util.toast
 
@@ -42,8 +40,6 @@ abstract class QueueFragment : Fragment()
     protected lateinit var thumbnailCache: ThumbnailCache
     
     protected var searchQuery: String? = null
-
-    private var redditTokenFetching = false
 
     private var receiverRegistered = false
     
@@ -174,14 +170,10 @@ abstract class QueueFragment : Fragment()
     {
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.menu_queue, menu)
-
-        val redditLoginMenuItem = menu.findItem(R.id.menu_queue_reddit_login)!!
+        
         val imgurLoginMenuItem = menu.findItem(R.id.menu_queue_imgur_login)!!
-
-        redditLoginMenuItem.isEnabled = !redditTokenFetching
         
         // todo: extract hardcoded strings
-        redditLoginMenuItem.title = if (reddit.isLoggedIn) "Log out of Reddit" else "Log into Reddit"
         imgurLoginMenuItem.title = if (imgurAccount.isLoggedIn) "Log out of Imgur" else "Log into Imgur"
 
         val searchItem = menu.findItem(R.id.menu_queue_search)
@@ -277,26 +269,6 @@ abstract class QueueFragment : Fragment()
         startActivityForResult(i, REQUEST_CODE_NEW_POST)
     }
     
-    protected fun logoutReddit()
-    {
-        toggleAutosubmit(false)
-        reddit.logout()
-        activity!!.invalidateOptionsMenu()
-        toast("Logged out of Reddit")
-    }
-    
-    protected fun toggleRedditAccount()
-    {
-        if (reddit.isLoggedIn)
-        {
-            logoutReddit()
-        }
-        else
-        {
-            showRedditLoginDialog()
-        }
-    }
-    
     protected fun logoutImgur()
     {
         imgurAccount.logout()
@@ -340,7 +312,6 @@ abstract class QueueFragment : Fragment()
         {
             R.id.menu_queue_add -> { createNewPost(); true }
             R.id.menu_queue_test -> { testButton(); true }
-            R.id.menu_queue_reddit_login -> { toggleRedditAccount(); true }
             R.id.menu_queue_imgur_login -> { toggleImgurAccount(); true }
             R.id.menu_queue_settings -> { openSettings(); true }
             R.id.menu_queue_log -> { openLog(); true }
@@ -364,49 +335,6 @@ abstract class QueueFragment : Fragment()
     {
         val i = LogActivity.newIntent(context!!)
         startActivity(i)
-    }
-
-    protected fun showRedditLoginDialog()
-    {
-        val authDialog = Dialog(context!!)
-        authDialog.setContentView(R.layout.dialog_auth)
-
-        authDialog.setOnCancelListener { toast("Fail") }
-
-        val authWebview = authDialog.findViewById<WebView>(R.id.auth_webview)
-        
-        authDialog.setOnDismissListener { 
-            Util.clearCookiesAndCache(authWebview)
-        }
-        
-        authWebview.webViewClient = object : WebViewClient()
-        {
-            override fun onPageFinished(view: WebView, url: String)
-            {
-                super.onPageFinished(view, url)
-
-                if (reddit.tryExtractCode(url))
-                {
-                    redditTokenFetching = true
-                    activity!!.invalidateOptionsMenu()
-
-                    authDialog.dismiss()
-
-                    doAsync {
-                        reddit.fetchAuthTokens()
-
-                        uiThread {
-                            redditTokenFetching = false
-                            activity!!.invalidateOptionsMenu()
-                            toast(if (reddit.isLoggedIn) "Success" else "Fail")
-                        }
-                    }
-                }
-            }
-        }
-
-        authWebview.loadUrl(reddit.authorizationUrl)
-        authDialog.show()
     }
 
     protected fun openSettings()

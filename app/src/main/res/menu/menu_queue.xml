@@ -53,11 +53,6 @@
         android:id="@+id/menu_queue_imgur_login"
         android:title="@string/menu_imgur_login"
         />
-    
-    <item
-        android:id="@+id/menu_queue_reddit_login"
-        android:title="@string/menu_reddit_login"
-        />
 
     <item
         android:id="@+id/menu_queue_settings"

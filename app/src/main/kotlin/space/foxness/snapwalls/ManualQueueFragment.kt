@@ -44,7 +44,7 @@ class ManualQueueFragment : QueueFragment()
         {
             if (!reddit.isLoggedIn)
             {
-                toast("You must be signed in to autosubmit")
+                toast("You must be logged into Reddit for that")
                 return
             }
             
