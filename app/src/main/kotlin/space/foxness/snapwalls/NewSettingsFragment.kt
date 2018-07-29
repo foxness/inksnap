@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Button
+import android.widget.Switch
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 import space.foxness.snapwalls.Util.toast
@@ -52,7 +53,18 @@ class NewSettingsFragment : Fragment()
         imgurButton.text = if (imgurAccount.isLoggedIn) "Log out" else "Log in"
         imgurButton.setOnClickListener { onImgurButtonClick() }
         
+        // DEBUG DONT POST SWITCH -----------
+        
+        val debugDontPostSwitch = v.findViewById<Switch>(R.id.debug_dont_post_switch)
+        debugDontPostSwitch.isChecked = settingsManager.debugDontPost
+        debugDontPostSwitch.setOnCheckedChangeListener { buttonView, isChecked -> onDebugDontPostCheckedChanged(isChecked) }
+        
         return v
+    }
+    
+    private fun onDebugDontPostCheckedChanged(checked: Boolean)
+    {
+        settingsManager.debugDontPost = checked // todo: save only on activity destroy?
     }
     
     @SuppressLint("SetTextI18n") // todo: fixeroni

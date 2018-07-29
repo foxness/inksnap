@@ -22,6 +22,7 @@ class SettingsManager private constructor(context: Context)
         imgurAccessTokenExpirationDate = null
         sortBy = SortBy.Date
         notFirstLaunch = false
+        debugDontPost = false
     }
     
     private val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
@@ -79,12 +80,14 @@ class SettingsManager private constructor(context: Context)
     var notFirstLaunch: Boolean // getBool()'s default value should be false for this to work
         get() = getBool(PREF_NOT_FIRST_LAUNCH)
         set(value) = setBool(PREF_NOT_FIRST_LAUNCH, value)
+    
+    var debugDontPost: Boolean
+        get() = getBool(PREF_DEBUG_DONT_POST)
+        set(value) = setBool(PREF_DEBUG_DONT_POST, value)
 
     // SETTINGS ------
 
     val period get() = Duration(getInt(PREF_PERIOD_MINUTES)!! * MILLIS_IN_MINUTE)
-
-    val debugDontPost get() = getBool(PREF_DEBUG_DONT_POST)
 
     enum class AutosubmitType
     { Manual, Periodic }
@@ -172,9 +175,9 @@ class SettingsManager private constructor(context: Context)
         private const val PREF_IMGUR_ACCESS_TOKEN_EXPIRATION_DATE = "imgurAccessTokenExpirationDate"
         private const val PREF_SORT_BY = "sortBy"
         private const val PREF_NOT_FIRST_LAUNCH = "notFirstLaunch"
-
-        private const val PREF_PERIOD_MINUTES = "period_minutes"
         private const val PREF_DEBUG_DONT_POST = "debug_dont_post"
+        
+        private const val PREF_PERIOD_MINUTES = "period_minutes"
         private const val PREF_AUTOSUBMIT_TYPE = "autosubmit_type"
         private const val PREF_WALLPAPER_MODE = "wallpaper_mode"
 
