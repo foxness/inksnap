@@ -1,7 +1,6 @@
 package space.foxness.snapwalls
 
 import android.app.Activity
-import android.app.Dialog
 import android.content.*
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
@@ -16,8 +15,6 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SearchView
 import android.view.*
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
@@ -35,7 +32,6 @@ abstract class QueueFragment : Fragment()
     protected lateinit var settingsManager: SettingsManager
     protected lateinit var queue: Queue
     protected lateinit var reddit: Reddit
-    protected lateinit var imgurAccount: ImgurAccount
     protected lateinit var postScheduler: PostScheduler
     protected lateinit var thumbnailCache: ThumbnailCache
     
@@ -112,7 +108,6 @@ abstract class QueueFragment : Fragment()
         queue = Queue.getInstance(ctx)
         postScheduler = PostScheduler.getInstance(ctx)
         reddit = Autoreddit.getInstance(ctx).reddit
-        imgurAccount = Autoimgur.getInstance(ctx).imgurAccount
         thumbnailCache = ThumbnailCache.getInstance(ctx)
         
         val responseHandler = Handler()
@@ -170,11 +165,6 @@ abstract class QueueFragment : Fragment()
     {
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.menu_queue, menu)
-        
-        val imgurLoginMenuItem = menu.findItem(R.id.menu_queue_imgur_login)!!
-        
-        // todo: extract hardcoded strings
-        imgurLoginMenuItem.title = if (imgurAccount.isLoggedIn) "Log out of Imgur" else "Log into Imgur"
 
         val searchItem = menu.findItem(R.id.menu_queue_search)
         val searchView = searchItem.actionView as SearchView
@@ -269,25 +259,6 @@ abstract class QueueFragment : Fragment()
         startActivityForResult(i, REQUEST_CODE_NEW_POST)
     }
     
-    protected fun logoutImgur()
-    {
-        imgurAccount.logout()
-        activity!!.invalidateOptionsMenu()
-        toast("Logged out of Imgur")
-    }
-    
-    protected fun toggleImgurAccount()
-    {
-        if (imgurAccount.isLoggedIn)
-        {
-            logoutImgur()
-        }
-        else
-        {
-            showImgurLoginDialog()
-        }
-    }
-    
     protected fun sortByTitle()
     {
         settingsManager.sortBy = SettingsManager.SortBy.Title
@@ -312,7 +283,6 @@ abstract class QueueFragment : Fragment()
         {
             R.id.menu_queue_add -> { createNewPost(); true }
             R.id.menu_queue_test -> { testButton(); true }
-            R.id.menu_queue_imgur_login -> { toggleImgurAccount(); true }
             R.id.menu_queue_settings -> { openSettings(); true }
             R.id.menu_queue_log -> { openLog(); true }
             R.id.menu_queue_extract -> { extractPosts(); true }
@@ -346,36 +316,6 @@ abstract class QueueFragment : Fragment()
     protected fun testButton()
     {
         toast(VariantVariables.VARIANT_NAME)
-    }
-
-    protected fun showImgurLoginDialog()
-    {
-        val authDialog = Dialog(context!!)
-        authDialog.setContentView(R.layout.dialog_auth)
-
-        val authWebview = authDialog.findViewById<WebView>(R.id.auth_webview)
-
-        authDialog.setOnDismissListener {
-            activity!!.invalidateOptionsMenu()
-            Util.clearCookiesAndCache(authWebview)
-            toast(if (imgurAccount.isLoggedIn) "Success" else "Fail")
-        }
-        
-        authWebview.webViewClient = object : WebViewClient()
-        {
-            override fun onPageFinished(view: WebView, url: String)
-            {
-                super.onPageFinished(view, url)
-
-                if (imgurAccount.tryExtractTokens(url))
-                {
-                    authDialog.dismiss()
-                }
-            }
-        }
-
-        authWebview.loadUrl(imgurAccount.authorizationUrl)
-        authDialog.show()
     }
 
     protected fun startTimer(timeLeft: Duration)
