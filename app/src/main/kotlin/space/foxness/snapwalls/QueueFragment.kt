@@ -231,14 +231,34 @@ abstract class QueueFragment : Fragment()
     {
         var posts = queue.posts
         
-        val sq = searchQuery
-        if (sq != null)
+        val stringQuery = searchQuery
+        if (stringQuery != null)
         {
-            val query = sq.toRegex(RegexOption.IGNORE_CASE)
+            var regexQuery: Regex? = null
             
-            posts = posts.filter { it.title.contains(query)
-                                   || it.content.contains(query)
-                                   || it.subreddit.contains(query) }
+            try
+            {
+                regexQuery = stringQuery.toRegex(RegexOption.IGNORE_CASE)
+            }
+            catch (exception: Exception)
+            {
+                // nuthin
+            }
+
+            val predicate = if (regexQuery == null)
+            {
+                { it: Post -> it.title.contains(stringQuery) 
+                              || it.content.contains(stringQuery) 
+                              || it.subreddit.contains(stringQuery) }
+            }
+            else
+            {
+                { it: Post -> it.title.contains(regexQuery) 
+                              || it.content.contains(regexQuery) 
+                              || it.subreddit.contains(regexQuery) }
+            }
+            
+            posts = posts.filter(predicate)
         }
         
         val comparator = when (settingsManager.sortBy)
