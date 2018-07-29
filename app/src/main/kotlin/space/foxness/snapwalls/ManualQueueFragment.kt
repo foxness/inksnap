@@ -6,6 +6,7 @@ import space.foxness.snapwalls.Util.earliestPostDate
 import space.foxness.snapwalls.Util.earliestPostDateFromNow
 import space.foxness.snapwalls.Util.log
 import space.foxness.snapwalls.Util.onlyFuture
+import space.foxness.snapwalls.Util.onlyPast
 import space.foxness.snapwalls.Util.timeLeftUntil
 import space.foxness.snapwalls.Util.toNice
 import space.foxness.snapwalls.Util.toast
@@ -44,6 +45,12 @@ class ManualQueueFragment : QueueFragment()
             if (!reddit.isLoggedIn)
             {
                 toast("You must be signed in to autosubmit")
+                return
+            }
+            
+            if (queue.posts.onlyPast().isNotEmpty())
+            {
+                toast("You have a post date in the past")
                 return
             }
 
@@ -146,7 +153,7 @@ class ManualQueueFragment : QueueFragment()
         unregisterSubmitReceiver() // maybe move this into the if?
     }
     
-    fun startTimerForEarliestPostDateFromNow()
+    private fun startTimerForEarliestPostDateFromNow()
     {
         val earliestFromNow = queue.posts.earliestPostDateFromNow()
         if (earliestFromNow == null)

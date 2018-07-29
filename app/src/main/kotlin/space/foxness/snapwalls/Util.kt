@@ -168,6 +168,12 @@ object Util
         return filter { it.intendedSubmitDate!! > now }
     }
 
+    fun List<Post>.onlyPast(): List<Post>
+    {
+        val now = DateTime.now()
+        return filter { it.intendedSubmitDate!! <= now }
+    }
+
     fun List<Post>.onlyScheduled() = filter { it.scheduled }
 
     fun List<Post>.earliest() = minBy { it.intendedSubmitDate!! }
