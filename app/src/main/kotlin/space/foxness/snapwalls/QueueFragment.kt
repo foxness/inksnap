@@ -271,9 +271,9 @@ abstract class QueueFragment : Fragment()
         updatePostList()
     }
     
-    protected fun openNewSettings()
+    protected fun openSettings()
     {
-        val i = NewSettingsActivity.newIntent(context!!)
+        val i = SettingsActivity.newIntent(context!!)
         startActivity(i)
     }
 
@@ -283,12 +283,11 @@ abstract class QueueFragment : Fragment()
         {
             R.id.menu_queue_add -> { createNewPost(); true }
             R.id.menu_queue_test -> { testButton(); true }
-            R.id.menu_queue_settings -> { openSettings(); true }
             R.id.menu_queue_log -> { openLog(); true }
             R.id.menu_queue_extract -> { extractPosts(); true }
             R.id.menu_queue_sort_by_title -> { sortByTitle(); true }
             R.id.menu_queue_sort_by_date -> { sortByDate(); true }
-            R.id.menu_queue_new_settings -> { openNewSettings(); true }
+            R.id.menu_queue_settings -> { openSettings(); true }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -304,12 +303,6 @@ abstract class QueueFragment : Fragment()
     protected fun openLog()
     {
         val i = LogActivity.newIntent(context!!)
-        startActivity(i)
-    }
-
-    protected fun openSettings()
-    {
-        val i = SettingsActivity.newIntent(context!!)
         startActivity(i)
     }
 
