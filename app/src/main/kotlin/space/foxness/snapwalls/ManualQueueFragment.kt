@@ -19,13 +19,6 @@ class ManualQueueFragment : QueueFragment()
     override fun onSubmitReceived() // assumes that autosubmit is on
     {
         super.onSubmitReceived()
-        
-        if (!settingsManager.autosubmitEnabled) // todo: fix this
-        {
-            throw Exception("How the hey did this even happen?")
-            // hint: it must have happened when autosubmitEnabled was turned off right before
-            // the submit service started
-        }
 
         startTimerForEarliestPostDateFromNow()
 
