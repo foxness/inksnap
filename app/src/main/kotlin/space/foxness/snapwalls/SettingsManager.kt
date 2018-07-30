@@ -1,7 +1,6 @@
 package space.foxness.snapwalls
 
 import android.content.Context
-import android.support.v7.preference.PreferenceManager
 import org.joda.time.DateTime
 import org.joda.time.Duration
 
@@ -27,7 +26,7 @@ class SettingsManager private constructor(context: Context)
         period = Duration.standardHours(3)
     }
     
-    private val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+    private val sharedPreferences = context.getSharedPreferences(NAME, Context.MODE_PRIVATE)
 
     var redditAccessToken: String?
         get() = getString(PREF_REDDIT_ACCESS_TOKEN)
@@ -155,6 +154,8 @@ class SettingsManager private constructor(context: Context)
 
     companion object : SingletonHolder<SettingsManager, Context>(::SettingsManager)
     {
+        private const val NAME = "settings"
+        
         private const val PREF_REDDIT_ACCESS_TOKEN = "redditAccessToken"
         private const val PREF_REDDIT_REFRESH_TOKEN = "redditRefreshToken"
         private const val PREF_REDDIT_ACCESS_TOKEN_EXPIRATION_DATE =
