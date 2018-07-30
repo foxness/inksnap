@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorAccent">#8c9eff</color>
+    <color name="dividerColor">#1fffffff</color>
 </resources>

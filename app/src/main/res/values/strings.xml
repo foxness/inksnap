@@ -24,4 +24,11 @@
     <string name="menu_search">Search</string>
     <string name="paste">Paste</string>
     <string name="settings">Settings</string>
+    <string name="reddit_account">Reddit account</string>
+    <string name="log_out">Log out</string>
+    <string name="imgur_account">Imgur account</string>
+    <string name="debug_dont_post">[DEBUG] Don\'t post</string>
+    <string name="autosubmit_type">Autosubmit type</string>
+    <string name="timer_period">Timer period</string>
+    <string name="wallpaper_mode">Wallpaper mode</string>
 </resources>
