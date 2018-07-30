@@ -47,11 +47,7 @@
     <item
         android:id="@+id/menu_queue_test"
         android:title="Test"
-        tools:ignore="HardcodedText" />
-
-    <item
-        android:id="@+id/menu_queue_settings"
-        android:title="@string/settings"
+        tools:ignore="HardcodedText"
         />
 
     <item
@@ -62,6 +58,21 @@
     <item
         android:id="@+id/menu_queue_extract"
         android:title="@string/menu_extract"
+        />
+
+    <item
+        android:id="@+id/menu_queue_posted"
+        android:title="@string/posted"
+        />
+
+    <item
+        android:id="@+id/menu_queue_failed"
+        android:title="@string/failed"
+        />
+
+    <item
+        android:id="@+id/menu_queue_settings"
+        android:title="@string/settings"
         />
     
 </menu>

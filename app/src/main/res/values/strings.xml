@@ -31,4 +31,6 @@
     <string name="autosubmit_type">Autosubmit type</string>
     <string name="timer_period">Timer period</string>
     <string name="wallpaper_mode">Wallpaper mode</string>
+    <string name="posted">Posted</string>
+    <string name="failed">Failed</string>
 </resources>

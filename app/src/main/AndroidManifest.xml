@@ -41,6 +41,18 @@
             android:name=".LogActivity"
             android:parentActivityName=".QueueActivity"
             />
+        
+        <!-- todo: remove parent after adding bottom nav -->
+        <activity
+            android:name=".PostedActivity"
+            android:parentActivityName=".QueueActivity"
+            />
+
+        <!-- todo: remove parent after adding bottom nav -->
+        <activity
+            android:name=".FailedActivity"
+            android:parentActivityName=".QueueActivity"
+            />
 
         <service android:name=".AutosubmitService" />
         

@@ -279,6 +279,18 @@ abstract class QueueFragment : Fragment()
         startActivity(i)
     }
 
+    protected fun openPosted()
+    {
+        val i = PostedActivity.newIntent(context!!)
+        startActivity(i)
+    }
+
+    protected fun openFailed()
+    {
+        val i = FailedActivity.newIntent(context!!)
+        startActivity(i)
+    }
+
     override fun onOptionsItemSelected(item: MenuItem?): Boolean
     {
         return when (item!!.itemId)
@@ -290,6 +302,8 @@ abstract class QueueFragment : Fragment()
             R.id.menu_queue_sort_by_title -> { sortByTitle(); true }
             R.id.menu_queue_sort_by_date -> { sortByDate(); true }
             R.id.menu_queue_settings -> { openSettings(); true }
+            R.id.menu_queue_posted -> { openPosted(); true }
+            R.id.menu_queue_failed -> { openFailed(); true }
             else -> super.onOptionsItemSelected(item)
         }
     }
