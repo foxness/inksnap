@@ -24,6 +24,7 @@ class SettingsManager private constructor(context: Context)
         notFirstLaunch = false
         debugDontPost = false
         autosubmitType = AutosubmitType.Manual
+        period = Duration.standardHours(3)
     }
     
     private val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
@@ -48,7 +49,7 @@ class SettingsManager private constructor(context: Context)
         get() = getBool(PREF_AUTOSUBMIT_ENABLED)
         set(value) = setBool(PREF_AUTOSUBMIT_ENABLED, value)
 
-    var timeLeft: Duration?
+    var timeLeft: Duration? // todo: maybe make it non nullable?
         get() = getDuration(PREF_TIME_LEFT)
         set(value) = setDuration(PREF_TIME_LEFT, value)
 
@@ -85,10 +86,12 @@ class SettingsManager private constructor(context: Context)
     var autosubmitType: AutosubmitType
         get() = AutosubmitType.values()[getInt(PREF_AUTOSUBMIT_TYPE)!!]
         set(value) = setInt(PREF_AUTOSUBMIT_TYPE, value.ordinal)
+    
+    var period: Duration
+        get() = getDuration(PREF_PERIOD)!!
+        set(value) = setDuration(PREF_PERIOD, value)
 
     // SETTINGS ------
-
-    val period get() = Duration(getInt(PREF_PERIOD_MINUTES)!! * MILLIS_IN_MINUTE)
 
     val wallpaperMode: Boolean
         get() = getBool(PREF_WALLPAPER_MODE)
@@ -165,15 +168,13 @@ class SettingsManager private constructor(context: Context)
         private const val PREF_IMGUR_ACCESS_TOKEN_EXPIRATION_DATE = "imgurAccessTokenExpirationDate"
         private const val PREF_SORT_BY = "sortBy"
         private const val PREF_NOT_FIRST_LAUNCH = "notFirstLaunch"
-        private const val PREF_DEBUG_DONT_POST = "debug_dont_post"
-        private const val PREF_AUTOSUBMIT_TYPE = "autosubmit_type"
-        
-        private const val PREF_PERIOD_MINUTES = "period_minutes"
+        private const val PREF_DEBUG_DONT_POST = "debugDontPost"
+        private const val PREF_AUTOSUBMIT_TYPE = "autosubmitType"
+        private const val PREF_PERIOD = "period"
+
         private const val PREF_WALLPAPER_MODE = "wallpaper_mode"
 
         private const val LONG_NULL_SUBSTITUTE = Long.MIN_VALUE
         private const val INT_NULL_SUBSTITUTE = Int.MIN_VALUE
-
-        private const val MILLIS_IN_MINUTE: Long = 60 * 1000
     }
 }

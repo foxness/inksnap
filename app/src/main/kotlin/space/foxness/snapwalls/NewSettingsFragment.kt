@@ -3,18 +3,22 @@ package space.foxness.snapwalls
 import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.DialogInterface
+import android.content.res.Configuration
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.app.AlertDialog
+import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Button
+import android.widget.EditText
 import android.widget.Switch
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
+import org.joda.time.Duration
 import space.foxness.snapwalls.Util.toast
 
 class NewSettingsFragment : Fragment()
@@ -22,7 +26,8 @@ class NewSettingsFragment : Fragment()
     private lateinit var redditButton: Button
     private lateinit var imgurButton: Button
     private lateinit var autosubmitTypeButton: Button
-    
+    private lateinit var timerPeriodButton: Button
+
     private lateinit var settingsManager: SettingsManager
     private lateinit var redditAccount: Reddit
     private lateinit var imgurAccount: ImgurAccount
@@ -30,77 +35,121 @@ class NewSettingsFragment : Fragment()
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
-        
+
         val ctx = context!!
         settingsManager = SettingsManager.getInstance(ctx)
         redditAccount = Autoreddit.getInstance(ctx).reddit
         imgurAccount = Autoimgur.getInstance(ctx).imgurAccount
     }
-    
+
     @SuppressLint("SetTextI18n") // todo: fixeroni
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View?
     {
         val v = inflater.inflate(R.layout.fragment_new_settings, container, false)
-        
+
         // REDDIT ACCOUNT --------------------
-        
+
         redditButton = v.findViewById(R.id.reddit_toggle)
         redditButton.text = if (redditAccount.isLoggedIn) "Log out" else "Log in"
         redditButton.setOnClickListener { onRedditButtonClick() }
 
-        // IMGUR ACCOUNT --------------------
+        // IMGUR ACCOUNT ---------------------
 
         imgurButton = v.findViewById(R.id.imgur_toggle)
         imgurButton.text = if (imgurAccount.isLoggedIn) "Log out" else "Log in"
         imgurButton.setOnClickListener { onImgurButtonClick() }
-        
-        // DEBUG DONT POST ------------------
-        
+
+        // DEBUG DONT POST -------------------
+
         val debugDontPostSwitch = v.findViewById<Switch>(R.id.debug_dont_post_switch)
         debugDontPostSwitch.isChecked = settingsManager.debugDontPost
-        debugDontPostSwitch.setOnCheckedChangeListener { buttonView, isChecked -> onDebugDontPostCheckedChanged(isChecked) }
-        
-        // AUTOSUBMIT TYPE ------------------
-        
+        debugDontPostSwitch.setOnCheckedChangeListener { buttonView, isChecked ->
+            onDebugDontPostCheckedChanged(isChecked)
+        }
+
+        // AUTOSUBMIT TYPE -------------------
+
         autosubmitTypeButton = v.findViewById(R.id.autosubmit_button)
         autosubmitTypeButton.setOnClickListener { onAutosubmitTypeButtonClick() }
-        
+
+        // TIMER PERIOD ----------------------
+
+        timerPeriodButton = v.findViewById(R.id.timer_period_button)
+        timerPeriodButton.setOnClickListener { onTimerPeriodButtonClick() }
+
         return v
     }
 
     override fun onStart()
     {
         super.onStart()
-        autosubmitTypeButton.isEnabled = !settingsManager.autosubmitEnabled
-        redditButton.isEnabled = !settingsManager.autosubmitEnabled
+
+        val autosubmitNotEnabled = !settingsManager.autosubmitEnabled
+        autosubmitTypeButton.isEnabled = autosubmitNotEnabled
+        redditButton.isEnabled = autosubmitNotEnabled
+        timerPeriodButton.isEnabled = settingsManager.autosubmitType ==
+                SettingsManager.AutosubmitType.Periodic && autosubmitNotEnabled
     }
-    
+
+    private fun onTimerPeriodButtonClick()
+    {
+        val ctx = context!!
+        val adb = AlertDialog.Builder(ctx)
+
+        val currentMinutes = settingsManager.period.standardMinutes
+
+        val input = EditText(ctx) // todo: switch to layout
+        input.inputType = InputType.TYPE_CLASS_NUMBER
+        input.setRawInputType(Configuration.KEYBOARD_12KEY)
+        input.setText(currentMinutes.toString())
+
+        adb.setView(input)
+        adb.setTitle("Timer period") // todo: extracteroni
+        adb.setPositiveButton("OK") { dialog: DialogInterface, which: Int ->
+            dialog.dismiss()
+            val minutes = input.text.toString().toInt()
+            val millis = minutes * Util.MILLIS_IN_MINUTE
+            val period = Duration(millis)
+            settingsManager.period = period
+        }
+
+        adb.setNegativeButton("Cancel") { dialog: DialogInterface, which: Int ->
+            dialog.dismiss()
+        }
+
+        adb.show()
+    }
+
     private fun onAutosubmitTypeButtonClick()
     {
         val types = arrayOf("Manual", "Periodic") // todo: extract hardcoded strings
         val checkedItem = settingsManager.autosubmitType.ordinal
-        
+
         val adb = AlertDialog.Builder(context!!)
-        
+
         adb.setTitle("Autosubmit type") // todo: same ^
         adb.setNegativeButton("Cancel") { dialog: DialogInterface, which: Int ->
             dialog.dismiss()
         }
         adb.setSingleChoiceItems(types, checkedItem) { dialog: DialogInterface, which: Int ->
-            settingsManager.autosubmitType = SettingsManager.AutosubmitType.values()[which]
             dialog.dismiss()
+            val type = SettingsManager.AutosubmitType.values()[which]
+            settingsManager.autosubmitType = type
+
+            // why? because if changed type then autosubmit must be off
+            timerPeriodButton.isEnabled = type == SettingsManager.AutosubmitType.Periodic
         }
-        
+
         adb.show()
     }
-    
+
     private fun onDebugDontPostCheckedChanged(checked: Boolean)
     {
         settingsManager.debugDontPost = checked // todo: save only on activity destroy?
     }
-    
+
     @SuppressLint("SetTextI18n") // todo: fixeroni
     private fun onImgurButtonClick()
     {
@@ -115,7 +164,7 @@ class NewSettingsFragment : Fragment()
             showImgurLoginDialog()
         }
     }
-    
+
     private fun showImgurLoginDialog()
     {
         val authDialog = Dialog(context!!)
@@ -145,7 +194,7 @@ class NewSettingsFragment : Fragment()
         authWebview.loadUrl(imgurAccount.authorizationUrl)
         authDialog.show()
     }
-    
+
     @SuppressLint("SetTextI18n") // todo: fixeroni
     private fun onRedditButtonClick()
     {
@@ -167,7 +216,7 @@ class NewSettingsFragment : Fragment()
             showRedditLoginDialog()
         }
     }
-    
+
     private fun showRedditLoginDialog()
     {
         val authDialog = Dialog(context!!)
@@ -201,9 +250,9 @@ class NewSettingsFragment : Fragment()
 
                         uiThread {
                             redditButton.isEnabled = true
-                            
+
                             toast(if (redditAccount.isLoggedIn) "Success" else "Fail")
-                            
+
                             if (redditAccount.isLoggedIn)
                             {
                                 redditButton.text = "Log out"

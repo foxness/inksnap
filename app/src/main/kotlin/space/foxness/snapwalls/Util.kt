@@ -26,6 +26,8 @@ object Util
     const val USER_AGENT = "Snapwalls by /u/foxneZz"
 
     const val STATE_LENGTH = 10
+
+    const val MILLIS_IN_MINUTE: Long = 60 * 1000
     
     val titlePostComparator = Comparator { a: Post, b -> a.title.compareTo(b.title) }
 
