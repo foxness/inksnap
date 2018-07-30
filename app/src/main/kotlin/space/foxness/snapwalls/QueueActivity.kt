@@ -24,6 +24,7 @@ class QueueActivity : AppCompatActivity()
         if (!settingsManager.notFirstLaunch)
         {
             settingsManager.initializeDefaultSettings()
+            NotificationFactory.getInstance(this).createNotificationChannels()
             settingsManager.notFirstLaunch = true
         }
         

@@ -14,14 +14,14 @@ class NotificationFactory private constructor(private val context: Context)
 {
     private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     
-    init
+    fun createNotificationChannels() // should be run on first launch
     {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
         {
             val ids = listOf(SERVICE_CHANNEL_ID, ERROR_CHANNEL_ID, SUCCESS_CHANNEL_ID)
             val names = listOf(SERVICE_CHANNEL_NAME, ERROR_CHANNEL_NAME, SUCCESS_CHANNEL_NAME)
             val importances = listOf(SERVICE_CHANNEL_IMPORTANCE, ERROR_CHANNEL_IMPORTANCE, SUCCESS_CHANNEL_IMPORTANCE)
-            
+
             for (i in ids.indices)
             {
                 val channel = NotificationChannel(ids[i], names[i], importances[i])
@@ -48,7 +48,7 @@ class NotificationFactory private constructor(private val context: Context)
     {
         return buildNotification(
                 SERVICE_CHANNEL_ID,
-                "Submitting...",
+                "Submitting...", // todo: extract
                 "Your post is being submitted...")
     }
     
@@ -56,7 +56,7 @@ class NotificationFactory private constructor(private val context: Context)
     {
         val notification = buildNotification(
                 ERROR_CHANNEL_ID,
-                "An error has occurred",
+                "An error has occurred", // todo: extract
                 "An error has occurred while submitting")
         
         notify(ERROR_NOTIFICATION_ID, notification)
@@ -67,7 +67,7 @@ class NotificationFactory private constructor(private val context: Context)
     {
         val notification = buildNotification(
                 SUCCESS_CHANNEL_ID,
-                "Your post has been submitted",
+                "Your post has been submitted", // todo: extract
                 "Your post \"$postTitle\" has succesfully been submitted")
 
         notify(SUCCESS_NOTIFICATION_ID, notification)
@@ -81,7 +81,7 @@ class NotificationFactory private constructor(private val context: Context)
         private const val ERROR_NOTIFICATION_ID = 2
         private const val SUCCESS_NOTIFICATION_ID = 3
         
-        private const val SERVICE_CHANNEL_NAME = "Autosubmit"
+        private const val SERVICE_CHANNEL_NAME = "Autosubmit" // todo: extract
         private const val ERROR_CHANNEL_NAME = "Failed post"
         private const val SUCCESS_CHANNEL_NAME = "Sucessful post"
         
