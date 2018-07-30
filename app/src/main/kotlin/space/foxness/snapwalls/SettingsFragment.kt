@@ -16,8 +16,8 @@ import android.webkit.WebViewClient
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Switch
-import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.uiThread
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.launch
 import org.joda.time.Duration
 import space.foxness.snapwalls.Util.toast
 
@@ -254,22 +254,22 @@ class SettingsFragment : Fragment()
 
                 if (redditAccount.tryExtractCode(url))
                 {
+                    val fetchJob = launch { redditAccount.fetchAuthTokens() }
+                    
                     redditButton.isEnabled = false
-
+                    
                     authDialog.dismiss()
+                    
+                    launch(UI) {
+                        fetchJob.join()
 
-                    doAsync {
-                        redditAccount.fetchAuthTokens()
+                        redditButton.isEnabled = true
 
-                        uiThread {
-                            redditButton.isEnabled = true
+                        toast(if (redditAccount.isLoggedIn) "Success" else "Fail")
 
-                            toast(if (redditAccount.isLoggedIn) "Success" else "Fail")
-
-                            if (redditAccount.isLoggedIn)
-                            {
-                                redditButton.text = "Log out"
-                            }
+                        if (redditAccount.isLoggedIn)
+                        {
+                            redditButton.text = "Log out"
                         }
                     }
                 }
