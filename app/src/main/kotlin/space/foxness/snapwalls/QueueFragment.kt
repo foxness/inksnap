@@ -136,6 +136,8 @@ abstract class QueueFragment : Fragment()
         thumbnailDownloader.setThumbnailDownloadListener(tdl)
         thumbnailDownloader.start()
         thumbnailDownloader.getLooper()
+
+        // todo: handle posts that should have been posted but weren't
     }
 
     override fun onDestroy()
