@@ -70,7 +70,7 @@ abstract class QueueFragment : Fragment()
         recyclerView.addItemDecoration(DividerItemDecoration(recyclerView.context,
                                                              DividerItemDecoration.VERTICAL))
 
-        adapter = PostAdapter(queue.posts)
+        adapter = PostAdapter(queue.posts) // todo: refactor to not have args
         recyclerView.adapter = adapter
 
         // TIMER TOGGLE -------------------------------
@@ -291,9 +291,9 @@ abstract class QueueFragment : Fragment()
         startActivity(i)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean
+    override fun onOptionsItemSelected(item: MenuItem): Boolean
     {
-        return when (item!!.itemId)
+        return when (item.itemId)
         {
             R.id.menu_queue_add -> { createNewPost(); true }
             R.id.menu_queue_test -> { testButton(); true }

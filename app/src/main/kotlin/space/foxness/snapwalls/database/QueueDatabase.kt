@@ -7,22 +7,24 @@ import android.arch.persistence.room.TypeConverters
 import android.content.Context
 import space.foxness.snapwalls.Post
 import space.foxness.snapwalls.SingletonHolder
-import space.foxness.snapwalls.database.AppDatabase.Companion.databaseName
+import space.foxness.snapwalls.database.QueueDatabase.Companion.databaseName
 
 @Database(entities = [(Post::class)], version = 1)
 @TypeConverters(Converters::class)
-abstract class AppDatabase : RoomDatabase() {
+abstract class QueueDatabase : RoomDatabase()
+{
     abstract fun postDao(): PostDao
     
-    companion object : SingletonHolder<AppDatabase, Context>({
-        Room
-                .databaseBuilder(it.applicationContext, AppDatabase::class.java, databaseName)
+    companion object : SingletonHolder<QueueDatabase, Context>(
+    {
+        Room.databaseBuilder(it.applicationContext, QueueDatabase::class.java, databaseName)
                 .allowMainThreadQueries()
                 .build()
         
         // allowMainThreadQueries() is a dirty hack
         // todo: fix this by going async
-    }) {
+    })
+    {
         private const val databaseName = "queue"
     }
 }

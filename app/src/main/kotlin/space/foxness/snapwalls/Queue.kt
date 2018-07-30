@@ -1,11 +1,11 @@
 package space.foxness.snapwalls
 
 import android.content.Context
-import space.foxness.snapwalls.database.AppDatabase
+import space.foxness.snapwalls.database.QueueDatabase
 
 class Queue private constructor(context: Context)
 {
-    private val dbDao = AppDatabase.getInstance(context).postDao()
+    private val dbDao = QueueDatabase.getInstance(context).postDao()
     
     private val thumbnailCache = ThumbnailCache.getInstance(context)
 
