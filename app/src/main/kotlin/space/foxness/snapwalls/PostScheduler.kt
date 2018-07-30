@@ -14,8 +14,7 @@ import space.foxness.snapwalls.Util.timeLeftUntil
 // todo: make reddit not a singleton and rename it to reddit account
 
 class PostScheduler private constructor(context: Context)
-{ // todo: throw exception if schedule time is in the past
-
+{
     private val context = context.applicationContext!!
 
     private val queue = Queue.getInstance(context)

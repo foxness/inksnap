@@ -34,7 +34,7 @@ class PostFragment : Fragment()
     private var newPost = false
     private var allowIntendedSubmitDateEditing = false
 
-    // todo: account for submitservice
+    // todo: account for submitservice (aka freeze when the submission process is coming)
     // example: submit service submits and deletes a post while you're editing it
     // bad stuff will happen then
     // this also applies to all other activities/fragments

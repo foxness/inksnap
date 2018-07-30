@@ -27,11 +27,6 @@ class ManualQueueFragment : QueueFragment()
 
     override fun toggleAutosubmit(on: Boolean)
     {
-        if (on == settingsManager.autosubmitEnabled) // this should never happen
-        {
-            throw Exception("Can't change autosubmit to state it's already in")
-        }
-
         if (on)
         {
             if (!reddit.isLoggedIn)

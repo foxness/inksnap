@@ -21,9 +21,8 @@ import java.io.StringWriter
 
 class AutosubmitService : Service()
 {
-    // todo: improve these archaic variable names
-    private lateinit var mServiceLooper: Looper
-    private lateinit var mServiceHandler: ServiceHandler
+    private lateinit var serviceLooper: Looper
+    private lateinit var serviceHandler: ServiceHandler
     
     private lateinit var notificationFactory: NotificationFactory
 
@@ -154,9 +153,8 @@ class AutosubmitService : Service()
                     }
 
                     val broadcastIntent = Intent(POST_SUBMITTED)
-                    broadcastIntent.putExtra(EXTRA_SUBMITTED_ALL_POSTS, submittedAllPosts)
-                    LocalBroadcastManager.getInstance(ctx)
-                            .sendBroadcast(broadcastIntent)
+                    broadcastIntent.putExtra(EXTRA_SUBMITTED_ALL_POSTS, submittedAllPosts) // todo: handle the intent extra
+                    LocalBroadcastManager.getInstance(ctx).sendBroadcast(broadcastIntent)
                 }
                 else
                 {
@@ -201,8 +199,8 @@ class AutosubmitService : Service()
         val thread = HandlerThread("ServiceStartArguments", Process.THREAD_PRIORITY_BACKGROUND)
         thread.start()
 
-        mServiceLooper = thread.looper
-        mServiceHandler = ServiceHandler(mServiceLooper)
+        serviceLooper = thread.looper
+        serviceHandler = ServiceHandler(serviceLooper)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int
@@ -214,11 +212,11 @@ class AutosubmitService : Service()
         val serviceNotification = notificationFactory.getServiceNotification()
         startForeground(NotificationFactory.SERVICE_NOTIFICATION_ID, serviceNotification)
 
-        val msg = mServiceHandler.obtainMessage()
+        val msg = serviceHandler.obtainMessage()
         msg.arg1 = startId
-        mServiceHandler.sendMessage(msg) // todo: how is this different from 'msg.sendToTarget()'?
+        serviceHandler.sendMessage(msg) // todo: how is this different from 'msg.sendToTarget()'?
 
-        return Service.START_NOT_STICKY
+        return Service.START_NOT_STICKY // todo: use coroutines instead of ServiceHandler?
     }
 
     override fun onBind(intent: Intent): IBinder? = null

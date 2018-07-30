@@ -77,11 +77,6 @@ class PeriodicQueueFragment : QueueFragment()
 
     override fun toggleAutosubmit(on: Boolean)
     {
-        if (on == settingsManager.autosubmitEnabled) // this should never happen
-        {
-            throw Exception("Can't change autosubmit to state it's already in")
-        }
-
         if (on)
         {
             if (!reddit.isLoggedIn)
@@ -169,11 +164,6 @@ class PeriodicQueueFragment : QueueFragment()
     {
         super.onStart()
         
-        // TODO: schedule posts that were added a date if autosubmit is on and type is manual
-
-        // assume period and autosubmit type never change while autosubmit is enabled
-        // todo: actually prohibit changing these values while autosubmit is on
-
         if (settingsManager.timeLeft == null)
         {
             settingsManager.timeLeft = settingsManager.period
