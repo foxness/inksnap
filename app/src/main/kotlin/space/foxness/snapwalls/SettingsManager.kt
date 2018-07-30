@@ -91,10 +91,9 @@ class SettingsManager private constructor(context: Context)
         get() = getDuration(PREF_PERIOD)!!
         set(value) = setDuration(PREF_PERIOD, value)
 
-    // SETTINGS ------
-
-    val wallpaperMode: Boolean
+    var wallpaperMode: Boolean
         get() = getBool(PREF_WALLPAPER_MODE)
+        set(value) = setBool(PREF_WALLPAPER_MODE, value)
 
     private fun getString(key: String) = sharedPreferences.getString(key, null)
 
@@ -171,8 +170,7 @@ class SettingsManager private constructor(context: Context)
         private const val PREF_DEBUG_DONT_POST = "debugDontPost"
         private const val PREF_AUTOSUBMIT_TYPE = "autosubmitType"
         private const val PREF_PERIOD = "period"
-
-        private const val PREF_WALLPAPER_MODE = "wallpaper_mode"
+        private const val PREF_WALLPAPER_MODE = "wallpaperMode"
 
         private const val LONG_NULL_SUBSTITUTE = Long.MIN_VALUE
         private const val INT_NULL_SUBSTITUTE = Int.MIN_VALUE

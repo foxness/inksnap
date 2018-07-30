@@ -78,6 +78,14 @@ class NewSettingsFragment : Fragment()
 
         timerPeriodButton = v.findViewById(R.id.timer_period_button)
         timerPeriodButton.setOnClickListener { onTimerPeriodButtonClick() }
+        
+        // WALLPAPER MODE --------------------
+        
+        val wallpaperModeSwitch = v.findViewById<Switch>(R.id.wallpaper_mode_switch)
+        wallpaperModeSwitch.isChecked = settingsManager.wallpaperMode
+        wallpaperModeSwitch.setOnCheckedChangeListener { buttonView, isChecked ->
+            onWallpaperModeCheckedChanged(isChecked)
+        }
 
         return v
     }
@@ -91,6 +99,11 @@ class NewSettingsFragment : Fragment()
         redditButton.isEnabled = autosubmitNotEnabled
         timerPeriodButton.isEnabled = settingsManager.autosubmitType ==
                 SettingsManager.AutosubmitType.Periodic && autosubmitNotEnabled
+    }
+    
+    private fun onWallpaperModeCheckedChanged(checked: Boolean)
+    {
+        settingsManager.wallpaperMode = checked
     }
 
     private fun onTimerPeriodButtonClick()
