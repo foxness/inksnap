@@ -10,6 +10,9 @@ import android.webkit.CookieManager
 import android.webkit.URLUtil.isValidUrl
 import android.webkit.WebView
 import android.widget.Toast
+import khttp.responses.Response
+import khttp.structures.authorization.Authorization
+import kotlinx.coroutines.experimental.async
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import org.joda.time.format.PeriodFormatterBuilder
@@ -183,5 +186,41 @@ object Util
     fun List<Post>.earliestPostDate(): DateTime?
     {
         return map { it.intendedSubmitDate!! }.min()
+    }
+    
+    fun httpGet(
+            url: String,
+            headers: Map<String, String> = mapOf(),
+            data: Any? = null,
+            auth: Authorization? = null): Response
+    {
+        return khttp.get(url = url, headers = headers, data = data, auth = auth)
+    }
+
+    fun httpPost(
+            url: String,
+            headers: Map<String, String> = mapOf(),
+            data: Any? = null,
+            auth: Authorization? = null): Response
+    {
+        return khttp.post(url = url, headers = headers, data = data, auth = auth)
+    }
+    
+    fun httpGetAsync(
+            url: String,
+            headers: Map<String, String> = mapOf(),
+            data: Any? = null,
+            auth: Authorization? = null) = async {
+
+        httpGet(url = url, headers = headers, data = data, auth = auth)
+    }
+
+    fun httpPostAsync(
+            url: String,
+            headers: Map<String, String> = mapOf(),
+            data: Any? = null,
+            auth: Authorization? = null) = async {
+
+        httpPost(url = url, headers = headers, data = data, auth = auth)
     }
 }

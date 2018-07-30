@@ -20,7 +20,7 @@ class ManualQueueFragment : QueueFragment()
     {
         super.onSubmitReceived()
         
-        if (!settingsManager.autosubmitEnabled)
+        if (!settingsManager.autosubmitEnabled) // todo: fix this
         {
             throw Exception("How the hey did this even happen?")
             // hint: it must have happened when autosubmitEnabled was turned off right before

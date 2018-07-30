@@ -4,12 +4,12 @@ object Wallhaven
 {
     private val wallhavenRegex = """https://alpha\.wallhaven\.cc/wallpaper/(?<id>\d+)/?""".toRegex()
     
-    fun tryGetDirectUrl(url: String): String?
+    suspend fun tryGetDirectUrl(url: String): String?
     {
         if (wallhavenRegex.matches(url))
         {
             val headers = mapOf("User-Agent" to Util.USER_AGENT)
-            val response = khttp.get(url = url, headers = headers)
+            val response = Util.httpGetAsync(url = url, headers = headers).await()
 
             if (response.statusCode != 200)
             {

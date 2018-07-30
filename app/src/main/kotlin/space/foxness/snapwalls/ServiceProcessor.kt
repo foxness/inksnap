@@ -2,7 +2,7 @@ package space.foxness.snapwalls
 
 object ServiceProcessor // todo: add support for services other than wallhaven?
 {
-    fun tryGetDirectUrl(url: String): String?
+    suspend fun tryGetDirectUrl(url: String): String?
     {
         return Wallhaven.tryGetDirectUrl(url)
     }

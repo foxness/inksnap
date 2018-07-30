@@ -6,12 +6,13 @@ import android.content.Intent
 import android.net.ConnectivityManager
 import android.os.*
 import android.support.v4.content.LocalBroadcastManager
+import kotlinx.coroutines.experimental.runBlocking
 import org.joda.time.DateTime
 import org.joda.time.Duration
-import space.foxness.snapwalls.Util.isImageUrl
-import space.foxness.snapwalls.Util.toNice
 import space.foxness.snapwalls.Util.earliest
+import space.foxness.snapwalls.Util.isImageUrl
 import space.foxness.snapwalls.Util.onlyScheduled
+import space.foxness.snapwalls.Util.toNice
 import java.io.PrintWriter
 import java.io.StringWriter
 
@@ -28,15 +29,15 @@ class AutosubmitService : Service()
 
     private inner class ServiceHandler(looper: Looper) : Handler(looper)
     {
-        override fun handleMessage(msg: Message)
+        suspend fun handle(msg: Message)
         {
             val ctx = this@AutosubmitService
             val log = Log.getInstance(ctx)
-            
+
             try
             {
                 log.log("Autosubmit service has awoken")
-                
+
                 val queue = Queue.getInstance(ctx)
                 val scheduledPosts = queue.posts.onlyScheduled()
 
@@ -67,7 +68,7 @@ class AutosubmitService : Service()
                 if (isLinkPost)
                 {
                     val directUrl = ServiceProcessor.tryGetDirectUrl(post.content)
-                    
+
                     if (directUrl != null)
                     {
                         log.log("Recognized url:\nOld: \"${post.content}\"\nNew: \"$directUrl\"")
@@ -84,7 +85,7 @@ class AutosubmitService : Service()
                     val imgurImg = imgurAccount.uploadImage(post.content)
 
                     log.log("Success. New link: ${imgurImg.link}")
-                    
+
                     post.content = imgurImg.link
 
                     if (sm.wallpaperMode)
@@ -125,15 +126,15 @@ class AutosubmitService : Service()
                         // todo: handle this
                         throw error
                     }
-                    
+
                     val realSubmittedTime = DateTime.now()
 
                     notificationFactory.showSuccessNotification(post.title)
-                    
+
                     log.log("Successfully submitted a post. Link: $link")
-                    
+
                     val difference = Duration(post.intendedSubmitDate, realSubmittedTime)
-                    
+
                     log.log("Real vs intended time difference: ${difference.toNice()}")
 
                     queue.deletePost(post.id) // todo: move to archive or something
@@ -167,10 +168,10 @@ class AutosubmitService : Service()
                 val errors = StringWriter()
                 exception.printStackTrace(PrintWriter(errors))
                 val stacktrace = errors.toString()
-                
+
                 val errorMsg = "AN EXCEPTION HAS OCCURED. STACKTRACE:\n$stacktrace"
                 log.log(errorMsg)
-                
+
                 notificationFactory.showErrorNotification()
             }
             finally
@@ -180,6 +181,11 @@ class AutosubmitService : Service()
                 // BIG NOTE: stopSelf(msg.arg1) MUST BE CALLED BEFORE RETURNING
                 // DON'T RETURN WITHOUT CALLING IT
             }
+        }
+        
+        override fun handleMessage(msg: Message)
+        {
+            runBlocking { handle(msg) }
         }
     }
 

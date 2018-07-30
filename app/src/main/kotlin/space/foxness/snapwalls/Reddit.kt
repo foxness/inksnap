@@ -58,7 +58,7 @@ class Reddit private constructor(private val callbacks: Callbacks)
         callbacks.onNewLastSubmissionDate()
     }
 
-    fun submit(post: Post,
+    suspend fun submit(post: Post,
                debugDontPost: Boolean = false,
                resubmit: Boolean = true,
                sendReplies: Boolean = true): String
@@ -88,7 +88,7 @@ class Reddit private constructor(private val callbacks: Callbacks)
                 (if (post.isLink) "url" else "text") to post.content,
                 "title" to post.title)
 
-        val response = khttp.post(url = SUBMIT_ENDPOINT, headers = headers, data = data)
+        val response = Util.httpPostAsync(url = SUBMIT_ENDPOINT, headers = headers, data = data).await()
 
         if (response.statusCode != 200)
         {
@@ -126,7 +126,7 @@ class Reddit private constructor(private val callbacks: Callbacks)
         }
     }
 
-    private fun ensureValidAccessToken()
+    private suspend fun ensureValidAccessToken()
     {
         if (accessToken != null && accessTokenExpirationDate!! > DateTime.now())
         {
@@ -142,8 +142,7 @@ class Reddit private constructor(private val callbacks: Callbacks)
 
         val auth = BasicAuthorization(APP_CLIENT_ID, APP_CLIENT_SECRET)
 
-        val response =
-                khttp.post(url = ACCESS_TOKEN_ENDPOINT, headers = headers, data = data, auth = auth)
+        val response = Util.httpPostAsync(url = ACCESS_TOKEN_ENDPOINT, headers = headers, data = data, auth = auth).await()
 
         if (response.statusCode != 200)
         {
@@ -166,7 +165,7 @@ class Reddit private constructor(private val callbacks: Callbacks)
         callbacks.onNewAccessToken()
     }
 
-    fun fetchAuthTokens()
+    suspend fun fetchAuthTokens()
     {
         val authCode = authCode ?: throw Exception("Can't fetch auth tokens without auth code")
 
@@ -178,8 +177,7 @@ class Reddit private constructor(private val callbacks: Callbacks)
 
         val auth = BasicAuthorization(APP_CLIENT_ID, APP_CLIENT_SECRET)
 
-        val response =
-                khttp.post(url = ACCESS_TOKEN_ENDPOINT, headers = headers, data = data, auth = auth)
+        val response = Util.httpPostAsync(url = ACCESS_TOKEN_ENDPOINT, headers = headers, data = data, auth = auth).await()
 
         if (response.statusCode != 200)
         {

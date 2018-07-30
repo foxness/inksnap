@@ -84,7 +84,7 @@ class ImgurAccount(private val callbacks: Callbacks)
         callbacks.onNewAccessToken(accessToken!!, accessTokenExpirationDate!!)
     }
 
-    private fun ensureValidAccessToken()
+    private suspend fun ensureValidAccessToken()
     {
         if (accessToken != null && accessTokenExpirationDate!! > DateTime.now())
         {
@@ -101,7 +101,7 @@ class ImgurAccount(private val callbacks: Callbacks)
                          "client_id" to APP_CLIENT_ID,
                          "client_secret" to APP_CLIENT_SECRET)
 
-        val response = khttp.post(url = ACCESS_TOKEN_ENDPOINT, headers = headers, data = data)
+        val response = Util.httpPostAsync(url = ACCESS_TOKEN_ENDPOINT, headers = headers, data = data).await()
 
         if (response.statusCode != 200)
         {
@@ -123,7 +123,7 @@ class ImgurAccount(private val callbacks: Callbacks)
     
     data class ImgurImage(val link: String, val width: Int, val height: Int)
 
-    fun uploadImage(url: String): ImgurImage
+    suspend fun uploadImage(url: String): ImgurImage
     {
         if (!isValidUrl(url))
         {
@@ -138,7 +138,7 @@ class ImgurAccount(private val callbacks: Callbacks)
 
         val data = mapOf("image" to url, "type" to "URL")
 
-        val response = khttp.post(url = IMAGE_UPLOAD_ENDPOINT, headers = headers, data = data)
+        val response = Util.httpPostAsync(url = IMAGE_UPLOAD_ENDPOINT, headers = headers, data = data).await()
 
         if (response.statusCode != 200)
         {
