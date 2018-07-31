@@ -135,8 +135,15 @@ class AutosubmitService : Service()
                     val difference = Duration(post.intendedSubmitDate, realSubmittedTime)
 
                     log.log("Real vs intended time difference: ${difference.toNice()}")
+                    
+                    val postedPost = PostedPost.from(post, link)
+                    val postedPostRepository = PostedPostRepository.getInstance(ctx)
+                    postedPostRepository.addPostedPost(postedPost)
 
-                    queue.deletePost(post.id) // todo: move to archive or something
+                    log.log("Added to posted post repository")
+                    
+                    queue.deletePost(post.id)
+                    
                     log.log("Deleted the submitted post from the database")
 
                     val submittedAllPosts = queue.posts.isEmpty()

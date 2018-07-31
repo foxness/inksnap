@@ -4,12 +4,14 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     >
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/posted_recyclerview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        tools:listitem="@layout/posted_post"
         />
 
 </LinearLayout>
