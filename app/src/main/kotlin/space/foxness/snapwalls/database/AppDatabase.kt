@@ -6,14 +6,16 @@ import android.arch.persistence.room.RoomDatabase
 import android.arch.persistence.room.TypeConverters
 import android.content.Context
 import space.foxness.snapwalls.Post
+import space.foxness.snapwalls.PostedPost
 import space.foxness.snapwalls.SingletonHolder
 import space.foxness.snapwalls.database.AppDatabase.Companion.databaseName
 
-@Database(entities = [(Post::class)], version = 1)
+@Database(entities = [Post::class, PostedPost::class], version = 1)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase()
 {
     abstract fun postDao(): PostDao
+    abstract fun postedPostDao(): PostedPostDao
     
     companion object : SingletonHolder<AppDatabase, Context>(
     {
