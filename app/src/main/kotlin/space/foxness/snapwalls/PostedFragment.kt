@@ -1,5 +1,7 @@
 package space.foxness.snapwalls
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.DividerItemDecoration
@@ -35,18 +37,32 @@ class PostedFragment : Fragment()
     private inner class PostedPostHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
     {
         private val titleView: TextView
+        private val urlView: TextView
+        private val contentView: TextView
+        private val subredditView: TextView
         
         private lateinit var postedPost: PostedPost
         
         init
         {
+            itemView.setOnClickListener {
+                val i = Intent(Intent.ACTION_VIEW, Uri.parse(postedPost.url))
+                startActivity(i)
+            }
+            
             titleView = itemView.findViewById(R.id.posted_post_title)
+            urlView = itemView.findViewById(R.id.posted_post_url)
+            contentView = itemView.findViewById(R.id.posted_post_content)
+            subredditView = itemView.findViewById(R.id.posted_post_subreddit)
         }
         
         fun bindPostedPost(pp: PostedPost)
         {
             postedPost = pp
             titleView.text = postedPost.title
+            urlView.text = postedPost.url
+            contentView.text = postedPost.content
+            subredditView.text = postedPost.subreddit
         }
     }
     
