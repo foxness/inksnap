@@ -1,5 +1,7 @@
 package space.foxness.snapwalls
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
@@ -75,5 +77,7 @@ class QueueActivity : AppCompatActivity()
     {
         private const val SINGLE_FRAGMENT_LAYOUT = R.layout.activity_fragment
         private const val FRAGMENT_CONTAINER = R.id.fragment_container
+        
+        fun newIntent(context: Context) = Intent(context, QueueActivity::class.java)
     }
 }

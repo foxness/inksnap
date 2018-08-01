@@ -3,7 +3,9 @@ package space.foxness.snapwalls
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.support.annotation.RequiresApi
 import android.support.v4.app.NotificationCompat
@@ -30,13 +32,12 @@ class NotificationFactory private constructor(private val context: Context)
         }
     }
     
-    private fun buildNotification(channelId: String, title: String, text: String): Notification
+    private fun prebuildNotification(channelId: String, title: String, text: String): NotificationCompat.Builder
     {
         return NotificationCompat.Builder(context, channelId)
                 .setContentTitle(title)
                 .setContentText(text)
                 .setSmallIcon(ICON)
-                .build()
     }
     
     private fun notify(notificationId: Int, notification: Notification)
@@ -46,18 +47,18 @@ class NotificationFactory private constructor(private val context: Context)
     
     fun getServiceNotification(): Notification
     {
-        return buildNotification(
+        return prebuildNotification(
                 SERVICE_CHANNEL_ID,
                 "Submitting...", // todo: extract
-                "Your post is being submitted...")
+                "Your post is being submitted...").build()
     }
     
     fun showErrorNotification()
     {
-        val notification = buildNotification(
+        val notification = prebuildNotification(
                 ERROR_CHANNEL_ID,
                 "An error has occurred", // todo: extract
-                "An error has occurred while submitting")
+                "An error has occurred while submitting").build()
         
         notify(ERROR_NOTIFICATION_ID, notification)
     }
@@ -65,10 +66,18 @@ class NotificationFactory private constructor(private val context: Context)
     // todo: open post link upon clicking on the notification
     fun showSuccessNotification(postTitle: String)
     {
-        val notification = buildNotification(
+        val intent = QueueActivity.newIntent(context)
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+        
+        // todo: maybe add PendingIntent.FLAG_UPDATE_CURRENT to flags?
+        val pendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
+
+        val notification = prebuildNotification(
                 SUCCESS_CHANNEL_ID,
                 "Your post has been submitted", // todo: extract
                 "Your post \"$postTitle\" has succesfully been submitted")
+                .setContentIntent(pendingIntent)
+                .build()
 
         notify(SUCCESS_NOTIFICATION_ID, notification)
     }
