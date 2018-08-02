@@ -58,18 +58,17 @@ class NotificationFactory private constructor(private val context: Context)
         val notification = prebuildNotification(
                 ERROR_CHANNEL_ID,
                 "An error has occurred", // todo: extract
-                "An error has occurred while submitting").build()
+                "An error has occurred while submitting")
+                .build()
         
         notify(ERROR_NOTIFICATION_ID, notification)
     }
     
-    // todo: open post link upon clicking on the notification
     fun showSuccessNotification(postTitle: String)
     {
         val intent = QueueActivity.newIntent(context)
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
         
-        // todo: maybe add PendingIntent.FLAG_UPDATE_CURRENT to flags?
         val pendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
 
         val notification = prebuildNotification(
@@ -77,6 +76,7 @@ class NotificationFactory private constructor(private val context: Context)
                 "Your post has been submitted", // todo: extract
                 "Your post \"$postTitle\" has succesfully been submitted")
                 .setContentIntent(pendingIntent)
+                .setAutoCancel(true)
                 .build()
 
         notify(SUCCESS_NOTIFICATION_ID, notification)
