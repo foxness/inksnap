@@ -24,6 +24,7 @@ class SettingsManager private constructor(context: Context)
         debugDontPost = false
         autosubmitType = AutosubmitType.Manual
         period = Duration.standardHours(3)
+        notificationIdCounter = NotificationFactory.INITIAL_NOTIFICATION_ID
     }
     
     private val sharedPreferences = context.getSharedPreferences(NAME, Context.MODE_PRIVATE)
@@ -93,6 +94,10 @@ class SettingsManager private constructor(context: Context)
     var wallpaperMode: Boolean
         get() = getBool(PREF_WALLPAPER_MODE)
         set(value) = setBool(PREF_WALLPAPER_MODE, value)
+
+    var notificationIdCounter: Int
+        get() = getInt(PREF_NOTIFICATION_ID_COUNTER)!!
+        set(value) = setInt(PREF_NOTIFICATION_ID_COUNTER, value)
 
     private fun getString(key: String) = sharedPreferences.getString(key, null)
 
@@ -172,6 +177,7 @@ class SettingsManager private constructor(context: Context)
         private const val PREF_AUTOSUBMIT_TYPE = "autosubmitType"
         private const val PREF_PERIOD = "period"
         private const val PREF_WALLPAPER_MODE = "wallpaperMode"
+        private const val PREF_NOTIFICATION_ID_COUNTER = "notificationIdCounter"
 
         private const val LONG_NULL_SUBSTITUTE = Long.MIN_VALUE
         private const val INT_NULL_SUBSTITUTE = Int.MIN_VALUE

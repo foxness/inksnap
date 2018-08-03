@@ -9,12 +9,32 @@ import android.content.Intent
 import android.os.Build
 import android.support.annotation.RequiresApi
 import android.support.v4.app.NotificationCompat
+import java.util.concurrent.atomic.AtomicInteger
 
 // todo: different notification ids for different posts
 
 class NotificationFactory private constructor(private val context: Context)
 {
     private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    
+    private val settingsManager = SettingsManager.getInstance(context)
+
+    private var notificationIdCounter = AtomicInteger(settingsManager.notificationIdCounter)
+    
+    private fun getUniqueNotificationId(): Int
+    {
+        var current = notificationIdCounter.incrementAndGet()
+        
+        if (current == Int.MAX_VALUE) // you never know
+        {
+            notificationIdCounter = AtomicInteger(INITIAL_NOTIFICATION_ID)
+            current = notificationIdCounter.incrementAndGet()
+        }
+        
+        settingsManager.notificationIdCounter = current
+        
+        return current
+    }
     
     fun createNotificationChannels() // should be run on first launch
     {
@@ -61,7 +81,8 @@ class NotificationFactory private constructor(private val context: Context)
                 "An error has occurred while submitting")
                 .build()
         
-        notify(ERROR_NOTIFICATION_ID, notification)
+        val id = getUniqueNotificationId()
+        notify(id, notification)
     }
     
     fun showSuccessNotification(postTitle: String)
@@ -79,7 +100,8 @@ class NotificationFactory private constructor(private val context: Context)
                 .setAutoCancel(true)
                 .build()
 
-        notify(SUCCESS_NOTIFICATION_ID, notification)
+        val id = getUniqueNotificationId()
+        notify(id, notification)
     }
     
     companion object : SingletonHolder<NotificationFactory, Context>(::NotificationFactory)
@@ -87,8 +109,8 @@ class NotificationFactory private constructor(private val context: Context)
         private const val ICON = R.drawable.snapwalls_icon
         
         const val SERVICE_NOTIFICATION_ID = 1 // must not be 0
-        private const val ERROR_NOTIFICATION_ID = 2
-        private const val SUCCESS_NOTIFICATION_ID = 3
+        
+        const val INITIAL_NOTIFICATION_ID = 1337
         
         private const val SERVICE_CHANNEL_NAME = "Autosubmit" // todo: extract
         private const val ERROR_CHANNEL_NAME = "Failed post"
