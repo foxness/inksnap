@@ -53,9 +53,9 @@ abstract class QueueFragment : Fragment()
     
     protected lateinit var thumbnailDownloader: ThumbnailDownloader<PostHolder>
 
-    protected open fun onSubmitReceived()
+    protected open fun onAutosubmitServiceDoneReceived(context: Context, intent: Intent)
     {
-        toast("post submitted :O")
+        toast("service is done :O")
     }
     
     protected open fun onInitUi(v: View)
@@ -86,11 +86,11 @@ abstract class QueueFragment : Fragment()
     
     protected open fun onTimerTick(millisUntilFinished: Long) { }
 
-    private val submitReceiver: BroadcastReceiver = object : BroadcastReceiver()
+    private val autosubmitServiceDoneReceiver: BroadcastReceiver = object : BroadcastReceiver()
     {
-        override fun onReceive(context: Context?, intent: Intent?)
+        override fun onReceive(context: Context, intent: Intent)
         {
-            onSubmitReceived()
+            onAutosubmitServiceDoneReceived(context, intent)
         }
     }
 
@@ -352,10 +352,10 @@ abstract class QueueFragment : Fragment()
     protected fun startTimerAndRegisterReceiver(timeLeft: Duration)
     {
         startTimer(timeLeft)
-        registerSubmitReceiver()
+        registerAutosubmitServiceDoneReceiver()
     }
 
-    protected fun registerSubmitReceiver()
+    protected fun registerAutosubmitServiceDoneReceiver()
     {
         if (receiverRegistered)
         {
@@ -365,11 +365,11 @@ abstract class QueueFragment : Fragment()
         receiverRegistered = true
 
         val lbm = LocalBroadcastManager.getInstance(activity!!)
-        val intentFilter = IntentFilter(AutosubmitService.POST_SUBMITTED)
-        lbm.registerReceiver(submitReceiver, intentFilter)
+        val intentFilter = AutosubmitService.getAutosubmitServiceDoneBroadcastIntentFilter()
+        lbm.registerReceiver(autosubmitServiceDoneReceiver, intentFilter)
     }
 
-    protected fun unregisterSubmitReceiver()
+    protected fun unregisterAutosubmitServiceDoneReceiver()
     {
         if (!receiverRegistered)
         {
@@ -379,7 +379,7 @@ abstract class QueueFragment : Fragment()
         receiverRegistered = false
 
         val lbm = LocalBroadcastManager.getInstance(activity!!)
-        lbm.unregisterReceiver(submitReceiver)
+        lbm.unregisterReceiver(autosubmitServiceDoneReceiver)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)

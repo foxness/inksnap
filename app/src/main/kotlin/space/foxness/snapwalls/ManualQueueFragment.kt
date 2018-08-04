@@ -1,6 +1,8 @@
 package space.foxness.snapwalls
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.Intent
 import org.joda.time.Duration
 import space.foxness.snapwalls.Util.earliestPostDateFromNow
 import space.foxness.snapwalls.Util.log
@@ -16,9 +18,12 @@ class ManualQueueFragment : QueueFragment()
 
     override val allowIntendedSubmitDateEditing = true
 
-    override fun onSubmitReceived() // assumes that autosubmit is on
+    override fun onAutosubmitServiceDoneReceived(context: Context, intent: Intent) // assumes that autosubmit is on
     {
-        super.onSubmitReceived()
+        super.onAutosubmitServiceDoneReceived(context, intent)
+
+        // todo: do something with this?
+        val successfullyPosted = AutosubmitService.getSuccessfullyPostedFromIntent(intent)
 
         startTimerForEarliestPostDateFromNow()
 
@@ -46,7 +51,7 @@ class ManualQueueFragment : QueueFragment()
             val futurePosts = queue.posts.onlyFuture()
             if (futurePosts.isNotEmpty())
             {
-                registerSubmitReceiver()
+                registerAutosubmitServiceDoneReceiver()
 
                 postScheduler.scheduleManualPosts(futurePosts)
 
@@ -62,7 +67,7 @@ class ManualQueueFragment : QueueFragment()
             {
                 postScheduler.cancelScheduledPosts(futurePosts)
 
-                unregisterSubmitReceiver()
+                unregisterAutosubmitServiceDoneReceiver()
 
                 log("Canceled ${futurePosts.size} scheduled post(s)")
             }
@@ -110,7 +115,7 @@ class ManualQueueFragment : QueueFragment()
 
             if (settingsManager.autosubmitEnabled)
             {
-                registerSubmitReceiver()
+                registerAutosubmitServiceDoneReceiver()
             }
         }
 
@@ -128,7 +133,7 @@ class ManualQueueFragment : QueueFragment()
             timerObject.cancel()
         }
 
-        unregisterSubmitReceiver() // maybe move this into the if?
+        unregisterAutosubmitServiceDoneReceiver() // maybe move this into the if?
     }
     
     private fun startTimerForEarliestPostDateFromNow()

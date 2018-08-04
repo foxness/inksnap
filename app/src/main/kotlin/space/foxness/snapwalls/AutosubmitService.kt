@@ -3,6 +3,7 @@ package space.foxness.snapwalls
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.os.*
 import android.support.v4.content.LocalBroadcastManager
@@ -68,6 +69,7 @@ class AutosubmitService : Service()
             val queue = Queue.getInstance(ctx)
 
             var post: Post? = null
+            var successfullyPosted = false
             
             try
             {
@@ -170,6 +172,8 @@ class AutosubmitService : Service()
                         // todo: handle this
                         throw error
                     }
+                    
+                    successfullyPosted = true
 
                     val realSubmittedTime = DateTime.now()
 
@@ -203,10 +207,6 @@ class AutosubmitService : Service()
                         ps.scheduleServiceForNextPost()
                         log.log("Scheduled service for the next post")
                     }
-
-                    val broadcastIntent = Intent(POST_SUBMITTED)
-                    broadcastIntent.putExtra(EXTRA_SUBMITTED_ALL_POSTS, submittedAllPosts) // todo: handle the intent extra
-                    LocalBroadcastManager.getInstance(ctx).sendBroadcast(broadcastIntent)
                 }
             }
             catch (exception: Exception)
@@ -218,7 +218,7 @@ class AutosubmitService : Service()
                 val errorMsg = "AN EXCEPTION HAS OCCURED. STACKTRACE:\n$stacktrace"
                 log.log(errorMsg)
                 
-                val failReason = exception.message!!
+                val failReason = exception.message ?: exception.toString()
                 val detailedReason = stacktrace
                 
                 generateFailedPost(failReason, detailedReason, post)
@@ -227,6 +227,12 @@ class AutosubmitService : Service()
             }
             finally
             {
+                val broadcastIntent = Intent(AUTOSUBMIT_SERVICE_DONE)
+                broadcastIntent.putExtra(EXTRA_SUCCESSFULLY_POSTED, successfullyPosted)
+
+                val lbm = LocalBroadcastManager.getInstance(ctx)
+                lbm.sendBroadcast(broadcastIntent)
+                
                 stopSelf(msg.arg1)
 
                 // BIG NOTE: stopSelf(msg.arg1) MUST BE CALLED BEFORE RETURNING
@@ -276,13 +282,23 @@ class AutosubmitService : Service()
 
     companion object
     {
-        const val EXTRA_SUBMITTED_ALL_POSTS = "submittedAllPosts"
+        private const val EXTRA_SUCCESSFULLY_POSTED = "successfullyPosted"
 
-        const val POST_SUBMITTED = "postSubmitted"
+        private const val AUTOSUBMIT_SERVICE_DONE = "autosubmitServiceDone"
 
         private const val SEND_REPLIES = true
         private const val RESUBMIT = true
 
         fun newIntent(context: Context) = Intent(context, AutosubmitService::class.java)
+        
+        fun getSuccessfullyPostedFromIntent(broadcastIntent: Intent): Boolean
+        {
+            return broadcastIntent.getBooleanExtra(EXTRA_SUCCESSFULLY_POSTED, false)
+        }
+        
+        fun getAutosubmitServiceDoneBroadcastIntentFilter(): IntentFilter
+        {
+            return IntentFilter(AUTOSUBMIT_SERVICE_DONE)
+        }
     }
 }

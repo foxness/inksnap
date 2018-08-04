@@ -1,6 +1,8 @@
 package space.foxness.snapwalls
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.Intent
 import android.view.View
 import android.widget.SeekBar
 import org.joda.time.Duration
@@ -18,9 +20,12 @@ class PeriodicQueueFragment : QueueFragment()
     
     private lateinit var seekBar: SeekBar
 
-    override fun onSubmitReceived()
+    override fun onAutosubmitServiceDoneReceived(context: Context, intent: Intent)
     {
-        super.onSubmitReceived()
+        super.onAutosubmitServiceDoneReceived(context, intent)
+        
+        // todo: do something with this?
+        val successfullyPosted = AutosubmitService.getSuccessfullyPostedFromIntent(intent)
         
         if (queue.posts.isEmpty())
         {
@@ -28,7 +33,7 @@ class PeriodicQueueFragment : QueueFragment()
             settingsManager.timeLeft = settingsManager.period
             updateToggleViews(false)
 
-            unregisterSubmitReceiver()
+            unregisterAutosubmitServiceDoneReceiver()
         }
         else
         {
@@ -105,7 +110,7 @@ class PeriodicQueueFragment : QueueFragment()
         {
             settingsManager.autosubmitEnabled = false
 
-            unregisterSubmitReceiver()
+            unregisterAutosubmitServiceDoneReceiver()
 
             timerObject.cancel()
 
@@ -204,7 +209,7 @@ class PeriodicQueueFragment : QueueFragment()
             timerObject.cancel()
         }
 
-        unregisterSubmitReceiver() // maybe move this into the if?
+        unregisterAutosubmitServiceDoneReceiver() // maybe move this into the if?
     }
 
     override fun onNewPostAdded(newPost: Post)
