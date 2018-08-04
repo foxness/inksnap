@@ -27,15 +27,47 @@ class AutosubmitService : Service()
 
     private inner class ServiceHandler(looper: Looper) : Handler(looper)
     {
-        suspend fun handle(msg: Message)
+        fun generateFailedPost(failReason: String, detailedReason: String, post: Post?)
+        {
+            val underlyingPost = if (post == null)
+            {
+                val placeholder = Post.newInstance()
+                placeholder.content = "placeholder content"
+                placeholder.title = "placeholder title"
+                placeholder.subreddit = "placeholder subreddit"
+                placeholder
+            }
+            else
+            {
+                post
+            }
+            
+            val failedPost = FailedPost.from(underlyingPost, failReason, detailedReason)
+            
+            val context = this@AutosubmitService
+            
+            val log = Log.getInstance(context)
+            val failedPostRepository = FailedPostRepository.getInstance(context)
+            failedPostRepository.addFailedPost(failedPost)
+            
+            if (post != null)
+            {
+                val queue = Queue.getInstance(context)
+                queue.deletePost(post.id)
+            }
+            
+            log.log(detailedReason)
+            notificationFactory.showErrorNotification()
+        }
+        
+        // todo: refactor this whole method
+        suspend fun handle(msg: Message) // todo: refactor out of ServiceHandler to outer?
         {
             val ctx = this@AutosubmitService
             val log = Log.getInstance(ctx)
             val queue = Queue.getInstance(ctx)
-            val failedPostRepository = FailedPostRepository.getInstance(ctx)
 
             var post: Post? = null
-            var successfullyPosted = false
             
             try
             {
@@ -68,11 +100,8 @@ class AutosubmitService : Service()
                 {
                     val failReason = "No internet"
                     val detailedReason = "The device was not connected to the internet while the post was being submitted"
-                    val failedPost = FailedPost.from(post, failReason, detailedReason)
-                    failedPostRepository.addFailedPost(failedPost)
-                    queue.deletePost(post.id)
-                    log.log(detailedReason)
-                    notificationFactory.showErrorNotification()
+                    
+                    generateFailedPost(failReason, detailedReason, post)
                 }
                 else
                 {
@@ -141,8 +170,6 @@ class AutosubmitService : Service()
                         // todo: handle this
                         throw error
                     }
-                    
-                    successfullyPosted = true
 
                     val realSubmittedTime = DateTime.now()
 
@@ -194,25 +221,8 @@ class AutosubmitService : Service()
                 val failReason = exception.message!!
                 val detailedReason = stacktrace
                 
-                val failedPost = if (post == null) // this should never happen
-                {
-                    val p = Post.newInstance()
-                    p.content = "SP: $successfullyPosted"
-                    p.title = "placeholder title"
-                    p.subreddit = "placeholder subreddit"
-                    FailedPost.from(p, failReason, detailedReason)
-                }
-                else
-                {
-                    queue.deletePost(post.id)
-                    FailedPost.from(post, failReason, detailedReason)
-                }
+                generateFailedPost(failReason, detailedReason, post)
                 
-                failedPostRepository.addFailedPost(failedPost)
-
-                notificationFactory.showErrorNotification()
-                
-                // todo: extract-refactor failed post population
                 // todo: broadcast intent that you havent submitted
             }
             finally
