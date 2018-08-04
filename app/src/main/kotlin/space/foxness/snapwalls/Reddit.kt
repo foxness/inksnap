@@ -59,7 +59,7 @@ class Reddit private constructor(private val callbacks: Callbacks)
     }
 
     suspend fun submit(post: Post,
-               debugDontPost: Boolean = false,
+               debugDontPost: Boolean = false, // todo: get rid of this
                resubmit: Boolean = true,
                sendReplies: Boolean = true): String
     {

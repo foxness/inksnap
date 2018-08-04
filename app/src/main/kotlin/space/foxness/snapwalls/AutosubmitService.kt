@@ -44,7 +44,7 @@ class AutosubmitService : Service()
 
                 if (scheduledPosts.isEmpty())
                 {
-                    throw Exception("001: No scheduled posts found")
+                    throw Exception("No scheduled posts found") // this should never happen
                 }
 
                 post = scheduledPosts.earliest()!!
@@ -54,73 +54,68 @@ class AutosubmitService : Service()
                 val signedIn = reddit.isLoggedIn
                 val notRatelimited = !reddit.isRestrictedByRatelimit
                 val networkAvailable = isNetworkAvailable()
-
-                val readyToPost = signedIn && notRatelimited && networkAvailable
-
-                val sm = SettingsManager.getInstance(ctx)
-
-                val debugDontPost = sm.debugDontPost
-
-                val imgurAccount = Autoimgur.getInstance(ctx).imgurAccount
-
-                val isLinkPost = post.isLink
-                val loggedIntoImgur = imgurAccount.isLoggedIn
-
-                if (isLinkPost)
+                
+                if (signedIn && notRatelimited && networkAvailable)
                 {
-                    val directUrl = ServiceProcessor.tryGetDirectUrl(post.content)
+                    val imgurAccount = Autoimgur.getInstance(ctx).imgurAccount
 
-                    if (directUrl != null)
+                    val isLinkPost = post.isLink
+                    val loggedIntoImgur = imgurAccount.isLoggedIn
+
+                    if (isLinkPost)
                     {
-                        log.log("Recognized url:\nOld: \"${post.content}\"\nNew: \"$directUrl\"")
-                        post.content = directUrl
-                    }
-                }
+                        val directUrl = ServiceProcessor.tryGetDirectUrl(post.content)
 
-                val isImageUrl = post.content.isImageUrl()
-
-                if (isLinkPost && isImageUrl && loggedIntoImgur)
-                {
-                    log.log("Uploading ${post.content} to imgur...")
-
-                    val imgurImg = imgurAccount.uploadImage(post.content)
-
-                    log.log("Success. New link: ${imgurImg.link}")
-
-                    post.content = imgurImg.link
-
-                    if (sm.wallpaperMode)
-                    {
-                        val oldTitle = post.title
-                        post.title += " [${imgurImg.width}×${imgurImg.height}]"
-
-                        log.log("Changed post title from \"$oldTitle\" to \"${post.title}\" before posting")
-                    }
-                }
-                else
-                {
-                    if (!isLinkPost)
-                    {
-                        log.log("Not uploading to imgur because it's not a link")
+                        if (directUrl != null)
+                        {
+                            log.log("Recognized url:\nOld: \"${post.content}\"\nNew: \"$directUrl\"")
+                            post.content = directUrl
+                        }
                     }
 
-                    if (!isImageUrl)
-                    {
-                        log.log("Not uploading to imgur because it's not an image url")
-                    }
+                    val isImageUrl = post.content.isImageUrl()
 
-                    if (!loggedIntoImgur)
+                    if (isLinkPost && isImageUrl && loggedIntoImgur)
                     {
-                        log.log("Not uploading to imgur because not logged into imgur")
-                    }
-                }
+                        log.log("Uploading ${post.content} to imgur...")
 
-                if (readyToPost || debugDontPost)
-                {
+                        val imgurImg = imgurAccount.uploadImage(post.content)
+
+                        log.log("Success. New link: ${imgurImg.link}")
+
+                        post.content = imgurImg.link
+
+                        val sm = SettingsManager.getInstance(ctx)
+                        if (sm.wallpaperMode)
+                        {
+                            val oldTitle = post.title
+                            post.title += " [${imgurImg.width}×${imgurImg.height}]"
+
+                            log.log("Changed post title from \"$oldTitle\" to \"${post.title}\" before posting")
+                        }
+                    }
+                    else
+                    {
+                        if (!isLinkPost)
+                        {
+                            log.log("Not uploading to imgur because it's not a link")
+                        }
+
+                        if (!isImageUrl)
+                        {
+                            log.log("Not uploading to imgur because it's not an image url")
+                        }
+
+                        if (!loggedIntoImgur)
+                        {
+                            log.log("Not uploading to imgur because not logged into imgur")
+                        }
+                    }
+                    
                     val link: String?
                     try
                     {
-                        link = reddit.submit(post, debugDontPost, RESUBMIT, SEND_REPLIES)
+                        link = reddit.submit(post, false, RESUBMIT, SEND_REPLIES)
                     }
                     catch (error: Exception)
                     {

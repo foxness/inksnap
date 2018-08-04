@@ -76,7 +76,7 @@ class SettingsManager private constructor(context: Context)
         get() = getBool(PREF_NOT_FIRST_LAUNCH)
         set(value) = setBool(PREF_NOT_FIRST_LAUNCH, value)
     
-    var debugDontPost: Boolean
+    var debugDontPost: Boolean // todo: get rid of this
         get() = getBool(PREF_DEBUG_DONT_POST)
         set(value) = setBool(PREF_DEBUG_DONT_POST, value)
 
