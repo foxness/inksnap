@@ -50,7 +50,7 @@ class FailedFragment : Fragment()
         fun bindFailedPost(fp: FailedPost)
         {
             failedPost = fp
-            titleView.text = failedPost.title
+            titleView.text = failedPost.failReason
         }
     }
 

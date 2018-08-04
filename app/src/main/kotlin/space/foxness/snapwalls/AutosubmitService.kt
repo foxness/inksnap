@@ -32,12 +32,14 @@ class AutosubmitService : Service()
         {
             val ctx = this@AutosubmitService
             val log = Log.getInstance(ctx)
+            val queue = Queue.getInstance(ctx)
 
+            var post: Post? = null
+            var successfullyPosted = false
+            
             try
             {
                 log.log("Autosubmit service has awoken")
-
-                val queue = Queue.getInstance(ctx)
                 val scheduledPosts = queue.posts.onlyScheduled()
 
                 if (scheduledPosts.isEmpty())
@@ -45,7 +47,7 @@ class AutosubmitService : Service()
                     throw Exception("001: No scheduled posts found")
                 }
 
-                val post = scheduledPosts.earliest()!!
+                post = scheduledPosts.earliest()!!
 
                 val reddit = Autoreddit.getInstance(ctx).reddit
 
@@ -125,6 +127,8 @@ class AutosubmitService : Service()
                         // todo: handle this
                         throw error
                     }
+                    
+                    successfullyPosted = true
 
                     val realSubmittedTime = DateTime.now()
 
@@ -176,6 +180,27 @@ class AutosubmitService : Service()
 
                 val errorMsg = "AN EXCEPTION HAS OCCURED. STACKTRACE:\n$stacktrace"
                 log.log(errorMsg)
+                
+                val failReason = exception.message!!
+                val detailedReason = stacktrace
+                
+                val failedPost = if (post == null)
+                {
+                    val p = Post.newInstance()
+                    p.content = "SP: $successfullyPosted"
+                    p.title = "placeholder title"
+                    p.subreddit = "placeholder subreddit"
+                    FailedPost.from(p, failReason, detailedReason)
+                }
+                else
+                {
+                    val fp = FailedPost.from(post, failReason, detailedReason)
+                    queue.deletePost(post.id)
+                    fp
+                }
+                
+                val failedPostRepository = FailedPostRepository.getInstance(ctx)
+                failedPostRepository.addFailedPost(failedPost)
 
                 notificationFactory.showErrorNotification()
             }
