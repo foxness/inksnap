@@ -16,7 +16,6 @@ import space.foxness.snapwalls.Util.toNice
 import java.io.PrintWriter
 import java.io.StringWriter
 
-// todo: add all posts that failed to be submitted to a 'failed' list
 // todo: add network safeguard to auth
 
 class AutosubmitService : Service()
@@ -33,6 +32,7 @@ class AutosubmitService : Service()
             val ctx = this@AutosubmitService
             val log = Log.getInstance(ctx)
             val queue = Queue.getInstance(ctx)
+            val failedPostRepository = FailedPostRepository.getInstance(ctx)
 
             var post: Post? = null
             var successfullyPosted = false
@@ -44,7 +44,7 @@ class AutosubmitService : Service()
 
                 if (scheduledPosts.isEmpty())
                 {
-                    throw Exception("No scheduled posts found") // this should never happen
+                    throw Exception("No scheduled posts found")
                 }
 
                 post = scheduledPosts.earliest()!!
@@ -52,10 +52,28 @@ class AutosubmitService : Service()
                 val reddit = Autoreddit.getInstance(ctx).reddit
 
                 val signedIn = reddit.isLoggedIn
-                val notRatelimited = !reddit.isRestrictedByRatelimit
-                val networkAvailable = isNetworkAvailable()
+                if (!signedIn)
+                {
+                    throw Exception("Wasn't logged into Reddit")
+                }
                 
-                if (signedIn && notRatelimited && networkAvailable)
+                val notRatelimited = !reddit.isRestrictedByRatelimit
+                if (!notRatelimited)
+                {
+                    throw Exception("Tried to post while ratelimited by Reddit")
+                }
+                
+                val networkAvailable = isNetworkAvailable()
+                if (!networkAvailable)
+                {
+                    val failReason = "No internet"
+                    val detailedReason = "The device was not connected to the internet while the post was being submitted"
+                    val failedPost = FailedPost.from(post, failReason, detailedReason)
+                    failedPostRepository.addFailedPost(failedPost)
+                    queue.deletePost(post.id)
+                    log.log(detailedReason)
+                }
+                else
                 {
                     val imgurAccount = Autoimgur.getInstance(ctx).imgurAccount
 
@@ -162,10 +180,6 @@ class AutosubmitService : Service()
                     broadcastIntent.putExtra(EXTRA_SUBMITTED_ALL_POSTS, submittedAllPosts) // todo: handle the intent extra
                     LocalBroadcastManager.getInstance(ctx).sendBroadcast(broadcastIntent)
                 }
-                else
-                {
-                    log.log(constructErrorMessage(post, signedIn, notRatelimited, networkAvailable))
-                }
             }
             catch (exception: Exception)
             {
@@ -179,7 +193,7 @@ class AutosubmitService : Service()
                 val failReason = exception.message!!
                 val detailedReason = stacktrace
                 
-                val failedPost = if (post == null)
+                val failedPost = if (post == null) // this should never happen
                 {
                     val p = Post.newInstance()
                     p.content = "SP: $successfullyPosted"
@@ -189,12 +203,10 @@ class AutosubmitService : Service()
                 }
                 else
                 {
-                    val fp = FailedPost.from(post, failReason, detailedReason)
                     queue.deletePost(post.id)
-                    fp
+                    FailedPost.from(post, failReason, detailedReason)
                 }
                 
-                val failedPostRepository = FailedPostRepository.getInstance(ctx)
                 failedPostRepository.addFailedPost(failedPost)
 
                 notificationFactory.showErrorNotification()
@@ -258,33 +270,5 @@ class AutosubmitService : Service()
         private const val RESUBMIT = true
 
         fun newIntent(context: Context) = Intent(context, AutosubmitService::class.java)
-
-        // assumes that not all of the arguments are true
-        private fun constructErrorMessage(post: Post,
-                                          signedIn: Boolean,
-                                          notRatelimited: Boolean,
-                                          networkAvailable: Boolean): String
-        {
-            val reasonsDidntPost = mutableListOf<String>()
-
-            val notSignedInReason = "wasn't signed in"
-            val ratelimitedReason = "was ratelimited"
-            val networkNotAvailableReason = "network wasn't available"
-
-            if (!signedIn) reasonsDidntPost.add(notSignedInReason)
-            if (!notRatelimited) reasonsDidntPost.add(ratelimitedReason)
-            if (!networkAvailable) reasonsDidntPost.add(networkNotAvailableReason)
-
-            val postString = "the post titled '${post.title}' with ID ${post.id}"
-
-            var errorMessage = "Couldn't submit $postString because "
-
-            reasonsDidntPost.forEachIndexed { index, reason ->
-                errorMessage += if (index == reasonsDidntPost.size - 1) reason
-                else "$reason and "
-            }
-
-            return errorMessage
-        }
     }
 }
