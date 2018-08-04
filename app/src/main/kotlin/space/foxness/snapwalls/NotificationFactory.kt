@@ -11,8 +11,6 @@ import android.support.annotation.RequiresApi
 import android.support.v4.app.NotificationCompat
 import java.util.concurrent.atomic.AtomicInteger
 
-// todo: different notification ids for different posts
-
 class NotificationFactory private constructor(private val context: Context)
 {
     private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
