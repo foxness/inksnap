@@ -75,7 +75,7 @@ class NotificationFactory private constructor(private val context: Context)
     {
         val notification = prebuildNotification(
                 ERROR_CHANNEL_ID,
-                "An error has occurred", // todo: extract
+                "Your post was not submitted", // todo: extract
                 "An error has occurred while submitting")
                 .build()
         

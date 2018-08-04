@@ -72,6 +72,7 @@ class AutosubmitService : Service()
                     failedPostRepository.addFailedPost(failedPost)
                     queue.deletePost(post.id)
                     log.log(detailedReason)
+                    notificationFactory.showErrorNotification()
                 }
                 else
                 {
@@ -210,6 +211,9 @@ class AutosubmitService : Service()
                 failedPostRepository.addFailedPost(failedPost)
 
                 notificationFactory.showErrorNotification()
+                
+                // todo: extract-refactor failed post population
+                // todo: broadcast intent that you havent submitted
             }
             finally
             {
