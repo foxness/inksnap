@@ -34,8 +34,6 @@ class StartupReceiver : BroadcastReceiver()
                 }
                 catch (ex: Exception)
                 {
-                    log.log("Tried to schedule the service for the next post but it appears that it should have been posted while the the phone was not alive")
-
                     val errors = StringWriter()
                     ex.printStackTrace(PrintWriter(errors))
                     val stacktrace = errors.toString()

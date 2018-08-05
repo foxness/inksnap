@@ -8,6 +8,7 @@ import android.os.SystemClock
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import space.foxness.snapwalls.Util.earliest
+import space.foxness.snapwalls.Util.earliestPostDate
 import space.foxness.snapwalls.Util.onlyScheduled
 import space.foxness.snapwalls.Util.timeLeftUntil
 
@@ -116,8 +117,15 @@ class PostScheduler private constructor(context: Context)
 
     fun scheduleServiceForNextPost()
     {
-        val esp = queue.posts.onlyScheduled().earliest() ?: throw Exception("No scheduled posts found")
-        scheduleService(esp.intendedSubmitDate!!)
+        val earliest = queue.posts.earliestPostDate()!!
+        if (earliest <= DateTime.now())
+        {
+            runServiceNow()
+        }
+        else
+        {
+            scheduleService(earliest)
+        }
     }
 
     private fun scheduleService(datetime: DateTime)
@@ -135,6 +143,20 @@ class PostScheduler private constructor(context: Context)
         val datetimeElapsed = Duration(SystemClock.elapsedRealtime()) + delay
 
         alarmManager.setExact(type, datetimeElapsed.millis, pi)
+    }
+    
+    fun runServiceNow()
+    {
+        val intent = AutosubmitService.newIntent(context)
+        
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        {
+            context.startForegroundService(intent)
+        }
+        else
+        {
+            context.startService(intent)
+        }
     }
 
     private fun cancelScheduledService()
