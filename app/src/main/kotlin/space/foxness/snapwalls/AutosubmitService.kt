@@ -232,19 +232,6 @@ class AutosubmitService : Service()
                         queue.deletePost(post.id)
 
                         log.log("Deleted the submitted post from the database")
-
-                        val submittedAllPosts = queue.posts.isEmpty()
-                        if (submittedAllPosts)
-                        {
-                            SettingsManager.getInstance(ctx).autosubmitEnabled = false
-                            log.log("Ran out of posts and disabled autosubmit")
-                        }
-                        else
-                        {
-                            val ps = PostScheduler.getInstance(ctx)
-                            ps.scheduleServiceForNextPost()
-                            log.log("Scheduled service for the next post")
-                        }
                     }
                 }
             }
@@ -266,6 +253,19 @@ class AutosubmitService : Service()
             }
             finally
             {
+                // technically onlyScheduled() is not necessary
+                if (queue.posts.onlyScheduled().isEmpty())
+                {
+                    SettingsManager.getInstance(ctx).autosubmitEnabled = false
+                    log.log("Ran out of posts and disabled autosubmit")
+                }
+                else
+                {
+                    val ps = PostScheduler.getInstance(ctx)
+                    ps.scheduleServiceForNextPost()
+                    log.log("Scheduled service for the next post")
+                }
+                
                 val broadcastIntent = Intent(AUTOSUBMIT_SERVICE_DONE)
                 broadcastIntent.putExtra(EXTRA_SUCCESSFULLY_POSTED, successfullyPosted)
 
