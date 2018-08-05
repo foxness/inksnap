@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import org.joda.time.Duration
+import space.foxness.snapwalls.Util.compatibleWithRatelimit
 import space.foxness.snapwalls.Util.earliestPostDateFromNow
 import space.foxness.snapwalls.Util.log
 import space.foxness.snapwalls.Util.onlyFuture
@@ -43,6 +44,12 @@ class ManualQueueFragment : QueueFragment()
             if (queue.posts.onlyPast().isNotEmpty())
             {
                 toast("You have a post date in the past")
+                return
+            }
+            
+            if (!queue.posts.compatibleWithRatelimit())
+            {
+                toast("A post cannot be scheduled within 10 minutes of another (a rule imposed by Reddit)")
                 return
             }
 

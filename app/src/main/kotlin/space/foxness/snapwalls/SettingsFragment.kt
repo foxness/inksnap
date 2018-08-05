@@ -106,6 +106,7 @@ class SettingsFragment : Fragment()
         settingsManager.wallpaperMode = checked
     }
 
+    // todo: disallow periods less or equal to reddit ratelimit
     private fun onTimerPeriodButtonClick()
     {
         val ctx = context!!
