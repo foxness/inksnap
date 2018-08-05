@@ -1,5 +1,6 @@
 package space.foxness.snapwalls
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.DividerItemDecoration
@@ -35,22 +36,32 @@ class FailedFragment : Fragment()
     private inner class FailedPostHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
     {
         private val titleView: TextView
+        private val contentView: TextView
+        private val subredditView: TextView
+        private val failReasonView: TextView
+        private val detailedReasonView: TextView
 
         private lateinit var failedPost: FailedPost
 
         init
         {
-//            itemView.setOnClickListener {
-//                // todo: open?
-//            }
-
             titleView = itemView.findViewById(R.id.failed_post_title)
+            contentView = itemView.findViewById(R.id.failed_post_content)
+            subredditView = itemView.findViewById(R.id.failed_post_subreddit)
+            failReasonView = itemView.findViewById(R.id.failed_post_fail_reason)
+            detailedReasonView = itemView.findViewById(R.id.failed_post_detailed_reason)
         }
 
+        @SuppressLint("SetTextI18n") // todo: fix
         fun bindFailedPost(fp: FailedPost)
         {
             failedPost = fp
-            titleView.text = failedPost.failReason
+            
+            titleView.text = failedPost.title
+            contentView.text = failedPost.content
+            subredditView.text = "/r/${failedPost.subreddit}"
+            failReasonView.text = failedPost.failReason
+            detailedReasonView.text = failedPost.detailedReason
         }
     }
 

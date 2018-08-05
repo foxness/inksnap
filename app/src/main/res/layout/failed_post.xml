@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:paddingTop="12dp"
-    android:paddingBottom="12dp"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:orientation="vertical"
     >
 
     <TextView
@@ -14,9 +13,51 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textStyle="bold"
-        android:layout_alignParentStart="true"
         android:layout_marginStart="22dp"
+        android:layout_marginEnd="22dp"
+        android:layout_marginTop="8dp"
         tools:text="Post title"
         />
 
-</RelativeLayout>
+    <TextView
+        android:id="@+id/failed_post_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="22dp"
+        android:layout_marginEnd="22dp"
+        android:layout_marginTop="8dp"
+        tools:text="Post content"
+        />
+
+    <TextView
+        android:id="@+id/failed_post_subreddit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="22dp"
+        android:layout_marginEnd="22dp"
+        android:layout_marginTop="8dp"
+        tools:text="Post subreddit"
+        />
+    
+    <TextView
+        android:id="@+id/failed_post_fail_reason"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="22dp"
+        android:layout_marginEnd="22dp"
+        android:layout_marginTop="8dp"
+        tools:text="Fail reason"
+        />
+
+    <TextView
+        android:id="@+id/failed_post_detailed_reason"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="22dp"
+        android:layout_marginEnd="22dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        tools:text="Detailed reason"
+        />
+
+</LinearLayout>
