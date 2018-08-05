@@ -10,7 +10,6 @@ import android.support.v4.content.LocalBroadcastManager
 import kotlinx.coroutines.experimental.runBlocking
 import org.joda.time.DateTime
 import org.joda.time.Duration
-import space.foxness.snapwalls.Util.earliest
 import space.foxness.snapwalls.Util.isImageUrl
 import space.foxness.snapwalls.Util.onlyScheduled
 import space.foxness.snapwalls.Util.toNice
@@ -74,138 +73,178 @@ class AutosubmitService : Service()
             try
             {
                 log.log("Autosubmit service has awoken")
-                val scheduledPosts = queue.posts.onlyScheduled()
+                
+                // technically the "onlyScheduled()" part is not necessary because all of them are scheduled
+                val scheduledPosts = queue.posts.onlyScheduled().sortedBy { it.intendedSubmitDate!! }
 
                 if (scheduledPosts.isEmpty())
                 {
                     throw Exception("No scheduled posts found")
                 }
-
-                post = scheduledPosts.earliest()!!
-
-                val reddit = Autoreddit.getInstance(ctx).reddit
-
-                val signedIn = reddit.isLoggedIn
-                if (!signedIn)
+                
+                val now = DateTime.now()
+                var lastFailedPostIndex: Int? = null
+                
+                for (i in scheduledPosts.indices)
                 {
-                    throw Exception("Wasn't logged into Reddit")
+                    val realDelay = Duration(scheduledPosts[i].intendedSubmitDate!!, now)
+                    if (realDelay > POST_DELAY_LIMIT)
+                    {
+                        lastFailedPostIndex = i
+                    }
+                    else
+                    {
+                        break
+                    }
                 }
                 
-                val notRatelimited = !reddit.isRestrictedByRatelimit
-                if (!notRatelimited)
+                if (lastFailedPostIndex != null)
                 {
-                    throw Exception("Tried to post while ratelimited by Reddit")
-                }
-                
-                val networkAvailable = isNetworkAvailable()
-                if (!networkAvailable)
-                {
-                    val failReason = "No internet"
-                    val detailedReason = "The device was not connected to the internet while the post was being submitted"
+                    val failedPosts = scheduledPosts.take(lastFailedPostIndex + 1)
                     
-                    generateFailedPost(failReason, detailedReason, post)
+                    val failReason = "No service" // todo: extract < & v
+                    val detailedReason = "The service that submits scheduled posts could not be run at appropriate time either due to the android system not running it at appropriate time or due to the device being turned off"
+                    for (failedPost in failedPosts)
+                    {
+                        generateFailedPost(failReason, detailedReason, failedPost)
+                    }
+                    
+                    if (scheduledPosts.size > lastFailedPostIndex + 1)
+                    {
+                        post = scheduledPosts[lastFailedPostIndex + 1]
+                    } // else all posts were failed and we have nothing to post
                 }
                 else
                 {
-                    val imgurAccount = Autoimgur.getInstance(ctx).imgurAccount
+                    post = scheduledPosts.first()
+                }
+                
+                if (post != null)
+                {
+                    val reddit = Autoreddit.getInstance(ctx).reddit
 
-                    val isLinkPost = post.isLink
-                    val loggedIntoImgur = imgurAccount.isLoggedIn
-
-                    if (isLinkPost)
+                    val signedIn = reddit.isLoggedIn
+                    if (!signedIn)
                     {
-                        val directUrl = ServiceProcessor.tryGetDirectUrl(post.content)
-
-                        if (directUrl != null)
-                        {
-                            log.log("Recognized url:\nOld: \"${post.content}\"\nNew: \"$directUrl\"")
-                            post.content = directUrl
-                        }
+                        throw Exception("Wasn't logged into Reddit")
                     }
 
-                    val isImageUrl = post.content.isImageUrl()
-
-                    if (isLinkPost && isImageUrl && loggedIntoImgur)
+                    val notRatelimited = !reddit.isRestrictedByRatelimit
+                    if (!notRatelimited)
                     {
-                        log.log("Uploading ${post.content} to imgur...")
+                        throw Exception("Tried to post while ratelimited by Reddit")
+                    }
 
-                        val imgurImg = imgurAccount.uploadImage(post.content)
+                    val networkAvailable = isNetworkAvailable()
+                    if (!networkAvailable)
+                    {
+                        val failReason = "No internet"
+                        val detailedReason = "The device was not connected to the internet while the post was being submitted"
 
-                        log.log("Success. New link: ${imgurImg.link}")
-
-                        post.content = imgurImg.link
-
-                        val sm = SettingsManager.getInstance(ctx)
-                        if (sm.wallpaperMode)
-                        {
-                            val oldTitle = post.title
-                            post.title += " [${imgurImg.width}×${imgurImg.height}]"
-
-                            log.log("Changed post title from \"$oldTitle\" to \"${post.title}\" before posting")
-                        }
+                        generateFailedPost(failReason, detailedReason, post)
                     }
                     else
                     {
-                        if (!isLinkPost)
+                        val imgurAccount = Autoimgur.getInstance(ctx).imgurAccount
+
+                        val isLinkPost = post.isLink
+                        val loggedIntoImgur = imgurAccount.isLoggedIn
+
+                        if (isLinkPost)
                         {
-                            log.log("Not uploading to imgur because it's not a link")
+                            val directUrl = ServiceProcessor.tryGetDirectUrl(post.content)
+
+                            if (directUrl != null)
+                            {
+                                log.log("Recognized url:\nOld: \"${post.content}\"\nNew: \"$directUrl\"")
+                                post.content = directUrl
+                            }
                         }
 
-                        if (!isImageUrl)
+                        val isImageUrl = post.content.isImageUrl()
+
+                        if (isLinkPost && isImageUrl && loggedIntoImgur)
                         {
-                            log.log("Not uploading to imgur because it's not an image url")
+                            log.log("Uploading ${post.content} to imgur...")
+
+                            val imgurImg = imgurAccount.uploadImage(post.content)
+
+                            log.log("Success. New link: ${imgurImg.link}")
+
+                            post.content = imgurImg.link
+
+                            val sm = SettingsManager.getInstance(ctx)
+                            if (sm.wallpaperMode)
+                            {
+                                val oldTitle = post.title
+                                post.title += " [${imgurImg.width}×${imgurImg.height}]"
+
+                                log.log("Changed post title from \"$oldTitle\" to \"${post.title}\" before posting")
+                            }
+                        }
+                        else
+                        {
+                            if (!isLinkPost)
+                            {
+                                log.log("Not uploading to imgur because it's not a link")
+                            }
+
+                            if (!isImageUrl)
+                            {
+                                log.log("Not uploading to imgur because it's not an image url")
+                            }
+
+                            if (!loggedIntoImgur)
+                            {
+                                log.log("Not uploading to imgur because not logged into imgur")
+                            }
                         }
 
-                        if (!loggedIntoImgur)
+                        val link: String?
+                        try
                         {
-                            log.log("Not uploading to imgur because not logged into imgur")
+                            link = reddit.submit(post, false, RESUBMIT, SEND_REPLIES)
                         }
-                    }
-                    
-                    val link: String?
-                    try
-                    {
-                        link = reddit.submit(post, false, RESUBMIT, SEND_REPLIES)
-                    }
-                    catch (error: Exception)
-                    {
-                        // todo: handle this
-                        throw error
-                    }
-                    
-                    successfullyPosted = true
+                        catch (error: Exception)
+                        {
+                            // todo: handle this
+                            throw error
+                        }
 
-                    val realSubmittedTime = DateTime.now()
+                        successfullyPosted = true
 
-                    notificationFactory.showSuccessNotification(post.title)
+                        val realSubmittedTime = DateTime.now()
 
-                    log.log("Successfully submitted a post. Link: $link")
+                        notificationFactory.showSuccessNotification(post.title)
 
-                    val difference = Duration(post.intendedSubmitDate, realSubmittedTime)
+                        log.log("Successfully submitted a post. Link: $link")
 
-                    log.log("Real vs intended time difference: ${difference.toNice()}")
-                    
-                    val postedPost = PostedPost.from(post, link)
-                    val postedPostRepository = PostedPostRepository.getInstance(ctx)
-                    postedPostRepository.addPostedPost(postedPost)
+                        val difference = Duration(post.intendedSubmitDate, realSubmittedTime)
 
-                    log.log("Added to posted post repository")
-                    
-                    queue.deletePost(post.id)
-                    
-                    log.log("Deleted the submitted post from the database")
+                        log.log("Real vs intended time difference: ${difference.toNice()}")
 
-                    val submittedAllPosts = queue.posts.isEmpty()
-                    if (submittedAllPosts)
-                    {
-                        SettingsManager.getInstance(ctx).autosubmitEnabled = false
-                        log.log("Ran out of posts and disabled autosubmit")
-                    }
-                    else
-                    {
-                        val ps = PostScheduler.getInstance(ctx)
-                        ps.scheduleServiceForNextPost()
-                        log.log("Scheduled service for the next post")
+                        val postedPost = PostedPost.from(post, link)
+                        val postedPostRepository = PostedPostRepository.getInstance(ctx)
+                        postedPostRepository.addPostedPost(postedPost)
+
+                        log.log("Added to posted post repository")
+
+                        queue.deletePost(post.id)
+
+                        log.log("Deleted the submitted post from the database")
+
+                        val submittedAllPosts = queue.posts.isEmpty()
+                        if (submittedAllPosts)
+                        {
+                            SettingsManager.getInstance(ctx).autosubmitEnabled = false
+                            log.log("Ran out of posts and disabled autosubmit")
+                        }
+                        else
+                        {
+                            val ps = PostScheduler.getInstance(ctx)
+                            ps.scheduleServiceForNextPost()
+                            log.log("Scheduled service for the next post")
+                        }
                     }
                 }
             }
@@ -288,6 +327,8 @@ class AutosubmitService : Service()
 
         private const val SEND_REPLIES = true
         private const val RESUBMIT = true
+        
+        private val POST_DELAY_LIMIT = Duration(10 * 60 * 1000) // 10 minutes
 
         fun newIntent(context: Context) = Intent(context, AutosubmitService::class.java)
         
