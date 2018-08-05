@@ -106,11 +106,9 @@ class SettingsFragment : Fragment()
         settingsManager.wallpaperMode = checked
     }
 
-    // todo: disallow periods less or equal to reddit ratelimit
     private fun onTimerPeriodButtonClick()
     {
         val ctx = context!!
-        val adb = AlertDialog.Builder(ctx)
 
         val currentMinutes = settingsManager.period.standardMinutes
 
@@ -118,22 +116,40 @@ class SettingsFragment : Fragment()
         input.inputType = InputType.TYPE_CLASS_NUMBER
         input.setRawInputType(Configuration.KEYBOARD_12KEY)
         input.setText(currentMinutes.toString())
+        
+        val periodDialog = AlertDialog.Builder(ctx)
+                .setView(input)
+                .setTitle("Timer period") // todo: extracteroni
+                .setPositiveButton(android.R.string.ok, null)
+                .setNegativeButton(android.R.string.cancel, null)
+                .create()
 
-        adb.setView(input)
-        adb.setTitle("Timer period") // todo: extracteroni
-        adb.setPositiveButton("OK") { dialog: DialogInterface, which: Int ->
-            dialog.dismiss()
-            val minutes = input.text.toString().toInt()
-            val millis = minutes * Util.MILLIS_IN_MINUTE
-            val period = Duration(millis)
-            settingsManager.period = period
+        periodDialog.setOnShowListener { _ ->
+            val positiveButton = periodDialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            val negativeButton = periodDialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+            
+            positiveButton.setOnClickListener {
+                val minutes = input.text.toString().toInt()
+                val millis = minutes * Util.MILLIS_IN_MINUTE
+
+                if (millis > Reddit.RATELIMIT_MS)
+                {
+                    periodDialog.dismiss()
+                    val period = Duration(millis)
+                    settingsManager.period = period
+                }
+                else
+                {
+                    toast("The period cannot be 10 minutes or less (a rule imposed by Reddit)")
+                }
+            }
+            
+            negativeButton.setOnClickListener {
+                periodDialog.dismiss()
+            }
         }
-
-        adb.setNegativeButton("Cancel") { dialog: DialogInterface, which: Int ->
-            dialog.dismiss()
-        }
-
-        adb.show()
+        
+        periodDialog.show()
     }
 
     private fun onAutosubmitTypeButtonClick()
