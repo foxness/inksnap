@@ -82,4 +82,9 @@ class FailedFragment : Fragment()
             holder.bindFailedPost(postedPost)
         }
     }
+
+    companion object
+    {
+        fun newInstance() = FailedFragment()
+    }
 }

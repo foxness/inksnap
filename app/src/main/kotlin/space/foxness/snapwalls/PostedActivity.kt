@@ -5,7 +5,7 @@ import android.content.Intent
 
 class PostedActivity : SingleFragmentActivity()
 {
-    override fun createFragment() = PostedFragment()
+    override fun createFragment() = PostedFragment.newInstance()
     
     companion object
     {

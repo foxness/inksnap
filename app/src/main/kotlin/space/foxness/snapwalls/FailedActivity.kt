@@ -5,7 +5,7 @@ import android.content.Intent
 
 class FailedActivity : SingleFragmentActivity()
 {
-    override fun createFragment() = FailedFragment()
+    override fun createFragment() = FailedFragment.newInstance()
 
     companion object
     {

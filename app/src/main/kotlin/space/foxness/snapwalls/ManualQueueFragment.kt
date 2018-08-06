@@ -213,4 +213,9 @@ class ManualQueueFragment : QueueFragment()
 
         queue.deletePost(deletedPostId)
     }
+    
+    companion object
+    {
+        fun newInstance() = ManualQueueFragment()
+    }
 }

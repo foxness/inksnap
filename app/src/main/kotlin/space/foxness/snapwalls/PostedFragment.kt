@@ -83,4 +83,9 @@ class PostedFragment : Fragment()
             holder.bindPostedPost(postedPost)
         }
     }
+
+    companion object
+    {
+        fun newInstance() = PostedFragment()
+    }
 }

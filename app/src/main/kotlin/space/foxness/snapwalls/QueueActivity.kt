@@ -63,8 +63,8 @@ class QueueActivity : AppCompatActivity()
     {
         return when (currentType)
         {
-            SettingsManager.AutosubmitType.Manual -> ManualQueueFragment()
-            SettingsManager.AutosubmitType.Periodic -> PeriodicQueueFragment()
+            SettingsManager.AutosubmitType.Manual -> ManualQueueFragment.newInstance()
+            SettingsManager.AutosubmitType.Periodic -> PeriodicQueueFragment.newInstance()
         }
     }
     

@@ -8,14 +8,17 @@
     >
 
     <FrameLayout
-        android:id="@+id/fragment_container"
+        android:id="@+id/main_fragment_container"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         />
 
+    <!--todo: remove-->
+    <View style="@style/divider"/>
+
     <android.support.design.widget.BottomNavigationView
-        android:id="@+id/navigation"
+        android:id="@+id/main_bottom_navigation"
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:layout_gravity="start"

@@ -257,5 +257,7 @@ class PeriodicQueueFragment : QueueFragment()
     companion object
     {
         private const val SEEKBAR_MAX_VALUE = 1000
+
+        fun newInstance() = PeriodicQueueFragment()
     }
 }

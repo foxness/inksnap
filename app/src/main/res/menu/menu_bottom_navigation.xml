@@ -16,7 +16,7 @@
         />
     
     <item
-        android:id="@+id/action_navigation"
+        android:id="@+id/action_failed"
         android:title="Failed"
         android:icon="@android:drawable/ic_menu_agenda"
         />
