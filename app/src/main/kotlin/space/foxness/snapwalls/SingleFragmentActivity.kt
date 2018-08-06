@@ -14,7 +14,7 @@ abstract class SingleFragmentActivity : AppCompatActivity()
         setContentView(SINGLE_FRAGMENT_LAYOUT)
 
         val fm = supportFragmentManager
-        var fragment: Fragment? = fm.findFragmentById(FRAGMENT_CONTAINER)
+        var fragment = fm.findFragmentById(FRAGMENT_CONTAINER)
 
         if (fragment == null)
         {

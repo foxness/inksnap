@@ -18,7 +18,7 @@
         android:theme="@style/AppTheme"
         >
         
-        <activity android:name=".QueueActivity" >
+        <activity android:name=".MainActivity" >
             
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -29,32 +29,30 @@
         
         <activity
             android:name=".PostActivity"
-            android:parentActivityName=".QueueActivity"
+            android:parentActivityName=".MainActivity"
             />
         
         <activity
             android:name=".SettingsActivity"
-            android:parentActivityName=".QueueActivity"
+            android:parentActivityName=".MainActivity"
             />
         
         <activity
             android:name=".LogActivity"
-            android:parentActivityName=".QueueActivity"
+            android:parentActivityName=".MainActivity"
             />
         
-        <!-- todo: remove parent after adding bottom nav -->
         <activity
             android:name=".PostedActivity"
-            android:parentActivityName=".QueueActivity"
+            android:parentActivityName=".MainActivity"
             />
 
-        <!-- todo: remove parent after adding bottom nav -->
         <activity
             android:name=".FailedActivity"
-            android:parentActivityName=".QueueActivity"
+            android:parentActivityName=".MainActivity"
             />
         
-        <activity android:name=".MainActivity" />
+        <activity android:name=".QueueActivity" />
 
         <service android:name=".AutosubmitService" />
         

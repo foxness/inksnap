@@ -66,6 +66,11 @@
         />
 
     <item
+        android:id="@+id/menu_queue_queue"
+        android:title="Queue"
+        />
+
+    <item
         android:id="@+id/menu_queue_posted"
         android:title="@string/posted"
         />
