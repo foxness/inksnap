@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    >
+    
+    <item
+        android:id="@+id/action_queue"
+        android:title="Queue"
+        android:icon="@android:drawable/ic_menu_search" 
+        />
+        
+    <item
+        android:id="@+id/action_posted"
+        android:title="Posted"
+        android:icon="@android:drawable/ic_menu_camera"
+        />
+    
+    <item
+        android:id="@+id/action_navigation"
+        android:title="Failed"
+        android:icon="@android:drawable/ic_menu_agenda"
+        />
+    
+</menu>

@@ -53,6 +53,8 @@
             android:name=".FailedActivity"
             android:parentActivityName=".QueueActivity"
             />
+        
+        <activity android:name=".MainActivity" />
 
         <service android:name=".AutosubmitService" />
         
