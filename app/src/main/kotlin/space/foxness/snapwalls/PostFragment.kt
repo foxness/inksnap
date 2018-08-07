@@ -61,10 +61,13 @@ class PostFragment : Fragment()
         allowIntendedSubmitDateEditing = args.getBoolean(ARG_ALLOW_INTENDED_SUBMIT_DATE_EDITING)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?)
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater)
     {
         super.onCreateOptionsMenu(menu, inflater)
-        inflater!!.inflate(R.menu.menu_post, menu)
+        inflater.inflate(R.menu.menu_post, menu)
+
+        val deleteItem = menu.findItem(R.id.menu_post_delete)
+        deleteItem.isVisible = !newPost
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean
@@ -96,17 +99,9 @@ class PostFragment : Fragment()
 
     private fun deletePost()
     {
-        if (newPost)
-        {
-            activity!!.setResult(Activity.RESULT_CANCELED)
-        }
-        else
-        {
-            val i = Intent()
-            i.putExtra(RESULT_DELETED_POST_ID, post.id)
-            activity!!.setResult(RESULT_CODE_DELETED, i)
-        }
-
+        val i = Intent()
+        i.putExtra(RESULT_DELETED_POST_ID, post.id)
+        activity!!.setResult(RESULT_CODE_DELETED, i)
         activity!!.finish()
     }
 
