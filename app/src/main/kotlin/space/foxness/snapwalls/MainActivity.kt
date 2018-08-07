@@ -18,7 +18,7 @@ class MainActivity : AppCompatActivity()
     
     private var currentFragment: Fragment? = null
     
-    private var selectedItemId = HOME_ITEM_ID
+    private var selectedItemId: Int? = null
     
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -38,17 +38,17 @@ class MainActivity : AppCompatActivity()
         bottomNavigation = findViewById(R.id.main_bottom_navigation)
         bottomNavigation.setOnNavigationItemSelectedListener {
             val itemId = it.itemId
-            selectFragment(itemId)
+            setFragmentBasedOnMenu(itemId)
             true
         }
         
         val itemId = savedInstanceState?.getInt(ARG_SELECTED_ITEM_ID) ?: HOME_ITEM_ID
-        selectFragment(itemId)
+        setFragmentBasedOnMenu(itemId)
     }
 
     override fun onSaveInstanceState(outState: Bundle)
     {
-        outState.putInt(ARG_SELECTED_ITEM_ID, selectedItemId)
+        outState.putInt(ARG_SELECTED_ITEM_ID, selectedItemId ?: HOME_ITEM_ID)
         super.onSaveInstanceState(outState)
     }
 
@@ -66,12 +66,7 @@ class MainActivity : AppCompatActivity()
             if (currentType != settingsManager.autosubmitType)
             {
                 val newFragment = getQueueFragment()
-
-                fragmentManager.beginTransaction()
-                        .replace(FRAGMENT_CONTAINER, newFragment)
-                        .commit()
-                
-                currentFragment = newFragment
+                setFragment(newFragment)
             }
         }
         
@@ -87,9 +82,14 @@ class MainActivity : AppCompatActivity()
         }
     }
 
-    private fun selectFragment(itemId: Int)
+    private fun setFragmentBasedOnMenu(itemId: Int)
     {
-        selectedItemId = itemId // todo: dont change fragment if the item id didnt change
+        if (selectedItemId == itemId)
+        {
+            return
+        }
+        
+        selectedItemId = itemId
         
         val newFragment = when (selectedItemId)
         {
@@ -100,6 +100,11 @@ class MainActivity : AppCompatActivity()
             else -> throw Exception("what")
         }
         
+        setFragment(newFragment)
+    }
+    
+    private fun setFragment(newFragment: Fragment)
+    {
         if (currentFragment == null)
         {
             fragmentManager.beginTransaction()
