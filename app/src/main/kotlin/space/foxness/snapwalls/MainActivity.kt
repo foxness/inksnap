@@ -7,6 +7,9 @@ import android.support.design.widget.BottomNavigationView
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v7.app.AppCompatActivity
+import android.view.Menu
+import android.view.MenuItem
+import space.foxness.snapwalls.Util.toast
 
 class MainActivity : AppCompatActivity()
 {
@@ -44,6 +47,40 @@ class MainActivity : AppCompatActivity()
         
         val itemId = savedInstanceState?.getInt(ARG_SELECTED_ITEM_ID) ?: HOME_ITEM_ID
         setFragmentBasedOnMenu(itemId)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean
+    {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
+
+    private fun openSettings()
+    {
+        val i = SettingsActivity.newIntent(this)
+        startActivity(i)
+    }
+
+    private fun openLog()
+    {
+        val i = LogActivity.newIntent(this)
+        startActivity(i)
+    }
+
+    private fun testButton()
+    {
+        toast(VariantVariables.VARIANT_NAME)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean
+    {
+        return when (item.itemId)
+        {
+            R.id.menu_main_test -> { testButton(); true }
+            R.id.menu_main_log -> { openLog(); true }
+            R.id.menu_main_settings -> { openSettings(); true }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle)

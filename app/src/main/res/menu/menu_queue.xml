@@ -42,27 +42,10 @@
         </menu>
         
     </item>
-
-    <!--todo: remove-->
-    <item
-        android:id="@+id/menu_queue_test"
-        android:title="Test"
-        tools:ignore="HardcodedText"
-        />
-
-    <item
-        android:id="@+id/menu_queue_log"
-        android:title="@string/menu_log"
-        />
     
     <item
         android:id="@+id/menu_queue_extract"
         android:title="@string/menu_extract"
-        />
-
-    <item
-        android:id="@+id/menu_queue_settings"
-        android:title="@string/settings"
         />
     
 </menu>

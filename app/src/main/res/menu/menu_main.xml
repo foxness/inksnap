@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    >
+
+    <!--todo: remove-->
+    <item
+        android:id="@+id/menu_main_test"
+        android:title="Test"
+        tools:ignore="HardcodedText"
+        />
+
+    <item
+        android:id="@+id/menu_main_log"
+        android:title="@string/log"
+        />
+
+    <item
+        android:id="@+id/menu_main_settings"
+        android:title="@string/settings"
+        />
+
+</menu>

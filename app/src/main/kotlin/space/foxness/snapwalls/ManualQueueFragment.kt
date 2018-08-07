@@ -114,6 +114,10 @@ class ManualQueueFragment : QueueFragment()
             settingsManager.timeLeft = settingsManager.period
         }
 
+        // todo: handle autosubmit type switches
+        // switching from periodic to manual leads to posts with no dates
+        // posts with no dates cause manual to crash
+        
         val earliestFromNow = queue.posts.earliestPostDateFromNow()
         if (earliestFromNow != null)
         {
