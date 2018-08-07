@@ -41,18 +41,6 @@
             android:name=".LogActivity"
             android:parentActivityName=".MainActivity"
             />
-        
-        <activity
-            android:name=".PostedActivity"
-            android:parentActivityName=".MainActivity"
-            />
-
-        <activity
-            android:name=".FailedActivity"
-            android:parentActivityName=".MainActivity"
-            />
-        
-        <activity android:name=".QueueActivity" />
 
         <service android:name=".AutosubmitService" />
         

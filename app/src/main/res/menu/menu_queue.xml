@@ -61,26 +61,6 @@
         />
 
     <item
-        android:id="@+id/menu_queue_main"
-        android:title="Main"
-        />
-
-    <item
-        android:id="@+id/menu_queue_queue"
-        android:title="Queue"
-        />
-
-    <item
-        android:id="@+id/menu_queue_posted"
-        android:title="@string/posted"
-        />
-
-    <item
-        android:id="@+id/menu_queue_failed"
-        android:title="@string/failed"
-        />
-
-    <item
         android:id="@+id/menu_queue_settings"
         android:title="@string/settings"
         />
