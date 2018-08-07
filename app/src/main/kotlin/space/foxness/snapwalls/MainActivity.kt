@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
+import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v7.app.AppCompatActivity
 
@@ -13,6 +14,10 @@ class MainActivity : AppCompatActivity()
     
     private lateinit var fragmentManager: FragmentManager
     
+    private lateinit var settingsManager: SettingsManager
+    
+    private var currentFragment: Fragment? = null
+    
     private var selectedItemId = HOME_ITEM_ID
     
     override fun onCreate(savedInstanceState: Bundle?)
@@ -20,7 +25,7 @@ class MainActivity : AppCompatActivity()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val settingsManager = SettingsManager.getInstance(this)
+        settingsManager = SettingsManager.getInstance(this)
         if (!settingsManager.notFirstLaunch)
         {
             settingsManager.initializeDefaultSettings()
@@ -47,32 +52,54 @@ class MainActivity : AppCompatActivity()
         super.onSaveInstanceState(outState)
     }
 
-    override fun onBackPressed()
+    override fun onStart()
     {
         if (selectedItemId == HOME_ITEM_ID)
         {
-            super.onBackPressed()
+            val currentType = when (currentFragment)
+            {
+                is ManualQueueFragment -> SettingsManager.AutosubmitType.Manual
+                is PeriodicQueueFragment -> SettingsManager.AutosubmitType.Periodic
+                else -> throw Exception("how?")
+            }
+            
+            if (currentType != settingsManager.autosubmitType)
+            {
+                val newFragment = getQueueFragment()
+
+                fragmentManager.beginTransaction()
+                        .replace(FRAGMENT_CONTAINER, newFragment)
+                        .commit()
+                
+                currentFragment = newFragment
+            }
         }
-        else
+        
+        super.onStart()
+    }
+    
+    private fun getQueueFragment(): QueueFragment
+    {
+        return when (settingsManager.autosubmitType)
         {
-            selectFragment(HOME_ITEM_ID)
+            SettingsManager.AutosubmitType.Manual -> ManualQueueFragment.newInstance()
+            SettingsManager.AutosubmitType.Periodic -> PeriodicQueueFragment.newInstance()
         }
     }
 
     private fun selectFragment(itemId: Int)
     {
-        selectedItemId = itemId
+        selectedItemId = itemId // todo: dont change fragment if the item id didnt change
         
         val newFragment = when (selectedItemId)
         {
-            R.id.action_queue -> ManualQueueFragment.newInstance()
+            R.id.action_queue -> getQueueFragment()
             R.id.action_posted -> PostedFragment.newInstance()
             R.id.action_failed -> FailedFragment.newInstance()
+            
             else -> throw Exception("what")
         }
         
-        // this is optimizable by storing bool of whether or not the fragment is already present
-        val currentFragment = fragmentManager.findFragmentById(FRAGMENT_CONTAINER)
         if (currentFragment == null)
         {
             fragmentManager.beginTransaction()
@@ -85,9 +112,9 @@ class MainActivity : AppCompatActivity()
                     .replace(FRAGMENT_CONTAINER, newFragment)
                     .commit()
         }
+        
+        currentFragment = newFragment
     }
-    
-//    private fun updateToolbarText()
 
     companion object
     {
