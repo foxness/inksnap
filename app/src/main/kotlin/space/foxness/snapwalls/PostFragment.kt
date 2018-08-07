@@ -71,12 +71,26 @@ class PostFragment : Fragment()
     {
         return when (item!!.itemId)
         {
-            R.id.menu_post_delete ->
-            {
-                deletePost()
-                true
-            }
+            R.id.menu_post_delete -> { deletePost(); true }
+            R.id.menu_post_done -> { savePost(); true }
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+    
+    private fun savePost()
+    {
+        unloadViewsToPost()
+
+        if (post.isValid(allowIntendedSubmitDateEditing))
+        {
+            val data = Intent()
+            data.putExtra(RESULT_POST, post)
+            activity!!.setResult(Activity.RESULT_OK, data)
+            activity!!.finish()
+        }
+        else
+        {
+            toast(post.reasonWhyInvalid(allowIntendedSubmitDateEditing))
         }
     }
 
@@ -189,7 +203,7 @@ class PostFragment : Fragment()
         {
             updateIntendedSubmitDateButtonText()
 
-            intendedSubmitDateButton.setOnClickListener {
+            intendedSubmitDateButton.setOnClickListener { _ ->
                 val context = context!!
                 val is24HourFormat = DateFormat.is24HourFormat(context)
 
@@ -260,25 +274,6 @@ class PostFragment : Fragment()
             val label = v.findViewById<TextView>(R.id.intended_submit_date_label)
             label.visibility = View.GONE
         }
-
-        // SAVE BUTTON ------------------------
-
-        val saveButton = v.findViewById<Button>(R.id.save_button)
-        saveButton.setOnClickListener {
-            unloadViewsToPost()
-            
-            if (post.isValid(allowIntendedSubmitDateEditing))
-            {
-                val data = Intent()
-                data.putExtra(RESULT_POST, post)
-                activity!!.setResult(Activity.RESULT_OK, data)
-                activity!!.finish()
-            }
-            else
-            {
-                toast(post.reasonWhyInvalid(allowIntendedSubmitDateEditing))
-            }
-        }
         
         updatePostType(post.isLink)
 
@@ -298,13 +293,11 @@ class PostFragment : Fragment()
     {
         private const val ARG_POST = "post"
         private const val ARG_NEW_POST = "new_post"
-        private const val ARG_ALLOW_INTENDED_SUBMIT_DATE_EDITING =
-                "allow_intended_submit_date_editing"
+        private const val ARG_ALLOW_INTENDED_SUBMIT_DATE_EDITING = "allow_intended_submit_date_editing"
         private const val RESULT_POST = "post"
         private const val RESULT_DELETED_POST_ID = "deleted_post_id"
 
-        private const val DATETIME_FORMAT =
-                "yyyy/MM/dd EEE HH:mm" // todo: make dependent on region/locale
+        private const val DATETIME_FORMAT = "yyyy/MM/dd EEE HH:mm" // todo: make dependent on region/locale
         
         const val RESULT_CODE_DELETED = 5
 

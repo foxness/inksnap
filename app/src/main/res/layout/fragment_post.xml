@@ -108,23 +108,5 @@
         android:layout_marginEnd="16dp"
         tools:text="Formatted datetime here"
         />
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        >
-
-        <Button
-            android:id="@+id/save_button"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginEnd="40dp"
-            android:text="@string/save_text"
-            />
-
-    </RelativeLayout>
     
 </LinearLayout>

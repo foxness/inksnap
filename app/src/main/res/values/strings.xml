@@ -33,4 +33,5 @@
     <string name="wallpaper_mode">Wallpaper mode</string>
     <string name="posted">Posted</string>
     <string name="failed">Failed</string>
+    <string name="done">Done</string>
 </resources>
