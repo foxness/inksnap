@@ -38,7 +38,7 @@
             />
         
         <activity
-            android:name=".NewpostActivity"
+            android:name=".PostActivity"
             android:parentActivityName=".MainActivity"
             />
 

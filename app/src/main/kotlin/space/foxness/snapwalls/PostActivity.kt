@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.support.v4.app.Fragment
 
-class NewpostActivity : SingleFragmentActivity()
+class PostActivity : SingleFragmentActivity()
 {
     override fun createFragment(): Fragment
     {
@@ -22,7 +22,7 @@ class NewpostActivity : SingleFragmentActivity()
             i.getSerializableExtra(EXTRA_POST) as Post
         }
 
-        return NewpostFragment.newInstance(post, allowIntendedSubmitDateEditing)
+        return PostFragment.newInstance(post, allowIntendedSubmitDateEditing)
     }
     
     companion object
@@ -33,7 +33,7 @@ class NewpostActivity : SingleFragmentActivity()
         
         fun newIntent(packageContext: Context, post: Post?, allowIntendedSubmitDateEditing: Boolean): Intent
         {
-            val i = Intent(packageContext, NewpostActivity::class.java)
+            val i = Intent(packageContext, PostActivity::class.java)
             i.putExtra(EXTRA_ALLOW_INTENDED_SUBMIT_DATE_EDITING, allowIntendedSubmitDateEditing)
 
             if (post == null)

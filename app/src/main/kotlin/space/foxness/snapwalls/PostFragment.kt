@@ -10,7 +10,7 @@ import android.support.v4.view.ViewPager
 import android.view.*
 import space.foxness.snapwalls.Util.toast
 
-class NewpostFragment : Fragment()
+class PostFragment : Fragment()
 {
     private lateinit var viewPager: ViewPager
     private lateinit var adapter: PostFragmentPagerAdapter
@@ -175,7 +175,7 @@ class NewpostFragment : Fragment()
 
         fun getDeletedPostIdFromResult(data: Intent) = data.getStringExtra(RESULT_DELETED_POST_ID)!!
         
-        fun newInstance(post: Post?, allowIntendedSubmitDateEditing: Boolean): NewpostFragment
+        fun newInstance(post: Post?, allowIntendedSubmitDateEditing: Boolean): PostFragment
         {
             val args = Bundle()
 
@@ -191,7 +191,7 @@ class NewpostFragment : Fragment()
 
             args.putBoolean(ARG_ALLOW_INTENDED_SUBMIT_DATE_EDITING, allowIntendedSubmitDateEditing)
 
-            val fragment = NewpostFragment()
+            val fragment = PostFragment()
             fragment.arguments = args
             return fragment
         }

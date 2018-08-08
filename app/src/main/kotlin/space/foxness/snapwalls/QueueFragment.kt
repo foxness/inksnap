@@ -257,7 +257,7 @@ abstract class QueueFragment : Fragment()
 
     protected fun createNewPost()
     {
-        val i = NewpostActivity.newIntent(context!!, null, allowIntendedSubmitDateEditing)
+        val i = PostActivity.newIntent(context!!, null, allowIntendedSubmitDateEditing)
         startActivityForResult(i, REQUEST_CODE_NEW_POST)
     }
     
@@ -356,7 +356,7 @@ abstract class QueueFragment : Fragment()
             {
                 if (resultCode == Activity.RESULT_OK)
                 {
-                    val newPost = NewpostFragment.getPostFromResult(data!!)
+                    val newPost = PostFragment.getPostFromResult(data!!)
                     onNewPostAdded(newPost)
                 }
             }
@@ -367,13 +367,13 @@ abstract class QueueFragment : Fragment()
                 {
                     Activity.RESULT_OK -> // ok means the post was saved
                     {
-                        val editedPost = NewpostFragment.getPostFromResult(data!!)
+                        val editedPost = PostFragment.getPostFromResult(data!!)
                         onPostEdited(editedPost)
                     }
 
-                    NewpostFragment.RESULT_CODE_DELETED ->
+                    PostFragment.RESULT_CODE_DELETED ->
                     {
-                        val deletedPostId = NewpostFragment.getDeletedPostIdFromResult(data!!)
+                        val deletedPostId = PostFragment.getDeletedPostIdFromResult(data!!)
                         onPostDeleted(deletedPostId)
                     }
                 }
@@ -441,7 +441,7 @@ abstract class QueueFragment : Fragment()
         init
         {
             itemView.setOnClickListener {
-                val i = NewpostActivity.newIntent(context!!, post, allowIntendedSubmitDateEditing)
+                val i = PostActivity.newIntent(context!!, post, allowIntendedSubmitDateEditing)
                 startActivityForResult(i, REQUEST_CODE_EDIT_POST)
             }
 
