@@ -2,7 +2,6 @@
     <string name="app_name">Snapwalls</string>
     <string name="title_label">Title</string>
     <string name="title_hint">Enter a title for the post</string>
-    <string name="link_label">Link?</string>
     <string name="content_label">Content</string>
     <string name="content_hint">Enter the content of the post</string>
     <string name="subreddit_label">Subreddit</string>
