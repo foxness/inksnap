@@ -39,8 +39,8 @@ class PostFragment : Fragment()
         {
             return when (position)
             {
-                0 -> "self" // todo: extract
-                1 -> "link"
+                SELFPOST_TAB_INDEX -> "self" // todo: extract
+                LINKPOST_TAB_INDEX -> "link"
                 else -> throw Exception("how")
             }
         }
@@ -85,27 +85,7 @@ class PostFragment : Fragment()
         
         viewPager = v.findViewById(R.id.newpost_viewpager)
         viewPager.adapter = adapter
-        
-//        val otsl = object : TabLayout.OnTabSelectedListener
-//        {
-//            override fun onTabSelected(tab: TabLayout.Tab)
-//            {
-//                log("tab ${tab.text} at ${tab.position} selected")
-//            }
-//            
-//            override fun onTabReselected(tab: TabLayout.Tab)
-//            {
-//                log("tab ${tab.text} at ${tab.position} reselected")
-//            }
-//            
-//            override fun onTabUnselected(tab: TabLayout.Tab)
-//            {
-//                log("tab ${tab.text} at ${tab.position} unselected")
-//            }
-//        }
-//        
-//        val tabLayout = v.findViewById<TabLayout>(R.id.newpost_tablayout)
-//        tabLayout.addOnTabSelectedListener(otsl)
+        viewPager.currentItem = if (post.isLink) LINKPOST_TAB_INDEX else SELFPOST_TAB_INDEX
         
         return v
     }
@@ -161,6 +141,9 @@ class PostFragment : Fragment()
     
     companion object
     {
+        private const val SELFPOST_TAB_INDEX = 0
+        private const val LINKPOST_TAB_INDEX = 1
+        
         private const val ARG_POST = "post"
         private const val ARG_NEW_POST = "new_post"
         private const val ARG_ALLOW_INTENDED_SUBMIT_DATE_EDITING = "allow_intended_submit_date_editing"
