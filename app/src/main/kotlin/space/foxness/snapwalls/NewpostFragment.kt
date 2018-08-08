@@ -1,25 +1,59 @@
 package space.foxness.snapwalls
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
-import android.support.design.widget.TabLayout
 import android.support.v4.app.Fragment
+import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.view.ViewPager
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import space.foxness.snapwalls.Util.log
+import android.view.*
+import org.joda.time.DateTime
+import space.foxness.snapwalls.Util.toast
 
 class NewpostFragment : Fragment()
 {
+    private lateinit var viewPager: ViewPager
+    private lateinit var adapter: PostFragmentPagerAdapter
+    
     private lateinit var post: Post
     private var newPost = false
     private var allowIntendedSubmitDateEditing = false
     
+    private val currentFragment get() = adapter.getItem(viewPager.currentItem)
+    
+    private class PostFragmentPagerAdapter(fragmentManager: FragmentManager) : FragmentPagerAdapter(fragmentManager)
+    {
+        private val fragmentList = mutableListOf<Fragment>()
+
+        override fun getItem(position: Int) = fragmentList[position]
+
+        override fun destroyItem(container: ViewGroup, position: Int, `object`: Any)
+        {
+            super.destroyItem(container, position, `object`)
+            fragmentList.removeAt(position)
+        }
+
+        override fun getCount() = fragmentList.size
+
+        override fun getPageTitle(position: Int): CharSequence?
+        {
+            return when (position)
+            {
+                0 -> "self" // todo: extract
+                1 -> "link"
+                else -> throw Exception("how")
+            }
+        }
+        
+        fun addFragment(fragment: Fragment) = fragmentList.add(fragment)
+    }
+    
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
-
+        setHasOptionsMenu(true)
+        
         val args = arguments!!
         if (args.getBoolean(ARG_NEW_POST))
         {
@@ -35,6 +69,13 @@ class NewpostFragment : Fragment()
         }
 
         allowIntendedSubmitDateEditing = args.getBoolean(ARG_ALLOW_INTENDED_SUBMIT_DATE_EDITING)
+        
+        val self = SelfpostFragment.newInstance(post, allowIntendedSubmitDateEditing)
+        val link = LinkpostFragment.newInstance(post, allowIntendedSubmitDateEditing)
+        
+        adapter = PostFragmentPagerAdapter(childFragmentManager)
+        adapter.addFragment(self)
+        adapter.addFragment(link)
     }
     
     override fun onCreateView(inflater: LayoutInflater,
@@ -43,54 +84,87 @@ class NewpostFragment : Fragment()
     {
         val v = inflater.inflate(R.layout.fragment_newpost, container, false)
         
-        val viewPager = v.findViewById<ViewPager>(R.id.newpost_viewpager)
-        viewPager.adapter = object : FragmentPagerAdapter(childFragmentManager)
-        {
-            override fun getItem(position: Int): Fragment
-            {
-                return when (position)
-                {
-                    0 -> SelfpostFragment.newInstance(post, allowIntendedSubmitDateEditing)
-                    1 -> LinkpostFragment.newInstance(post, allowIntendedSubmitDateEditing)
-                    else -> throw Exception("how!@#")
-                }
-            }
-
-            override fun getCount() = 2
-
-            override fun getPageTitle(position: Int): CharSequence?
-            {
-                return when (position)
-                {
-                    0 -> "self" // todo: extract
-                    1 -> "link"
-                    else -> throw Exception("how")
-                }
-            }
-        }
+        viewPager = v.findViewById(R.id.newpost_viewpager)
+        viewPager.adapter = adapter
         
-        val otsl = object : TabLayout.OnTabSelectedListener
-        {
-            override fun onTabSelected(tab: TabLayout.Tab)
-            {
-                log("tab ${tab.text} at ${tab.position} selected")
-            }
-            
-            override fun onTabReselected(tab: TabLayout.Tab)
-            {
-                log("tab ${tab.text} at ${tab.position} reselected")
-            }
-            
-            override fun onTabUnselected(tab: TabLayout.Tab)
-            {
-                log("tab ${tab.text} at ${tab.position} unselected")
-            }
-        }
-        
-        val tabLayout = v.findViewById<TabLayout>(R.id.newpost_tablayout)
-        tabLayout.addOnTabSelectedListener(otsl)
+//        val otsl = object : TabLayout.OnTabSelectedListener
+//        {
+//            override fun onTabSelected(tab: TabLayout.Tab)
+//            {
+//                log("tab ${tab.text} at ${tab.position} selected")
+//            }
+//            
+//            override fun onTabReselected(tab: TabLayout.Tab)
+//            {
+//                log("tab ${tab.text} at ${tab.position} reselected")
+//            }
+//            
+//            override fun onTabUnselected(tab: TabLayout.Tab)
+//            {
+//                log("tab ${tab.text} at ${tab.position} unselected")
+//            }
+//        }
+//        
+//        val tabLayout = v.findViewById<TabLayout>(R.id.newpost_tablayout)
+//        tabLayout.addOnTabSelectedListener(otsl)
         
         return v
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater)
+    {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.menu_post, menu)
+
+        val deleteItem = menu.findItem(R.id.menu_post_delete)
+        deleteItem.isVisible = !newPost
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean
+    {
+        return when (item!!.itemId)
+        {
+            R.id.menu_post_delete -> { deletePost(); true }
+            R.id.menu_post_done -> { savePost(); true }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun savePost()
+    {
+        unloadFragmentToPost()
+
+        if (post.isValid(allowIntendedSubmitDateEditing))
+        {
+            val data = Intent()
+            data.putExtra(RESULT_POST, post)
+            activity!!.setResult(Activity.RESULT_OK, data)
+            activity!!.finish()
+        }
+        else
+        {
+            toast(post.reasonWhyInvalid(allowIntendedSubmitDateEditing))
+        }
+    }
+
+    private fun deletePost()
+    {
+        val i = Intent()
+        i.putExtra(RESULT_DELETED_POST_ID, post.id)
+        activity!!.setResult(RESULT_CODE_DELETED, i)
+        activity!!.finish()
+    }
+
+    private fun unloadFragmentToPost()
+    {
+//        post = currentFragment.post
+        // todo
+
+        post.title = "todo placeholder"
+        post.content = "todo placeholder"
+        post.subreddit = "todo_placeholder"
+        post.isLink = false
+        post.intendedSubmitDate = DateTime.now().plusDays(5)
     }
     
     companion object
@@ -98,6 +172,15 @@ class NewpostFragment : Fragment()
         private const val ARG_POST = "post"
         private const val ARG_NEW_POST = "new_post"
         private const val ARG_ALLOW_INTENDED_SUBMIT_DATE_EDITING = "allow_intended_submit_date_editing"
+
+        private const val RESULT_POST = "post"
+        private const val RESULT_DELETED_POST_ID = "deleted_post_id"
+
+        const val RESULT_CODE_DELETED = 5
+
+        fun getPostFromResult(data: Intent) = data.getSerializableExtra(RESULT_POST) as? Post
+
+        fun getDeletedPostIdFromResult(data: Intent) = data.getStringExtra(RESULT_DELETED_POST_ID)!!
         
         fun newInstance(post: Post?, allowIntendedSubmitDateEditing: Boolean): NewpostFragment
         {

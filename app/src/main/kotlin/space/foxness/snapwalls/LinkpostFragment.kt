@@ -1,22 +1,21 @@
 package space.foxness.snapwalls
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.ClipDescription.MIMETYPE_TEXT_PLAIN
 import android.content.ClipboardManager
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.text.InputType
 import android.text.format.DateFormat
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.*
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
-import space.foxness.snapwalls.Util.toast
 
 class LinkpostFragment : Fragment()
 {
@@ -42,7 +41,6 @@ class LinkpostFragment : Fragment()
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
-        setHasOptionsMenu(true)
 
         val args = arguments!!
         if (args.getBoolean(ARG_NEW_POST))
@@ -59,50 +57,6 @@ class LinkpostFragment : Fragment()
         }
 
         allowIntendedSubmitDateEditing = args.getBoolean(ARG_ALLOW_INTENDED_SUBMIT_DATE_EDITING)
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater)
-    {
-        super.onCreateOptionsMenu(menu, inflater)
-        inflater.inflate(R.menu.menu_post, menu)
-
-        val deleteItem = menu.findItem(R.id.menu_post_delete)
-        deleteItem.isVisible = !newPost
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean
-    {
-        return when (item!!.itemId)
-        {
-            R.id.menu_post_delete -> { deletePost(); true }
-            R.id.menu_post_done -> { savePost(); true }
-            else -> super.onOptionsItemSelected(item)
-        }
-    }
-
-    private fun savePost()
-    {
-        unloadViewsToPost()
-
-        if (post.isValid(allowIntendedSubmitDateEditing))
-        {
-            val data = Intent()
-            data.putExtra(RESULT_POST, post)
-            activity!!.setResult(Activity.RESULT_OK, data)
-            activity!!.finish()
-        }
-        else
-        {
-            toast(post.reasonWhyInvalid(allowIntendedSubmitDateEditing))
-        }
-    }
-
-    private fun deletePost()
-    {
-        val i = Intent()
-        i.putExtra(RESULT_DELETED_POST_ID, post.id)
-        activity!!.setResult(RESULT_CODE_DELETED, i)
-        activity!!.finish()
     }
 
     private fun updateIntendedSubmitDateButtonText()
@@ -289,16 +243,8 @@ class LinkpostFragment : Fragment()
         private const val ARG_POST = "post"
         private const val ARG_NEW_POST = "new_post"
         private const val ARG_ALLOW_INTENDED_SUBMIT_DATE_EDITING = "allow_intended_submit_date_editing"
-        private const val RESULT_POST = "post"
-        private const val RESULT_DELETED_POST_ID = "deleted_post_id"
 
         private const val DATETIME_FORMAT = "yyyy/MM/dd EEE HH:mm" // todo: make dependent on region/locale
-
-        const val RESULT_CODE_DELETED = 5
-
-        fun getPostFromResult(data: Intent) = data.getSerializableExtra(RESULT_POST) as? Post
-
-        fun getDeletedPostIdFromResult(data: Intent) = data.getStringExtra(RESULT_DELETED_POST_ID)!!
 
         fun newInstance(post: Post?, allowIntendedSubmitDateEditing: Boolean): LinkpostFragment
         {
