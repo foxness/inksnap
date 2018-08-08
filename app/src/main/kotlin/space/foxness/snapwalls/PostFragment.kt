@@ -146,7 +146,7 @@ class PostFragment : Fragment()
         
         private const val ARG_POST = "post"
         private const val ARG_NEW_POST = "new_post"
-        private const val ARG_ALLOW_INTENDED_SUBMIT_DATE_EDITING = "allow_intended_submit_date_editing"
+        private const val ARG_ALLOW_INTENDED_SUBMIT_DATE_EDITING = "aisde"
 
         private const val RESULT_POST = "post"
         private const val RESULT_DELETED_POST_ID = "deleted_post_id"

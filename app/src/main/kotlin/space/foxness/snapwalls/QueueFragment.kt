@@ -356,7 +356,7 @@ abstract class QueueFragment : Fragment()
             {
                 if (resultCode == Activity.RESULT_OK)
                 {
-                    val newPost = PostFragment.getPostFromResult(data!!)
+                    val newPost = PostActivity.getPostFromResult(data!!)
                     onNewPostAdded(newPost)
                 }
             }
@@ -367,13 +367,13 @@ abstract class QueueFragment : Fragment()
                 {
                     Activity.RESULT_OK -> // ok means the post was saved
                     {
-                        val editedPost = PostFragment.getPostFromResult(data!!)
+                        val editedPost = PostActivity.getPostFromResult(data!!)
                         onPostEdited(editedPost)
                     }
 
-                    PostFragment.RESULT_CODE_DELETED ->
+                    PostActivity.RESULT_CODE_DELETED ->
                     {
-                        val deletedPostId = PostFragment.getDeletedPostIdFromResult(data!!)
+                        val deletedPostId = PostActivity.getDeletedPostIdFromResult(data!!)
                         onPostDeleted(deletedPostId)
                     }
                 }

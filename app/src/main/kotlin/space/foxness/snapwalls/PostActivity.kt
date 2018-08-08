@@ -30,6 +30,12 @@ class PostActivity : SingleFragmentActivity()
         private const val EXTRA_ALLOW_INTENDED_SUBMIT_DATE_EDITING = "aisde"
         private const val EXTRA_NEW_POST = "new_post"
         private const val EXTRA_POST = "post"
+
+        const val RESULT_CODE_DELETED = PostFragment.RESULT_CODE_DELETED
+
+        fun getPostFromResult(data: Intent) = PostFragment.getPostFromResult(data)
+
+        fun getDeletedPostIdFromResult(data: Intent) = PostFragment.getDeletedPostIdFromResult(data)
         
         fun newIntent(packageContext: Context, post: Post?, allowIntendedSubmitDateEditing: Boolean): Intent
         {
