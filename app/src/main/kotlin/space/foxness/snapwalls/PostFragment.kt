@@ -1,49 +1,58 @@
 package space.foxness.snapwalls
 
-import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.DatePickerDialog
-import android.app.TimePickerDialog
-import android.content.ClipDescription.MIMETYPE_TEXT_PLAIN
-import android.content.ClipboardManager
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
-import android.text.InputType
-import android.text.format.DateFormat
+import android.support.v4.app.FragmentManager
+import android.support.v4.app.FragmentPagerAdapter
+import android.support.v4.view.ViewPager
 import android.view.*
-import android.widget.*
-import org.joda.time.DateTime
-import org.joda.time.format.DateTimeFormat
 import space.foxness.snapwalls.Util.toast
 
 class PostFragment : Fragment()
 {
-    private lateinit var titleEdit: EditText
-    private lateinit var contentEdit: EditText
-    private lateinit var contentLabel: TextView
-    private lateinit var subredditEdit: EditText
-    private lateinit var linkSwitch: Switch
-    private lateinit var intendedSubmitDateButton: Button
-    private lateinit var pasteButton: Button
-
-    private var intendedSubmitDate: DateTime? = null
-
+    private lateinit var viewPager: ViewPager
+    private lateinit var adapter: PostFragmentPagerAdapter
+    
     private lateinit var post: Post
     private var newPost = false
     private var allowIntendedSubmitDateEditing = false
+    
+    private val currentFragment get() = adapter.getItem(viewPager.currentItem)
+    
+    private class PostFragmentPagerAdapter(fragmentManager: FragmentManager) : FragmentPagerAdapter(fragmentManager)
+    {
+        private val fragmentList = mutableListOf<BasepostFragment>()
 
-    // todo: account for submitservice (aka freeze when the submission process is coming)
-    // example: submit service submits and deletes a post while you're editing it
-    // bad stuff will happen then
-    // this also applies to all other activities/fragments
+        override fun getItem(position: Int) = fragmentList[position]
 
+        override fun destroyItem(container: ViewGroup, position: Int, `object`: Any)
+        {
+            super.destroyItem(container, position, `object`)
+            fragmentList.removeAt(position)
+        }
+
+        override fun getCount() = fragmentList.size
+
+        override fun getPageTitle(position: Int): CharSequence?
+        {
+            return when (position)
+            {
+                0 -> "self" // todo: extract
+                1 -> "link"
+                else -> throw Exception("how")
+            }
+        }
+        
+        fun addFragment(fragment: BasepostFragment) = fragmentList.add(fragment)
+    }
+    
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
-
+        
         val args = arguments!!
         if (args.getBoolean(ARG_NEW_POST))
         {
@@ -59,6 +68,46 @@ class PostFragment : Fragment()
         }
 
         allowIntendedSubmitDateEditing = args.getBoolean(ARG_ALLOW_INTENDED_SUBMIT_DATE_EDITING)
+        
+        val self = SelfpostFragment.newInstance(post, allowIntendedSubmitDateEditing)
+        val link = LinkpostFragment.newInstance(post, allowIntendedSubmitDateEditing)
+        
+        adapter = PostFragmentPagerAdapter(childFragmentManager)
+        adapter.addFragment(self)
+        adapter.addFragment(link)
+    }
+    
+    override fun onCreateView(inflater: LayoutInflater,
+                              container: ViewGroup?,
+                              savedInstanceState: Bundle?): View
+    {
+        val v = inflater.inflate(R.layout.fragment_newpost, container, false)
+        
+        viewPager = v.findViewById(R.id.newpost_viewpager)
+        viewPager.adapter = adapter
+        
+//        val otsl = object : TabLayout.OnTabSelectedListener
+//        {
+//            override fun onTabSelected(tab: TabLayout.Tab)
+//            {
+//                log("tab ${tab.text} at ${tab.position} selected")
+//            }
+//            
+//            override fun onTabReselected(tab: TabLayout.Tab)
+//            {
+//                log("tab ${tab.text} at ${tab.position} reselected")
+//            }
+//            
+//            override fun onTabUnselected(tab: TabLayout.Tab)
+//            {
+//                log("tab ${tab.text} at ${tab.position} unselected")
+//            }
+//        }
+//        
+//        val tabLayout = v.findViewById<TabLayout>(R.id.newpost_tablayout)
+//        tabLayout.addOnTabSelectedListener(otsl)
+        
+        return v
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater)
@@ -79,10 +128,10 @@ class PostFragment : Fragment()
             else -> super.onOptionsItemSelected(item)
         }
     }
-    
+
     private fun savePost()
     {
-        unloadViewsToPost()
+        unloadFragmentToPost()
 
         if (post.isValid(allowIntendedSubmitDateEditing))
         {
@@ -105,201 +154,27 @@ class PostFragment : Fragment()
         activity!!.finish()
     }
 
-    private fun updateIntendedSubmitDateButtonText()
+    private fun unloadFragmentToPost()
     {
-        intendedSubmitDateButton.text = if (intendedSubmitDate == null)
-        {
-            "Date not set"
-        }
-        else
-        {
-            DateTimeFormat.forPattern(DATETIME_FORMAT).print(intendedSubmitDate)
-        }
+        post = currentFragment.getThePost()
     }
     
-    @SuppressLint("SetTextI18n") // todo: fix this, extract hardcoded strings
-    private fun updatePostType(isLink: Boolean)
-    {
-        if (isLink)
-        {
-            contentLabel.text = "URL"
-            contentEdit.hint = "Enter the url of the post"
-            pasteButton.visibility = View.VISIBLE
-            contentEdit.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI
-        }
-        else
-        {
-            contentLabel.text = "Content"
-            contentEdit.hint = "Enter the content of the post"
-            pasteButton.visibility = View.GONE
-            contentEdit.inputType = InputType.TYPE_CLASS_TEXT // todo: multiline content input
-        }
-    }
-
-    override fun onCreateView(inflater: LayoutInflater,
-                              container: ViewGroup?,
-                              savedInstanceState: Bundle?): View
-    {
-        val v = inflater.inflate(R.layout.fragment_post, container, false)
-        
-        // LAYOUT -----------------------------
-        
-        val layout = v.findViewById<LinearLayout>(R.id.post_layout)
-        layout.requestFocus()
-
-        // TITLE EDIT -------------------------
-
-        titleEdit = v.findViewById(R.id.post_title)
-        titleEdit.setText(post.title)
-
-        // CONTENT EDIT -----------------------
-
-        contentEdit = v.findViewById(R.id.post_content)
-        contentEdit.setText(post.content)
-        
-        // CONTENT LABEL ----------------------
-        
-        contentLabel = v.findViewById(R.id.content_label)
-        
-        // PASTE BUTTON -----------------------
-        
-        pasteButton = v.findViewById(R.id.paste_button)
-        val clipboard = context!!.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        pasteButton.setOnClickListener {
-            if (clipboard.hasPrimaryClip() && clipboard.primaryClipDescription.hasMimeType(MIMETYPE_TEXT_PLAIN))
-            {
-                val pasteData = clipboard.primaryClip.getItemAt(0).text
-                if (pasteData != null)
-                {
-                    contentEdit.setText(pasteData)
-                }
-            }
-        }
-
-        // SUBREDDIT EDIT ---------------------
-
-        subredditEdit = v.findViewById(R.id.post_subreddit)
-        subredditEdit.setText(post.subreddit)
-
-        // LINK SWITCH ------------------------
-
-        linkSwitch = v.findViewById(R.id.post_link)
-        linkSwitch.isChecked = post.isLink
-        linkSwitch.setOnCheckedChangeListener { cb: CompoundButton, checked: Boolean ->
-            updatePostType(checked)
-        }
-
-        // INTENDED SUBMIT DATE BUTTON --------------
-
-        intendedSubmitDate = post.intendedSubmitDate
-        intendedSubmitDateButton = v.findViewById(R.id.intended_submit_date_button)
-        
-        if (allowIntendedSubmitDateEditing)
-        {
-            updateIntendedSubmitDateButtonText()
-
-            intendedSubmitDateButton.setOnClickListener { _ ->
-                val context = context!!
-                val is24HourFormat = DateFormat.is24HourFormat(context)
-
-                // todo: maybe show now + 1 hour or something?
-                val dialogDatetime = intendedSubmitDate ?: DateTime.now()
-
-                var newYear: Int? = null
-                var newMonth: Int? = null
-                var newDay: Int? = null
-                var newHour: Int? = null
-                var newMinute: Int? = null
-                
-                val tsl = TimePickerDialog.OnTimeSetListener { view, hour, minute -> 
-                    newHour = hour
-                    newMinute = minute
-                }
-                
-                val dialogHour = dialogDatetime.hourOfDay
-                val dialogMinute = dialogDatetime.minuteOfHour
-                
-                val timeDialog = TimePickerDialog(context, tsl, dialogHour, dialogMinute, is24HourFormat)
-
-                var timeDialogCanceled = false
-                
-                timeDialog.setOnCancelListener {
-                    timeDialogCanceled = true
-                }
-
-                timeDialog.setOnDismissListener {
-                    if (!timeDialogCanceled)
-                    {
-                        intendedSubmitDate = DateTime(newYear!!, newMonth!!, newDay!!, newHour!!, newMinute!!)
-                        updateIntendedSubmitDateButtonText()
-                    }
-                }
-                
-                val dsl = DatePickerDialog.OnDateSetListener { view, year, month, day ->
-                    newYear = year
-                    newMonth = month + 1 // DatePicker months start at 0
-                    newDay = day
-                }
-                
-                val dialogYear = dialogDatetime.year
-                val dialogMonth = dialogDatetime.monthOfYear - 1 // reason = above
-                val dialogDay = dialogDatetime.dayOfMonth
-                
-                val dateDialog = DatePickerDialog(context, dsl, dialogYear, dialogMonth, dialogDay)
-
-                var dateDialogCanceled = false
-                
-                dateDialog.setOnCancelListener {
-                    dateDialogCanceled = true
-                }
-
-                dateDialog.setOnDismissListener {
-                    if (!dateDialogCanceled)
-                    {
-                        timeDialog.show()
-                    }
-                }
-
-                dateDialog.show()
-            }
-        }
-        else
-        {
-            intendedSubmitDateButton.visibility = View.GONE
-            val label = v.findViewById<TextView>(R.id.intended_submit_date_label)
-            label.visibility = View.GONE
-        }
-        
-        updatePostType(post.isLink)
-
-        return v
-    }
-
-    private fun unloadViewsToPost()
-    {
-        post.title = titleEdit.text.toString()
-        post.content = contentEdit.text.toString()
-        post.subreddit = subredditEdit.text.toString()
-        post.isLink = linkSwitch.isChecked
-        post.intendedSubmitDate = intendedSubmitDate
-    }
-
     companion object
     {
         private const val ARG_POST = "post"
         private const val ARG_NEW_POST = "new_post"
         private const val ARG_ALLOW_INTENDED_SUBMIT_DATE_EDITING = "allow_intended_submit_date_editing"
+
         private const val RESULT_POST = "post"
         private const val RESULT_DELETED_POST_ID = "deleted_post_id"
 
-        private const val DATETIME_FORMAT = "yyyy/MM/dd EEE HH:mm" // todo: make dependent on region/locale
-        
         const val RESULT_CODE_DELETED = 5
 
-        fun getPostFromResult(data: Intent) = data.getSerializableExtra(RESULT_POST) as? Post
+        // todo: have the activity have these too (for loose coupling)
+        fun getPostFromResult(data: Intent) = data.getSerializableExtra(RESULT_POST) as Post
 
         fun getDeletedPostIdFromResult(data: Intent) = data.getStringExtra(RESULT_DELETED_POST_ID)!!
-
+        
         fun newInstance(post: Post?, allowIntendedSubmitDateEditing: Boolean): PostFragment
         {
             val args = Bundle()

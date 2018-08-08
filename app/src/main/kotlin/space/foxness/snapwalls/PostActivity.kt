@@ -9,10 +9,10 @@ class PostActivity : SingleFragmentActivity()
     override fun createFragment(): Fragment
     {
         val i = intent
-        
+
         val allowIntendedSubmitDateEditing =
                 i.getBooleanExtra(EXTRA_ALLOW_INTENDED_SUBMIT_DATE_EDITING, false)
-        
+
         val post = if (i.getBooleanExtra(EXTRA_NEW_POST, false))
         {
             null
@@ -21,23 +21,21 @@ class PostActivity : SingleFragmentActivity()
         {
             i.getSerializableExtra(EXTRA_POST) as Post
         }
-        
+
         return PostFragment.newInstance(post, allowIntendedSubmitDateEditing)
     }
-
+    
     companion object
     {
-        private const val EXTRA_ALLOW_INTENDED_SUBMIT_DATE_EDITING =
-                "allow_intended_submit_date_editing"
-        
+        private const val EXTRA_ALLOW_INTENDED_SUBMIT_DATE_EDITING = "aisde"
         private const val EXTRA_NEW_POST = "new_post"
         private const val EXTRA_POST = "post"
-
+        
         fun newIntent(packageContext: Context, post: Post?, allowIntendedSubmitDateEditing: Boolean): Intent
         {
             val i = Intent(packageContext, PostActivity::class.java)
             i.putExtra(EXTRA_ALLOW_INTENDED_SUBMIT_DATE_EDITING, allowIntendedSubmitDateEditing)
-            
+
             if (post == null)
             {
                 i.putExtra(EXTRA_NEW_POST, true)
@@ -47,7 +45,7 @@ class PostActivity : SingleFragmentActivity()
                 i.putExtra(EXTRA_NEW_POST, false)
                 i.putExtra(EXTRA_POST, post)
             }
-            
+
             return i
         }
     }
