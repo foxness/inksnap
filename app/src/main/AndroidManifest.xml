@@ -42,7 +42,10 @@
             android:parentActivityName=".MainActivity"
             />
         
-        <activity android:name=".NewpostActivity" />
+        <activity
+            android:name=".NewpostActivity"
+            android:parentActivityName=".MainActivity"
+            />
 
         <service android:name=".AutosubmitService" />
         

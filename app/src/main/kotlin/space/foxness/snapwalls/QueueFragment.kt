@@ -257,7 +257,7 @@ abstract class QueueFragment : Fragment()
 
     protected fun createNewPost()
     {
-        val i = PostActivity.newIntent(context!!, null, allowIntendedSubmitDateEditing)
+        val i = NewpostActivity.newIntent(context!!, null, allowIntendedSubmitDateEditing)
         startActivityForResult(i, REQUEST_CODE_NEW_POST)
     }
     
@@ -272,12 +272,6 @@ abstract class QueueFragment : Fragment()
         settingsManager.sortBy = SettingsManager.SortBy.Date
         updatePostList()
     }
-    
-    private fun openNewpost()
-    {
-        val i = NewpostActivity.newIntent(context!!, null, true)
-        startActivity(i)
-    }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean
     {
@@ -287,7 +281,6 @@ abstract class QueueFragment : Fragment()
             R.id.menu_queue_extract -> { extractPosts(); true }
             R.id.menu_queue_sort_by_title -> { sortByTitle(); true }
             R.id.menu_queue_sort_by_date -> { sortByDate(); true }
-            R.id.menu_queue_newpost -> { openNewpost(); true }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -363,7 +356,7 @@ abstract class QueueFragment : Fragment()
             {
                 if (resultCode == Activity.RESULT_OK)
                 {
-                    val newPost = PostFragment.getPostFromResult(data!!)!!
+                    val newPost = NewpostFragment.getPostFromResult(data!!)
                     onNewPostAdded(newPost)
                 }
             }
@@ -374,13 +367,13 @@ abstract class QueueFragment : Fragment()
                 {
                     Activity.RESULT_OK -> // ok means the post was saved
                     {
-                        val editedPost = PostFragment.getPostFromResult(data!!)!!
+                        val editedPost = NewpostFragment.getPostFromResult(data!!)
                         onPostEdited(editedPost)
                     }
 
-                    PostFragment.RESULT_CODE_DELETED ->
+                    NewpostFragment.RESULT_CODE_DELETED ->
                     {
-                        val deletedPostId = PostFragment.getDeletedPostIdFromResult(data!!)
+                        val deletedPostId = NewpostFragment.getDeletedPostIdFromResult(data!!)
                         onPostDeleted(deletedPostId)
                     }
                 }
@@ -448,7 +441,7 @@ abstract class QueueFragment : Fragment()
         init
         {
             itemView.setOnClickListener {
-                val i = PostActivity.newIntent(context!!, post, allowIntendedSubmitDateEditing)
+                val i = NewpostActivity.newIntent(context!!, post, allowIntendedSubmitDateEditing)
                 startActivityForResult(i, REQUEST_CODE_EDIT_POST)
             }
 
