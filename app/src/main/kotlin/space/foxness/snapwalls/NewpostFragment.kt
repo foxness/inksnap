@@ -8,7 +8,6 @@ import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.view.ViewPager
 import android.view.*
-import org.joda.time.DateTime
 import space.foxness.snapwalls.Util.toast
 
 class NewpostFragment : Fragment()
@@ -24,7 +23,7 @@ class NewpostFragment : Fragment()
     
     private class PostFragmentPagerAdapter(fragmentManager: FragmentManager) : FragmentPagerAdapter(fragmentManager)
     {
-        private val fragmentList = mutableListOf<Fragment>()
+        private val fragmentList = mutableListOf<BasepostFragment>()
 
         override fun getItem(position: Int) = fragmentList[position]
 
@@ -46,7 +45,7 @@ class NewpostFragment : Fragment()
             }
         }
         
-        fun addFragment(fragment: Fragment) = fragmentList.add(fragment)
+        fun addFragment(fragment: BasepostFragment) = fragmentList.add(fragment)
     }
     
     override fun onCreate(savedInstanceState: Bundle?)
@@ -157,14 +156,7 @@ class NewpostFragment : Fragment()
 
     private fun unloadFragmentToPost()
     {
-//        post = currentFragment.post
-        // todo
-
-        post.title = "todo placeholder"
-        post.content = "todo placeholder"
-        post.subreddit = "todo_placeholder"
-        post.isLink = false
-        post.intendedSubmitDate = DateTime.now().plusDays(5)
+        post = currentFragment.getThePost()
     }
     
     companion object
