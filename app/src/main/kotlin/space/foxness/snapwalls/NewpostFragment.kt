@@ -12,6 +12,31 @@ import space.foxness.snapwalls.Util.log
 
 class NewpostFragment : Fragment()
 {
+    private lateinit var post: Post
+    private var newPost = false
+    private var allowIntendedSubmitDateEditing = false
+    
+    override fun onCreate(savedInstanceState: Bundle?)
+    {
+        super.onCreate(savedInstanceState)
+
+        val args = arguments!!
+        if (args.getBoolean(ARG_NEW_POST))
+        {
+            newPost = true
+            post = Post.newInstance()
+            post.title = "testy" // todo: remove on production
+            post.content = "besty" // same ^
+            post.subreddit = "test" // same ^
+        }
+        else
+        {
+            post = args.getSerializable(ARG_POST) as Post
+        }
+
+        allowIntendedSubmitDateEditing = args.getBoolean(ARG_ALLOW_INTENDED_SUBMIT_DATE_EDITING)
+    }
+    
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View
@@ -25,8 +50,8 @@ class NewpostFragment : Fragment()
             {
                 return when (position)
                 {
-                    0 -> SelfpostFragment.newInstance()
-                    1 -> LinkpostFragment.newInstance()
+                    0 -> SelfpostFragment.newInstance(post, allowIntendedSubmitDateEditing)
+                    1 -> LinkpostFragment.newInstance(post, allowIntendedSubmitDateEditing)
                     else -> throw Exception("how!@#")
                 }
             }
@@ -70,6 +95,29 @@ class NewpostFragment : Fragment()
     
     companion object
     {
-        fun newInstance() = NewpostFragment()
+        private const val ARG_POST = "post"
+        private const val ARG_NEW_POST = "new_post"
+        private const val ARG_ALLOW_INTENDED_SUBMIT_DATE_EDITING = "allow_intended_submit_date_editing"
+        
+        fun newInstance(post: Post?, allowIntendedSubmitDateEditing: Boolean): NewpostFragment
+        {
+            val args = Bundle()
+
+            if (post != null)
+            {
+                args.putSerializable(ARG_POST, post)
+                args.putBoolean(ARG_NEW_POST, false)
+            }
+            else
+            {
+                args.putBoolean(ARG_NEW_POST, true)
+            }
+
+            args.putBoolean(ARG_ALLOW_INTENDED_SUBMIT_DATE_EDITING, allowIntendedSubmitDateEditing)
+
+            val fragment = NewpostFragment()
+            fragment.arguments = args
+            return fragment
+        }
     }
 }

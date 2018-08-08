@@ -272,6 +272,12 @@ abstract class QueueFragment : Fragment()
         settingsManager.sortBy = SettingsManager.SortBy.Date
         updatePostList()
     }
+    
+    private fun openNewpost()
+    {
+        val i = NewpostActivity.newIntent(context!!, null, true)
+        startActivity(i)
+    }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean
     {
@@ -281,6 +287,7 @@ abstract class QueueFragment : Fragment()
             R.id.menu_queue_extract -> { extractPosts(); true }
             R.id.menu_queue_sort_by_title -> { sortByTitle(); true }
             R.id.menu_queue_sort_by_date -> { sortByDate(); true }
+            R.id.menu_queue_newpost -> { openNewpost(); true }
             else -> super.onOptionsItemSelected(item)
         }
     }

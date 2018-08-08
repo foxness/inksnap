@@ -21,10 +21,4 @@
         android:title="@string/settings"
         />
 
-    <item
-        android:id="@+id/menu_main_newpost"
-        android:title="Newpost"
-        />
-
-
 </menu>

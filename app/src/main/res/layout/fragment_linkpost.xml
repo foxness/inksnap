@@ -1,15 +1,112 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="10dp"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
+    android:id="@+id/post_layout"
+    tools:context=".PostFragment"
     >
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="I am linkpost"
+        android:text="@string/title_label"
+        style="?android:listSeparatorTextViewStyle"
+        />
+
+    <EditText
+        android:id="@+id/post_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:hint="@string/title_hint"
+        android:inputType="text"
+        android:selectAllOnFocus="true"
+        />
+
+    <Switch
+        android:id="@+id/post_link"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/link_label"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        />
+
+    <TextView
+        android:id="@+id/content_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/content_label"
+        style="?android:listSeparatorTextViewStyle"
+        />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        >
+
+        <EditText
+            android:id="@+id/post_content"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:hint="@string/content_hint"
+            android:inputType="text"
+            android:selectAllOnFocus="true"
+            />
+
+        <Button
+            android:id="@+id/paste_button"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:text="@string/paste"
+            android:layout_margin="0dp"
+            />
+
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/subreddit_label"
+        style="?android:listSeparatorTextViewStyle"
+        />
+
+    <EditText
+        android:id="@+id/post_subreddit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:hint="@string/subreddit_hint"
+        android:inputType="text"
+        android:selectAllOnFocus="true"
+        />
+
+    <TextView
+        android:id="@+id/intended_submit_date_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/intended_submit_date_label"
+        style="?android:listSeparatorTextViewStyle"
+        />
+
+    <Button
+        android:id="@+id/intended_submit_date_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        tools:text="Formatted datetime here"
         />
 
 </LinearLayout>
