@@ -23,7 +23,12 @@ class NewpostFragment : Fragment()
         {
             override fun getItem(position: Int): Fragment
             {
-                return SelfpostFragment.newInstance()
+                return when (position)
+                {
+                    0 -> SelfpostFragment.newInstance()
+                    1 -> LinkpostFragment.newInstance()
+                    else -> throw Exception("how!@#")
+                }
             }
 
             override fun getCount() = 2
@@ -32,7 +37,7 @@ class NewpostFragment : Fragment()
             {
                 return when (position)
                 {
-                    0 -> "self"
+                    0 -> "self" // todo: extract
                     1 -> "link"
                     else -> throw Exception("how")
                 }
