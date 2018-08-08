@@ -41,6 +41,8 @@
             android:name=".LogActivity"
             android:parentActivityName=".MainActivity"
             />
+        
+        <activity android:name=".NewpostActivity" />
 
         <service android:name=".AutosubmitService" />
         

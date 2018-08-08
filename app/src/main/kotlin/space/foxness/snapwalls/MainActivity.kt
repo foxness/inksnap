@@ -72,6 +72,12 @@ class MainActivity : AppCompatActivity()
         toast(VariantVariables.VARIANT_NAME)
     }
 
+    private fun openNewpost()
+    {
+        val i = NewpostActivity.newIntent(this)
+        startActivity(i)
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean
     {
         return when (item.itemId)
@@ -79,6 +85,7 @@ class MainActivity : AppCompatActivity()
             R.id.menu_main_test -> { testButton(); true }
             R.id.menu_main_log -> { openLog(); true }
             R.id.menu_main_settings -> { openSettings(); true }
+            R.id.menu_main_newpost -> { openNewpost(); true }
             else -> super.onOptionsItemSelected(item)
         }
     }
