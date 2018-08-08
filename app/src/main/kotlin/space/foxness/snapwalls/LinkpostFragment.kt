@@ -12,6 +12,8 @@ import android.widget.EditText
 
 class LinkpostFragment : BasepostFragment()
 {
+    override val layoutId = R.layout.fragment_linkpost
+    
     private lateinit var urlEdit: EditText
     private lateinit var pasteButton: Button
 
@@ -28,7 +30,7 @@ class LinkpostFragment : BasepostFragment()
 
         // URL EDIT -----------------------
 
-        urlEdit = v.findViewById(R.id.post_content)
+        urlEdit = v.findViewById(R.id.post_url)
         urlEdit.setText(post.content)
 
         // PASTE BUTTON -----------------------
@@ -54,6 +56,7 @@ class LinkpostFragment : BasepostFragment()
         super.unloadViewsToPost()
         
         post.content = urlEdit.text.toString()
+        post.isLink = true
     }
 
     companion object

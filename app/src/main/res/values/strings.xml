@@ -33,4 +33,6 @@
     <string name="failed">Failed</string>
     <string name="done">Done</string>
     <string name="log">Log</string>
+    <string name="url">Url</string>
+    <string name="enter_the_url_of_the_post">Enter the url of the post</string>
 </resources>

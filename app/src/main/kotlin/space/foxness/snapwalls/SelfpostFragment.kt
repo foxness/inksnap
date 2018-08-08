@@ -8,6 +8,8 @@ import android.widget.EditText
 
 class SelfpostFragment : BasepostFragment()
 {
+    override val layoutId = R.layout.fragment_selfpost
+    
     private lateinit var contentEdit: EditText
 
     // todo: account for submitservice (aka freeze when the submission process is coming)
@@ -34,6 +36,7 @@ class SelfpostFragment : BasepostFragment()
         super.unloadViewsToPost()
         
         post.content = contentEdit.text.toString()
+        post.isLink = false
     }
 
     companion object

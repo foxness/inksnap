@@ -8,15 +8,19 @@ import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.Button
+import android.widget.EditText
+import android.widget.LinearLayout
+import android.widget.TextView
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 
 abstract class BasepostFragment : Fragment()
 {
+    protected abstract val layoutId: Int
+    
     private lateinit var titleEdit: EditText
     private lateinit var subredditEdit: EditText
-    private lateinit var linkSwitch: Switch
     private lateinit var intendedSubmitDateButton: Button
 
     protected var intendedSubmitDate: DateTime? = null
@@ -54,7 +58,7 @@ abstract class BasepostFragment : Fragment()
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View
     {
-        val v = inflater.inflate(R.layout.fragment_selfpost, container, false)
+        val v = inflater.inflate(layoutId, container, false)
 
         // LAYOUT -----------------------------
 
@@ -70,11 +74,6 @@ abstract class BasepostFragment : Fragment()
 
         subredditEdit = v.findViewById(R.id.post_subreddit)
         subredditEdit.setText(post.subreddit)
-
-        // LINK SWITCH ------------------------
-
-        linkSwitch = v.findViewById(R.id.post_link)
-        linkSwitch.isChecked = post.isLink
 
         // INTENDED SUBMIT DATE BUTTON --------------
 
@@ -164,7 +163,6 @@ abstract class BasepostFragment : Fragment()
     {
         post.title = titleEdit.text.toString()
         post.subreddit = subredditEdit.text.toString()
-        post.isLink = linkSwitch.isChecked
         post.intendedSubmitDate = intendedSubmitDate
     }
     
