@@ -3,10 +3,7 @@ package space.foxness.snapwalls
 import android.content.ClipDescription.MIMETYPE_TEXT_PLAIN
 import android.content.ClipboardManager
 import android.content.Context
-import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 
@@ -22,20 +19,13 @@ class LinkpostFragment : BasepostFragment()
     // bad stuff will happen then
     // this also applies to all other activities/fragments
 
-    override fun onCreateView(inflater: LayoutInflater,
-                              container: ViewGroup?,
-                              savedInstanceState: Bundle?): View
+    override fun initUi(v: View)
     {
-        val v = super.onCreateView(inflater, container, savedInstanceState)
+        super.initUi(v)
 
         // URL EDIT -----------------------
 
         urlEdit = v.findViewById(R.id.post_url)
-        
-        if (post.isLink)
-        {
-            urlEdit.setText(post.content)
-        }
 
         // PASTE BUTTON -----------------------
 
@@ -51,8 +41,16 @@ class LinkpostFragment : BasepostFragment()
                 }
             }
         }
+    }
 
-        return v
+    override fun applyPostToViews()
+    {
+        super.applyPostToViews()
+
+        if (post.isLink)
+        {
+            urlEdit.setText(post.content)
+        }
     }
 
     override fun unloadViewsToPost()

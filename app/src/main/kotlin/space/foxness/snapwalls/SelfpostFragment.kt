@@ -1,9 +1,6 @@
 package space.foxness.snapwalls
 
-import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.EditText
 
 class SelfpostFragment : BasepostFragment()
@@ -17,22 +14,23 @@ class SelfpostFragment : BasepostFragment()
     // bad stuff will happen then
     // this also applies to all other activities/fragments
 
-    override fun onCreateView(inflater: LayoutInflater,
-                              container: ViewGroup?,
-                              savedInstanceState: Bundle?): View
+    override fun initUi(v: View)
     {
-        val v = super.onCreateView(inflater, container, savedInstanceState)
+        super.initUi(v)
 
         // CONTENT EDIT -----------------------
 
         contentEdit = v.findViewById(R.id.post_content)
-        
+    }
+
+    override fun applyPostToViews()
+    {
+        super.applyPostToViews()
+
         if (!post.isLink)
         {
             contentEdit.setText(post.content)
         }
-
-        return v
     }
 
     override fun unloadViewsToPost()

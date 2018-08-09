@@ -53,12 +53,20 @@ abstract class BasepostFragment : Fragment()
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater,
+    final override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View
     {
         val v = inflater.inflate(layoutId, container, false)
 
+        initUi(v)
+        applyPostToViews()
+
+        return v
+    }
+    
+    protected open fun initUi(v: View)
+    {
         // LAYOUT -----------------------------
 
         val layout = v.findViewById<LinearLayout>(R.id.post_layout)
@@ -67,22 +75,17 @@ abstract class BasepostFragment : Fragment()
         // TITLE EDIT -------------------------
 
         titleEdit = v.findViewById(R.id.post_title)
-        titleEdit.setText(post.title)
 
         // SUBREDDIT EDIT ---------------------
 
         subredditEdit = v.findViewById(R.id.post_subreddit)
-        subredditEdit.setText(post.subreddit)
 
         // INTENDED SUBMIT DATE BUTTON --------------
 
-        intendedSubmitDate = post.intendedSubmitDate
         intendedSubmitDateButton = v.findViewById(R.id.intended_submit_date_button)
 
         if (allowIntendedSubmitDateEditing)
         {
-            updateIntendedSubmitDateButtonText()
-
             intendedSubmitDateButton.setOnClickListener { _ ->
                 val context = context!!
                 val is24HourFormat = DateFormat.is24HourFormat(context)
@@ -154,8 +157,6 @@ abstract class BasepostFragment : Fragment()
             val divider = v.findViewById<View>(R.id.datetime_divider)
             divider.visibility = View.GONE
         }
-
-        return v
     }
 
     protected open fun unloadViewsToPost()
@@ -169,6 +170,24 @@ abstract class BasepostFragment : Fragment()
     {
         unloadViewsToPost()
         return post
+    }
+    
+    fun applyPost(newPost: Post)
+    {
+        post = newPost
+        applyPostToViews()
+    }
+    
+    protected open fun applyPostToViews()
+    {
+        titleEdit.setText(post.title)
+        subredditEdit.setText(post.subreddit)
+        
+        intendedSubmitDate = post.intendedSubmitDate
+        if (allowIntendedSubmitDateEditing)
+        {
+            updateIntendedSubmitDateButtonText()
+        }
     }
 
     companion object

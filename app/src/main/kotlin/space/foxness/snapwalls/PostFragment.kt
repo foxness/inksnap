@@ -19,7 +19,15 @@ class PostFragment : Fragment()
     private var newPost = false
     private var allowIntendedSubmitDateEditing = false
     
-    private val currentFragment get() = adapter.getItem(viewPager.currentItem)
+    private val selectedFragment get() = adapter.getItem(viewPager.currentItem)
+    
+    private val unselectedFragments: List<BasepostFragment>
+        get()
+        {
+            return (0 until adapter.count)
+                    .filter { it != viewPager.currentItem }
+                    .map { adapter.getItem(it) }
+        }
     
     private class PostFragmentPagerAdapter(fragmentManager: FragmentManager) : FragmentPagerAdapter(fragmentManager)
     {
@@ -87,6 +95,28 @@ class PostFragment : Fragment()
         viewPager.adapter = adapter
         viewPager.currentItem = if (post.isLink) LINKPOST_TAB_INDEX else SELFPOST_TAB_INDEX
         
+        val opcl = object : ViewPager.OnPageChangeListener
+        {
+            override fun onPageScrollStateChanged(state: Int)
+            {
+                if (state == ViewPager.SCROLL_STATE_DRAGGING)
+                {
+                    unloadFragmentToPost()
+                    unselectedFragments.forEach { 
+                        it.applyPost(post)
+                    }
+                }
+            }
+
+            override fun onPageScrolled(position: Int,
+                                        positionOffset: Float,
+                                        positionOffsetPixels: Int) { }
+
+            override fun onPageSelected(position: Int) { }
+        }
+        
+        viewPager.addOnPageChangeListener(opcl)
+        
         return v
     }
 
@@ -136,7 +166,7 @@ class PostFragment : Fragment()
 
     private fun unloadFragmentToPost()
     {
-        post = currentFragment.getThePost()
+        post = selectedFragment.getThePost()
     }
     
     companion object
