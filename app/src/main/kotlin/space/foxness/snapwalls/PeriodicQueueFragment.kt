@@ -214,6 +214,8 @@ class PeriodicQueueFragment : QueueFragment()
 
     override fun onNewPostAdded(newPost: Post)
     {
+        super.onNewPostAdded(newPost)
+        
         queue.addPost(newPost)
 
         if (settingsManager.autosubmitEnabled)
@@ -222,20 +224,17 @@ class PeriodicQueueFragment : QueueFragment()
         }
     }
 
-    override fun onPostEdited(editedPost: Post)
-    {
-        queue.updatePost(editedPost)
-    }
-
     override fun onPostDeleted(deletedPostId: String)
     {
-        if (settingsManager.autosubmitEnabled)
-        {
+        super.onPostDeleted(deletedPostId)
+        
+        val runOnEnabledAutosubmit = { postBeforeChange: Post ->
+            
             val earliestPostDate = queue.posts.earliestPostDate()!!
             val timeLeft = timeLeftUntil(earliestPostDate)
             postScheduler.cancelScheduledPosts(queue.posts)
             queue.deletePost(deletedPostId)
-            
+
             if (queue.posts.isEmpty())
             {
                 settingsManager.autosubmitEnabled = false
@@ -248,10 +247,12 @@ class PeriodicQueueFragment : QueueFragment()
 
             // todo: why is settingsManager.timeLeft nullable? maybe make it non-nullable?
         }
-        else
-        {
+
+        val runOnDisabledAutosubmit = {
             queue.deletePost(deletedPostId)
         }
+        
+        postChangeSafeguard(deletedPostId, runOnEnabledAutosubmit, runOnDisabledAutosubmit)
     }
 
     companion object

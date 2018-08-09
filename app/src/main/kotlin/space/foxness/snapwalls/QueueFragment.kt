@@ -18,6 +18,7 @@ import android.view.*
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import org.joda.time.DateTime
 import org.joda.time.Duration
 import space.foxness.snapwalls.Util.toast
 
@@ -44,12 +45,6 @@ abstract class QueueFragment : Fragment()
     protected abstract val fragmentLayoutId: Int
     
     protected abstract fun toggleAutosubmit(on: Boolean)
-    
-    protected abstract fun onNewPostAdded(newPost: Post)
-    
-    protected abstract fun onPostEdited(editedPost: Post)
-    
-    protected abstract fun onPostDeleted(deletedPostId: String)
     
     protected lateinit var thumbnailDownloader: ThumbnailDownloader<PostHolder>
 
@@ -91,6 +86,72 @@ abstract class QueueFragment : Fragment()
         override fun onReceive(context: Context, intent: Intent)
         {
             onAutosubmitServiceDoneReceived(context, intent)
+        }
+    }
+
+    protected open fun onNewPostAdded(newPost: Post) { }
+
+    protected open fun onPostEdited(editedPost: Post)
+    {
+        val postBeforeChangeId = editedPost.id
+        
+        val runOnEnabledAutosubmit = { postBeforeChange: Post ->
+            
+            val shouldBeRescheduled = !editedPost.intendedSubmitDate!!.isEqual(postBeforeChange.intendedSubmitDate)
+
+            if (shouldBeRescheduled)
+            {
+                postScheduler.cancelScheduledPost(postBeforeChange)
+            }
+
+            queue.updatePost(editedPost)
+
+            if (shouldBeRescheduled)
+            {
+                postScheduler.schedulePost(editedPost)
+            }
+        }
+        
+        val runOnDisabledAutosubmit = {
+            queue.updatePost(editedPost)
+        }
+        
+        postChangeSafeguard(postBeforeChangeId, runOnEnabledAutosubmit, runOnDisabledAutosubmit)
+    }
+
+    protected open fun onPostDeleted(deletedPostId: String) { }
+    
+    protected fun postChangeSafeguard(
+            postBeforeChangeId: String,
+            runOnEnabledAutosubmit: (postBeforeChange: Post) -> Unit,
+            runOnDisabledAutosubmit: () -> Unit)
+    {
+        val postBeforeChange = queue.getPost(postBeforeChangeId)
+        
+        if (postBeforeChange == null)
+        {
+            // todo: long toast or snackbar
+            toast("Whoops, the post you tried to edit or delete has already been posted :)")
+        }
+        else
+        {
+            if (settingsManager.autosubmitEnabled)
+            {
+                val editThresholdDate = postBeforeChange.intendedSubmitDate!! - Duration(POST_EDIT_THRESHOLD_MS)
+                if (DateTime.now() > editThresholdDate)
+                {
+                    // todo: long toast or snackbar
+                    toast("Can't edit or delete posts within 3 seconds of them being posted :P")
+                }
+                else
+                {
+                    runOnEnabledAutosubmit(postBeforeChange)
+                }
+            }
+            else
+            {
+                runOnDisabledAutosubmit()
+            }
         }
     }
 
@@ -473,10 +534,15 @@ abstract class QueueFragment : Fragment()
             thumbnailView.setImageDrawable(thumbnail)
         }
     }
-
-    // protected vals in companion are not yet supported
     
-    protected val REQUEST_CODE_NEW_POST = 0
-    protected val REQUEST_CODE_EDIT_POST = 1
-    protected val TIMER_UPDATE_INTERVAL_MS: Long = 100 // 0.1 seconds
+    companion object
+    {
+        // protected static not supported yet
+        
+        const val POST_EDIT_THRESHOLD_MS = 3000
+        
+        private const val REQUEST_CODE_NEW_POST = 0
+        private const val REQUEST_CODE_EDIT_POST = 1
+        private const val TIMER_UPDATE_INTERVAL_MS: Long = 100 // 0.1 seconds
+    }
 }

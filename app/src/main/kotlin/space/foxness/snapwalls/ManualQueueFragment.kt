@@ -180,6 +180,8 @@ class ManualQueueFragment : QueueFragment()
 
     override fun onNewPostAdded(newPost: Post)
     {
+        super.onNewPostAdded(newPost)
+        
         queue.addPost(newPost)
 
         if (settingsManager.autosubmitEnabled)
@@ -188,34 +190,21 @@ class ManualQueueFragment : QueueFragment()
         }
     }
 
-    override fun onPostEdited(editedPost: Post)
-    {
-        val oldPost = queue.getPost(editedPost.id)!!
-        val shouldBeRescheduled = settingsManager.autosubmitEnabled
-                && !editedPost.intendedSubmitDate!!.isEqual(oldPost.intendedSubmitDate)
-
-        if (shouldBeRescheduled)
-        {
-            postScheduler.cancelScheduledPost(oldPost)
-        }
-
-        queue.updatePost(editedPost)
-        
-        if (shouldBeRescheduled)
-        {
-            postScheduler.schedulePost(editedPost)
-        }
-    }
-
     override fun onPostDeleted(deletedPostId: String)
     {
-        if (settingsManager.autosubmitEnabled)
-        {
-            val deletedPost = queue.getPost(deletedPostId)!!
-            postScheduler.cancelScheduledPost(deletedPost)
+        super.onPostDeleted(deletedPostId)
+
+        val runOnEnabledAutosubmit = { postBeforeChange: Post ->
+            
+            postScheduler.cancelScheduledPost(postBeforeChange)
+            queue.deletePost(deletedPostId)
         }
 
-        queue.deletePost(deletedPostId)
+        val runOnDisabledAutosubmit = {
+            queue.deletePost(deletedPostId)
+        }
+        
+        postChangeSafeguard(deletedPostId, runOnEnabledAutosubmit, runOnDisabledAutosubmit)
     }
     
     companion object
