@@ -31,7 +31,11 @@ class LinkpostFragment : BasepostFragment()
         // URL EDIT -----------------------
 
         urlEdit = v.findViewById(R.id.post_url)
-        urlEdit.setText(post.content)
+        
+        if (post.isLink)
+        {
+            urlEdit.setText(post.content)
+        }
 
         // PASTE BUTTON -----------------------
 

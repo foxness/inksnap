@@ -26,7 +26,11 @@ class SelfpostFragment : BasepostFragment()
         // CONTENT EDIT -----------------------
 
         contentEdit = v.findViewById(R.id.post_content)
-        contentEdit.setText(post.content)
+        
+        if (!post.isLink)
+        {
+            contentEdit.setText(post.content)
+        }
 
         return v
     }
