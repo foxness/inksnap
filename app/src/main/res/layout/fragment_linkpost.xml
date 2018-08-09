@@ -25,11 +25,7 @@
 
     <View
         android:id="@+id/datetime_divider"
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:background="@color/dividerColor"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
+        style="@style/soft_divider"
         />
 
     <LinearLayout
@@ -62,13 +58,7 @@
 
     </LinearLayout>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:background="@color/dividerColor"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        />
+    <View style="@style/soft_divider"/>
 
     <EditText
         android:id="@+id/post_title"
@@ -85,13 +75,7 @@
         android:textStyle="bold"
         />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:background="@color/dividerColor"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        />
+    <View style="@style/soft_divider"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -128,12 +112,6 @@
 
     </LinearLayout>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:background="@color/dividerColor"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        />
+    <View style="@style/soft_divider"/>
 
 </LinearLayout>
