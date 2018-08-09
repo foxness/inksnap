@@ -18,6 +18,7 @@ import android.view.*
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import kotlinx.coroutines.experimental.Job
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import space.foxness.snapwalls.Util.toast
@@ -35,6 +36,8 @@ abstract class QueueFragment : Fragment()
     protected lateinit var reddit: Reddit
     protected lateinit var postScheduler: PostScheduler
     protected lateinit var thumbnailCache: ThumbnailCache
+    
+    protected var toggleRestrictorJob: Job? = null
     
     protected var searchQuery: String? = null
 
@@ -539,7 +542,9 @@ abstract class QueueFragment : Fragment()
     {
         // protected static not supported yet
         
-        const val POST_EDIT_THRESHOLD_MS = 3000
+        const val POST_EDIT_THRESHOLD_MS: Long = 3000
+        
+        const val AUTOSUBMIT_TOGGLE_THRESHOLD_MS: Long = 3000
         
         private const val REQUEST_CODE_NEW_POST = 0
         private const val REQUEST_CODE_EDIT_POST = 1

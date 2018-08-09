@@ -3,6 +3,9 @@ package space.foxness.snapwalls
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.launch
 import org.joda.time.Duration
 import space.foxness.snapwalls.Util.compatibleWithRatelimit
 import space.foxness.snapwalls.Util.earliestPostDateFromNow
@@ -27,6 +30,8 @@ class ManualQueueFragment : QueueFragment()
         val successfullyPosted = AutosubmitService.getSuccessfullyPostedFromIntent(intent)
 
         startTimerForEarliestPostDateFromNow()
+
+        unrestrictTimerToggle()
 
         updatePostList()
     }
@@ -93,6 +98,11 @@ class ManualQueueFragment : QueueFragment()
         if (autosubmitEnabled && earliestFromNow != null)
         {
             timeLeft = timeLeftUntil(earliestFromNow)
+            startToggleRestrictorJob(timeLeft)
+        }
+        else
+        {
+            stopToggleRestrictorJob()
         }
 
         updateTimerText(timeLeft)
@@ -106,8 +116,6 @@ class ManualQueueFragment : QueueFragment()
     override fun onStart()
     {
         super.onStart()
-        
-        // assume period and autosubmit type never change while autosubmit is enabled
 
         if (settingsManager.timeLeft == null)
         {
@@ -133,6 +141,42 @@ class ManualQueueFragment : QueueFragment()
         updateToggleViews(settingsManager.autosubmitEnabled)
         updatePostList()
     }
+    
+    private fun startToggleRestrictorJob(timeLeftUntilPost: Duration)
+    {
+        val timeLeftUntilCantToggleAutosubmit = timeLeftUntilPost - Duration(AUTOSUBMIT_TOGGLE_THRESHOLD_MS)
+        if (timeLeftUntilCantToggleAutosubmit > Duration.ZERO)
+        {
+            toggleRestrictorJob = launch(UI) {
+                delay(timeLeftUntilCantToggleAutosubmit.millis)
+
+                if (isActive)
+                {
+                    restrictTimerToggle()
+                }
+            }
+        }
+        else
+        {
+            restrictTimerToggle()
+        }
+    }
+    
+    private fun stopToggleRestrictorJob()
+    {
+        toggleRestrictorJob?.cancel()
+        toggleRestrictorJob = null
+    }
+    
+    private fun restrictTimerToggle()
+    {
+        timerToggle.isEnabled = false
+    }
+    
+    private fun unrestrictTimerToggle()
+    {
+        timerToggle.isEnabled = true
+    }
 
     override fun onStop()
     {
@@ -143,6 +187,8 @@ class ManualQueueFragment : QueueFragment()
         {
             timerObject.cancel()
         }
+        
+        toggleRestrictorJob?.cancel()
 
         unregisterAutosubmitServiceDoneReceiver() // maybe move this into the if?
     }
