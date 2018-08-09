@@ -19,6 +19,9 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.launch
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import space.foxness.snapwalls.Util.toast
@@ -536,6 +539,42 @@ abstract class QueueFragment : Fragment()
         {
             thumbnailView.setImageDrawable(thumbnail)
         }
+    }
+
+    protected fun startToggleRestrictorJob(timeLeftUntilPost: Duration)
+    {
+        val timeLeftUntilCantToggleAutosubmit = timeLeftUntilPost - Duration(AUTOSUBMIT_TOGGLE_THRESHOLD_MS)
+        if (timeLeftUntilCantToggleAutosubmit > Duration.ZERO)
+        {
+            toggleRestrictorJob = launch(UI) {
+                delay(timeLeftUntilCantToggleAutosubmit.millis)
+
+                if (isActive)
+                {
+                    restrictTimerToggle()
+                }
+            }
+        }
+        else
+        {
+            restrictTimerToggle()
+        }
+    }
+
+    protected fun stopToggleRestrictorJob()
+    {
+        toggleRestrictorJob?.cancel()
+        toggleRestrictorJob = null
+    }
+
+    protected fun restrictTimerToggle()
+    {
+        timerToggle.isEnabled = false
+    }
+
+    protected fun unrestrictTimerToggle()
+    {
+        timerToggle.isEnabled = true
     }
     
     companion object

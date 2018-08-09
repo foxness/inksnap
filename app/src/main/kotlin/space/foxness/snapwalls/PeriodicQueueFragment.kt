@@ -41,6 +41,8 @@ class PeriodicQueueFragment : QueueFragment()
             val unpausedTimeLeft = timeLeftUntil(earliestPostDate)
             startTimer(unpausedTimeLeft)
         }
+        
+        unrestrictTimerToggle()
 
         updatePostList()
     }
@@ -142,6 +144,16 @@ class PeriodicQueueFragment : QueueFragment()
     {
         timerToggle.text = if (autosubmitEnabled) "Turn off" else "Turn on"
         seekBar.isEnabled = !autosubmitEnabled
+        
+        if (autosubmitEnabled)
+        {
+            val timeLeft = timeLeftUntil(queue.posts.earliestPostDate()!!)
+            startToggleRestrictorJob(timeLeft)
+        }
+        else
+        {
+            stopToggleRestrictorJob()
+        }
 
         updateTimerViews(settingsManager.timeLeft!!)
     }
@@ -208,6 +220,8 @@ class PeriodicQueueFragment : QueueFragment()
         {
             timerObject.cancel()
         }
+        
+        toggleRestrictorJob?.cancel()
 
         unregisterAutosubmitServiceDoneReceiver() // maybe move this into the if?
     }

@@ -3,9 +3,6 @@ package space.foxness.snapwalls
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.launch
 import org.joda.time.Duration
 import space.foxness.snapwalls.Util.compatibleWithRatelimit
 import space.foxness.snapwalls.Util.earliestPostDateFromNow
@@ -140,42 +137,6 @@ class ManualQueueFragment : QueueFragment()
 
         updateToggleViews(settingsManager.autosubmitEnabled)
         updatePostList()
-    }
-    
-    private fun startToggleRestrictorJob(timeLeftUntilPost: Duration)
-    {
-        val timeLeftUntilCantToggleAutosubmit = timeLeftUntilPost - Duration(AUTOSUBMIT_TOGGLE_THRESHOLD_MS)
-        if (timeLeftUntilCantToggleAutosubmit > Duration.ZERO)
-        {
-            toggleRestrictorJob = launch(UI) {
-                delay(timeLeftUntilCantToggleAutosubmit.millis)
-
-                if (isActive)
-                {
-                    restrictTimerToggle()
-                }
-            }
-        }
-        else
-        {
-            restrictTimerToggle()
-        }
-    }
-    
-    private fun stopToggleRestrictorJob()
-    {
-        toggleRestrictorJob?.cancel()
-        toggleRestrictorJob = null
-    }
-    
-    private fun restrictTimerToggle()
-    {
-        timerToggle.isEnabled = false
-    }
-    
-    private fun unrestrictTimerToggle()
-    {
-        timerToggle.isEnabled = true
     }
 
     override fun onStop()
