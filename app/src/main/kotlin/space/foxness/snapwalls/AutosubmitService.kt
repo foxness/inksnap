@@ -260,8 +260,7 @@ class AutosubmitService : Service()
                 // technically onlyScheduled() is not necessary
                 if (queue.posts.onlyScheduled().isEmpty())
                 {
-                    SettingsManager.getInstance(ctx).autosubmitEnabled = false
-                    log.log("Ran out of posts and disabled autosubmit")
+                    log.log("Ran out of posts")
                 }
                 else
                 {
