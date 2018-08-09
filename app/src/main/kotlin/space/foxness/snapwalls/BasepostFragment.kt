@@ -11,7 +11,6 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
-import android.widget.TextView
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 
@@ -152,8 +151,8 @@ abstract class BasepostFragment : Fragment()
         else
         {
             intendedSubmitDateButton.visibility = View.GONE
-            val label = v.findViewById<TextView>(R.id.intended_submit_date_label)
-            label.visibility = View.GONE
+            val divider = v.findViewById<View>(R.id.datetime_divider)
+            divider.visibility = View.GONE
         }
 
         return v

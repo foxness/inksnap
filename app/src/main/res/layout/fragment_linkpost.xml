@@ -12,6 +12,26 @@
     tools:context=".LinkpostFragment"
     >
 
+    <Button
+        android:id="@+id/intended_submit_date_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="12dp"
+        tools:text="Formatted datetime here"
+        />
+
+    <View
+        android:id="@+id/datetime_divider"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/dividerColor"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -114,17 +134,6 @@
         android:background="@color/dividerColor"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        />
-
-    <Button
-        android:id="@+id/intended_submit_date_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="12dp"
-        tools:text="Formatted datetime here"
         />
 
 </LinearLayout>
