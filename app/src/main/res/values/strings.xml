@@ -34,4 +34,9 @@
     <string name="log">Log</string>
     <string name="url">Url</string>
     <string name="enter_the_url_of_the_post">Enter the url of the post</string>
+    <string name="an_interesting_title">An interesting title</string>
+    <string name="the_subreddit_you_re_posting_to">The subreddit you\'re posting to</string>
+    <string name="http">http://</string>
+    <string name="r">/r/</string>
+    <string name="subreddit">subreddit</string>
 </resources>

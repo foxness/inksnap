@@ -152,8 +152,7 @@ class PostFragment : Fragment()
         private const val RESULT_DELETED_POST_ID = "deleted_post_id"
 
         const val RESULT_CODE_DELETED = 5
-
-        // todo: have the activity have these too (for loose coupling)
+        
         fun getPostFromResult(data: Intent) = data.getSerializableExtra(RESULT_POST) as Post
 
         fun getDeletedPostIdFromResult(data: Intent) = data.getStringExtra(RESULT_DELETED_POST_ID)!!
