@@ -340,6 +340,12 @@ abstract class QueueFragment : Fragment()
         updatePostList()
     }
 
+    protected fun checkService()
+    {
+        val s = postScheduler.isServiceScheduled().toString()
+        toast(s)
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean
     {
         return when (item.itemId)
@@ -348,6 +354,7 @@ abstract class QueueFragment : Fragment()
             R.id.menu_queue_extract -> { extractPosts(); true }
             R.id.menu_queue_sort_by_title -> { sortByTitle(); true }
             R.id.menu_queue_sort_by_date -> { sortByDate(); true }
+            R.id.menu_queue_check_service -> { checkService(); true }
             else -> super.onOptionsItemSelected(item)
         }
     }

@@ -40,4 +40,5 @@
     <string name="r">/r/</string>
     <string name="subreddit">subreddit</string>
     <string name="your_text_post_optional">Your text post (optional)</string>
+    <string name="check_service">Check service</string>
 </resources>

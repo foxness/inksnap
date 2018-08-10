@@ -88,7 +88,7 @@ class AutosubmitService : Service()
                 for (i in scheduledPosts.indices)
                 {
                     val realDelay = Duration(scheduledPosts[i].intendedSubmitDate!!, now)
-                    if (realDelay > POST_DELAY_LIMIT)
+                    if (realDelay > Duration(POST_DELAY_LIMIT_MS))
                     {
                         lastFailedPostIndex = i
                     }
@@ -97,6 +97,8 @@ class AutosubmitService : Service()
                         break
                     }
                 }
+                
+                log.log("Failed posts: ${(lastFailedPostIndex ?: -1) + 1}")
                 
                 if (lastFailedPostIndex != null)
                 {
@@ -111,7 +113,13 @@ class AutosubmitService : Service()
                     
                     if (scheduledPosts.size > lastFailedPostIndex + 1)
                     {
-                        post = scheduledPosts[lastFailedPostIndex + 1]
+                        val candidatePost = scheduledPosts[lastFailedPostIndex + 1]
+                        
+                        // not checking for period end because that's already been checked previously when calculating lastFailedPostIndex
+                        if (candidatePost.intendedSubmitDate!! < now)
+                        {
+                            post = candidatePost
+                        }
                     } // else all posts were failed and we have nothing to post
                 }
                 else
@@ -331,7 +339,7 @@ class AutosubmitService : Service()
         private const val SEND_REPLIES = true
         private const val RESUBMIT = true
         
-        private val POST_DELAY_LIMIT = Duration(10 * 60 * 1000) // 10 minutes
+        private val POST_DELAY_LIMIT_MS: Long = 10 * 60 * 1000 // 10 minutes
 
         fun newIntent(context: Context) = Intent(context, AutosubmitService::class.java)
         
