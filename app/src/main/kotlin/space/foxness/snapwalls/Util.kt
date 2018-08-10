@@ -196,14 +196,14 @@ object Util
         }
         
         val sorted = sortedWith(datePostComparator)
-        val maxWindow = Duration(Reddit.RATELIMIT_MS)
+        val minWindow = Duration(Reddit.RATELIMIT_MS)
         
         for (i in 0..size - 2)
         {
             val current = sorted[i].intendedSubmitDate!!
             val next = sorted[i + 1].intendedSubmitDate!!
             val window = Duration(current, next)
-            if (window >= maxWindow)
+            if (window <= minWindow)
             {
                 return false
             }
