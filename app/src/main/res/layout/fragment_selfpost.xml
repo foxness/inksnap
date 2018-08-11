@@ -77,7 +77,7 @@
 
     <View style="@style/soft_divider"/>
 
-    <!--todo remove select all on focus-->
+    <!--todo remove select all on focus on other textviews-->
     
     <EditText
         android:id="@+id/post_content"
@@ -85,7 +85,6 @@
         android:layout_height="wrap_content"
         android:hint="@string/your_text_post_optional"
         android:inputType="textMultiLine"
-        android:selectAllOnFocus="true"
         android:background="@android:color/transparent"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
