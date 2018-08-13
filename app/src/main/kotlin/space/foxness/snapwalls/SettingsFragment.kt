@@ -183,16 +183,29 @@ class SettingsFragment : Fragment()
     @SuppressLint("SetTextI18n") // todo: fixeroni
     private fun onImgurButtonClick()
     {
-        if (imgurAccount.isLoggedIn)
+        if (Util.isNetworkAvailable(context!!))
         {
-            imgurAccount.logout()
-            imgurButton.text = "Log in"
-            toast("Logged out of Imgur")
+            if (imgurAccount.isLoggedIn)
+            {
+                imgurAccount.logout()
+                imgurButton.text = "Log in"
+                toast("Logged out of Imgur")
+            }
+            else
+            {
+                showImgurLoginDialog()
+            }
         }
         else
         {
-            showImgurLoginDialog()
+            showNoInternetMessage()
         }
+    }
+    
+    private fun showNoInternetMessage()
+    {
+        // todo: extract, make toast long or use snackbar
+        toast("Oops, looks like you're not connected to the internet")
     }
 
     private fun showImgurLoginDialog()
@@ -228,22 +241,29 @@ class SettingsFragment : Fragment()
     @SuppressLint("SetTextI18n") // todo: fixeroni
     private fun onRedditButtonClick()
     {
-        if (redditAccount.isLoggedIn)
+        if (Util.isNetworkAvailable(context!!))
         {
-            if (settingsManager.autosubmitEnabled)
+            if (redditAccount.isLoggedIn)
             {
-                toast("Can't change account while posts are scheduled")
+                if (settingsManager.autosubmitEnabled)
+                {
+                    toast("Can't change account while posts are scheduled")
+                }
+                else
+                {
+                    redditAccount.logout()
+                    redditButton.text = "Log in"
+                    toast("Logged out of Reddit")
+                }
             }
             else
             {
-                redditAccount.logout()
-                redditButton.text = "Log in"
-                toast("Logged out of Reddit")
+                showRedditLoginDialog()
             }
         }
         else
         {
-            showRedditLoginDialog()
+            showNoInternetMessage()
         }
     }
 

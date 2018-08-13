@@ -3,6 +3,7 @@ package space.foxness.snapwalls
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.net.ConnectivityManager
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
@@ -210,6 +211,13 @@ object Util
         }
         
         return true
+    }
+
+    fun isNetworkAvailable(context: Context): Boolean
+    {
+        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val ani = cm.activeNetworkInfo
+        return ani?.isConnected == true // same as (ani?.isConnected ?: false)
     }
     
     fun httpGet(

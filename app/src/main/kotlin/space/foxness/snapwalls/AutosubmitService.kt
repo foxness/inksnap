@@ -16,8 +16,6 @@ import space.foxness.snapwalls.Util.toNice
 import java.io.PrintWriter
 import java.io.StringWriter
 
-// todo: add network safeguard to auth
-
 class AutosubmitService : Service()
 {
     private lateinit var serviceLooper: Looper
@@ -147,7 +145,7 @@ class AutosubmitService : Service()
                     }
                     else
                     {
-                        if (!isNetworkAvailable())
+                        if (!Util.isNetworkAvailable(ctx))
                         {
                             val failReason = "No internet"
                             val detailedReason = "The device was not connected to the internet while the post was being submitted"
@@ -294,13 +292,6 @@ class AutosubmitService : Service()
         {
             runBlocking { handle(msg) }
         }
-    }
-
-    private fun isNetworkAvailable(): Boolean
-    {
-        val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val ani = cm.activeNetworkInfo
-        return ani?.isConnected == true // same as (ani?.isConnected ?: false)
     }
 
     override fun onCreate()
