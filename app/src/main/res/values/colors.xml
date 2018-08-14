@@ -2,4 +2,5 @@
 <resources>
     <color name="colorAccent">#8c9eff</color>
     <color name="dividerColor">#1fffffff</color>
+    <color name="inactiveBottomNavbar">#ffffff</color>
 </resources>
