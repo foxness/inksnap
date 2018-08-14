@@ -35,10 +35,22 @@
         android:layout_below="@id/queue_post_title"
         android:layout_toEndOf="@id/queue_post_thumbnail"
         android:paddingTop="4dp"
-        android:paddingBottom="10dp"
         android:paddingStart="0dp"
         android:paddingEnd="10dp"
         tools:text="Post content"
+        />
+
+    <TextView
+        android:id="@+id/queue_post_datetime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/queue_post_content"
+        android:layout_toEndOf="@id/queue_post_thumbnail"
+        android:paddingTop="4dp"
+        android:paddingBottom="10dp"
+        android:paddingStart="0dp"
+        android:paddingEnd="10dp"
+        tools:text="x seconds ago"
         />
 
 </RelativeLayout>

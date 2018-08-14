@@ -14,6 +14,7 @@ import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SearchView
+import android.text.format.DateUtils
 import android.view.*
 import android.widget.Button
 import android.widget.ImageView
@@ -509,6 +510,7 @@ abstract class QueueFragment : Fragment()
         private val titleView: TextView
         private val contentView: TextView
         private val thumbnailView: ImageView
+        private val datetimeView: TextView
 
         private lateinit var post: Post
 
@@ -522,6 +524,7 @@ abstract class QueueFragment : Fragment()
             titleView = itemView.findViewById(R.id.queue_post_title)
             contentView = itemView.findViewById(R.id.queue_post_content)
             thumbnailView = itemView.findViewById(R.id.queue_post_thumbnail)
+            datetimeView = itemView.findViewById(R.id.queue_post_datetime)
         }
 
         fun bindPost(p: Post)
@@ -529,6 +532,18 @@ abstract class QueueFragment : Fragment()
             post = p
             titleView.text = post.title
             contentView.text = post.content
+            
+            val postIsd = post.intendedSubmitDate
+            val relativeDateString = if (postIsd == null)
+            {
+                "unknown"
+            }
+            else
+            {
+                DateUtils.getRelativeTimeSpanString(postIsd.millis, System.currentTimeMillis(), 0)
+            }
+            
+            datetimeView.text = relativeDateString
             
             val thumbId = if (post.isLink) R.drawable.link_thumb else R.drawable.self_thumb
             val thumbnail = resources.getDrawable(thumbId, context?.theme)
