@@ -4,13 +4,13 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.*
 import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.Handler
 import android.support.v4.app.Fragment
 import android.support.v4.content.LocalBroadcastManager
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -195,10 +195,10 @@ abstract class QueueFragment : Fragment()
                     // todo: also add url that corresponds to the thumbnail
                 }
                 
-                thumbnailCache.add(target.getPostId(), thumbnail)
-                target.setThumbnail(thumbnail)
-
-                toast("used downloaded thumbnail")
+                val squared = Util.squareBitmap(thumbnail)
+                
+                thumbnailCache.add(target.getPostId(), squared)
+                target.setThumbnail(squared)
             }
         }
         
@@ -557,12 +557,15 @@ abstract class QueueFragment : Fragment()
         
         fun getPostId() = post.id
         
+        // warning: thumbnail must be a square, not a rectangle
         fun setThumbnail(thumbnail: Bitmap)
         {
-            setThumbnail(BitmapDrawable(resources, thumbnail))
+            val drawable = RoundedBitmapDrawableFactory.create(resources, thumbnail)
+            drawable.cornerRadius = Math.max(thumbnail.width, thumbnail.height) / 2f
+            setThumbnail(drawable)
         }
         
-        fun setThumbnail(thumbnail: Drawable)
+        private fun setThumbnail(thumbnail: Drawable)
         {
             thumbnailView.setImageDrawable(thumbnail)
         }

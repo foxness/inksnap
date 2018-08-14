@@ -220,6 +220,28 @@ object Util
         return ani?.isConnected == true // same as (ani?.isConnected ?: false)
     }
     
+    fun squareBitmap(srcBmp: Bitmap): Bitmap
+    {
+        return if (srcBmp.width >= srcBmp.height)
+        {
+            Bitmap.createBitmap(
+                    srcBmp,
+                    srcBmp.width / 2 - srcBmp.height / 2,
+                    0,
+                    srcBmp.height,
+                    srcBmp.height)
+        }
+        else
+        {
+            Bitmap.createBitmap(
+                    srcBmp,
+                    0,
+                    srcBmp.height / 2 - srcBmp.width / 2,
+                    srcBmp.width,
+                    srcBmp.width)
+        }
+    }
+    
     fun httpGet(
             url: String,
             headers: Map<String, String> = mapOf(),
