@@ -1,5 +1,6 @@
 package space.foxness.snapwalls
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.*
 import android.graphics.Bitmap
@@ -511,6 +512,7 @@ abstract class QueueFragment : Fragment()
         private val contentView: TextView
         private val thumbnailView: ImageView
         private val datetimeView: TextView
+        private val subredditView: TextView
 
         private lateinit var post: Post
 
@@ -525,13 +527,16 @@ abstract class QueueFragment : Fragment()
             contentView = itemView.findViewById(R.id.queue_post_content)
             thumbnailView = itemView.findViewById(R.id.queue_post_thumbnail)
             datetimeView = itemView.findViewById(R.id.queue_post_datetime)
+            subredditView = itemView.findViewById(R.id.queue_post_subreddit)
         }
 
+        @SuppressLint("SetTextI18n") // todo: fix
         fun bindPost(p: Post)
         {
             post = p
             titleView.text = post.title
             contentView.text = post.content
+            subredditView.text = "/r/" + post.subreddit
             
             val postIsd = post.intendedSubmitDate
             val relativeDateString = if (postIsd == null)

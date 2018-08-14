@@ -11,17 +11,37 @@
     android:paddingTop="8dp"
     android:paddingBottom="10dp"
     >
-
-    <TextView
-        android:id="@+id/queue_post_datetime"
+    
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="12sp"
         android:layout_marginBottom="8dp"
-        tools:text="x seconds ago"
-        android:textColor="#64ffffff"
-        android:fontFamily="sans-serif-condensed"
-        />
+        >
+        
+        <TextView
+            android:id="@+id/queue_post_subreddit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            tools:text="/r/subreddit"
+            android:textColor="#9affffff"
+            android:fontFamily="sans-serif-condensed"
+            android:layout_alignParentStart="true"
+            />
+
+        <TextView
+            android:id="@+id/queue_post_datetime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            tools:text="x seconds ago"
+            android:textColor="#9affffff"
+            android:fontFamily="sans-serif-condensed"
+            android:layout_alignParentEnd="true"
+            tools:ignore="RelativeOverlap"
+            />
+        
+    </RelativeLayout>
     
     <LinearLayout
         android:layout_width="match_parent"
