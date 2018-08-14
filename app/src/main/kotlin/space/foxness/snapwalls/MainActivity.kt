@@ -45,8 +45,14 @@ class MainActivity : AppCompatActivity()
             true
         }
         
-        val itemId = savedInstanceState?.getInt(ARG_SELECTED_ITEM_ID) ?: HOME_ITEM_ID
-        setFragmentBasedOnMenu(itemId)
+        // todo: do this in every fragment
+        currentFragment = fragmentManager.findFragmentById(FRAGMENT_CONTAINER)
+        
+        if (currentFragment == null)
+        {
+            val itemId = savedInstanceState?.getInt(ARG_SELECTED_ITEM_ID) ?: HOME_ITEM_ID
+            setFragmentBasedOnMenu(itemId)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean
