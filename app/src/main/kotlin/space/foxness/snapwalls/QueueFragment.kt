@@ -70,8 +70,6 @@ abstract class QueueFragment : Fragment()
         // RECYCLER VIEW ------------------------------
 
         recyclerView.layoutManager = LinearLayoutManager(context!!)
-        recyclerView.addItemDecoration(DividerItemDecoration(recyclerView.context,
-                                                             DividerItemDecoration.VERTICAL))
 
         adapter = PostAdapter(queue.posts) // todo: refactor to not have args
         recyclerView.adapter = adapter
