@@ -20,7 +20,7 @@
     <android.support.design.widget.BottomNavigationView
         android:id="@+id/main_bottom_navigation"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="wrap_content"
         android:layout_gravity="start"
         app:itemIconTint="@drawable/bottom_navigation_selector"
         app:itemTextColor="@drawable/bottom_navigation_selector"

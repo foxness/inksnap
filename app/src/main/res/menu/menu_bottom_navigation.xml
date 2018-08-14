@@ -5,20 +5,20 @@
     
     <item
         android:id="@+id/action_queue"
-        android:title="Queue"
-        android:icon="@android:drawable/ic_menu_search" 
+        android:title="@string/queue_bottom_navbar"
+        android:icon="@drawable/queue_icon" 
         />
         
     <item
         android:id="@+id/action_posted"
-        android:title="Posted"
-        android:icon="@android:drawable/ic_menu_camera"
+        android:title="@string/posted_bottom_navbar"
+        android:icon="@drawable/posted_icon"
         />
     
     <item
         android:id="@+id/action_failed"
-        android:title="Failed"
-        android:icon="@android:drawable/ic_menu_agenda"
+        android:title="@string/failed_bottom_navbar"
+        android:icon="@drawable/failed_icon"
         />
     
 </menu>
