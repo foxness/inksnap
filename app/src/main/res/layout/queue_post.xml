@@ -1,60 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:paddingStart="10dp"
+    android:paddingEnd="10dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="10dp"
     >
-    
-    <ImageView
-        android:id="@+id/queue_post_thumbnail"
-        android:layout_width="72dp"
-        android:layout_height="48dp"
-        android:layout_margin="10dp"
-        android:contentDescription="@string/post_thumbnail"
-        android:layout_centerVertical="true"
-        android:src="@drawable/self_thumb"
-        android:scaleType="fitCenter"
-        />
-    
-    <TextView
-        android:id="@+id/queue_post_title"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_toEndOf="@id/queue_post_thumbnail"
-        android:textStyle="bold"
-        android:paddingTop="10dp"
-        android:paddingStart="0dp"
-        android:paddingEnd="10dp"
-        android:singleLine="true"
-        android:ellipsize="end"
-        tools:text="Post title"
-        />
-
-    <TextView
-        android:id="@+id/queue_post_content"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/queue_post_title"
-        android:layout_toEndOf="@id/queue_post_thumbnail"
-        android:paddingTop="4dp"
-        android:paddingStart="0dp"
-        android:paddingEnd="10dp"
-        android:singleLine="true"
-        android:ellipsize="end"
-        tools:text="Post content"
-        />
 
     <TextView
         android:id="@+id/queue_post_datetime"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/queue_post_content"
-        android:layout_toEndOf="@id/queue_post_thumbnail"
-        android:paddingTop="4dp"
-        android:paddingBottom="10dp"
-        android:paddingStart="0dp"
-        android:paddingEnd="10dp"
+        android:textSize="12sp"
+        android:layout_marginBottom="8dp"
         tools:text="x seconds ago"
+        android:textColor="#64ffffff"
+        android:fontFamily="sans-serif-condensed"
         />
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        >
 
-</RelativeLayout>
+        <ImageView
+            android:id="@+id/queue_post_thumbnail"
+            android:layout_width="72dp"
+            android:layout_height="48dp"
+            android:contentDescription="@string/post_thumbnail"
+            android:src="@drawable/self_thumb"
+            android:scaleType="fitCenter"
+            />
+        
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_weight="1"
+            android:layout_marginStart="10dp"
+            >
+
+            <TextView
+                android:id="@+id/queue_post_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:singleLine="true"
+                android:ellipsize="end"
+                tools:text="Post title"
+                android:fontFamily="sans-serif-condensed"
+                />
+
+            <TextView
+                android:id="@+id/queue_post_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:textColor="#80ffffff"
+                android:textSize="14sp"
+                tools:text="Post content"
+                />
+            
+        </LinearLayout>
+        
+    </LinearLayout>
+
+</LinearLayout>
