@@ -3,6 +3,8 @@ package space.foxness.snapwalls
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.view.View
+import android.widget.TextView
 import org.joda.time.Duration
 import space.foxness.snapwalls.Util.compatibleWithRatelimit
 import space.foxness.snapwalls.Util.earliestPostDateFromNow
@@ -16,6 +18,8 @@ import space.foxness.snapwalls.Util.toast
 class ManualQueueFragment : QueueFragment()
 {
     override val fragmentLayoutId = R.layout.fragment_queue_manual
+    
+    private lateinit var timerLabel: TextView // todo: move to queuefragment
 
     override val allowIntendedSubmitDateEditing = true
 
@@ -31,6 +35,13 @@ class ManualQueueFragment : QueueFragment()
         unrestrictTimerToggle()
 
         updatePostList()
+    }
+
+    override fun onInitUi(v: View)
+    {
+        super.onInitUi(v)
+        
+        timerLabel = v.findViewById(R.id.queue_timer_label)
     }
 
     override fun toggleAutosubmit(on: Boolean)
@@ -89,25 +100,38 @@ class ManualQueueFragment : QueueFragment()
     private fun updateToggleViews(autosubmitEnabled: Boolean) // todo: refactor to not use arg?
     {
         timerToggle.text = if (autosubmitEnabled) "Turn off" else "Turn on"
-
-        var timeLeft: Duration? = null
+        
         val earliestFromNow = queue.posts.earliestPostDateFromNow()
-        if (autosubmitEnabled && earliestFromNow != null)
+        
+        if (earliestFromNow == null)
         {
-            timeLeft = timeLeftUntil(earliestFromNow)
-            startToggleRestrictorJob(timeLeft)
+            stopToggleRestrictorJob()
+            updateTimerVisibility(false)
         }
         else
         {
-            stopToggleRestrictorJob()
-        }
+            val timeLeft = timeLeftUntil(earliestFromNow)
 
-        updateTimerText(timeLeft)
+            updateTimerText(timeLeft)
+            updateTimerVisibility(true)
+
+            if (autosubmitEnabled)
+            {
+                startToggleRestrictorJob(timeLeft)
+            }
+        }
+    }
+    
+    private fun updateTimerVisibility(visible: Boolean)
+    {
+        val flag = if (visible) View.VISIBLE else View.INVISIBLE
+        timerText.visibility = flag
+        timerLabel.visibility = flag
     }
 
-    private fun updateTimerText(timeLeft: Duration?)
+    private fun updateTimerText(timeLeft: Duration)
     {
-        timerText.text = timeLeft?.toNice() ?: "---"
+        timerText.text = timeLeft.toNice()
     }
 
     override fun onStart()
@@ -159,12 +183,13 @@ class ManualQueueFragment : QueueFragment()
         val earliestFromNow = queue.posts.earliestPostDateFromNow()
         if (earliestFromNow == null)
         {
-            updateTimerText(null)
+            updateTimerVisibility(false)
         }
         else
         {
             val timeLeft = timeLeftUntil(earliestFromNow)
             startTimer(timeLeft)
+            updateTimerVisibility(true)
         }
     }
 
