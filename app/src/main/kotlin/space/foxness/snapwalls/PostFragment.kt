@@ -58,9 +58,6 @@ class PostFragment : Fragment()
         {
             newPost = true
             post = Post.newInstance()
-            post.title = "testy" // todo: remove on production
-            post.content = "besty" // same ^
-            post.subreddit = "test" // same ^
         }
         else
         {
