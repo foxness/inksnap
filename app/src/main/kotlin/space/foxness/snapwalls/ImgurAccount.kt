@@ -105,7 +105,7 @@ class ImgurAccount(private val callbacks: Callbacks)
 
         if (response.statusCode != 200)
         {
-            throw Exception("Response code: ${response.statusCode}, response: $response")
+            throw Exception("Response code: ${response.statusCode}, response: ${response.text}")
         }
 
         val json = response.jsonObject
@@ -142,8 +142,7 @@ class ImgurAccount(private val callbacks: Callbacks)
 
         if (response.statusCode != 200)
         {
-            val text = response.text
-            throw Exception("Response code: ${response.statusCode}, response: $text")
+            throw Exception("Response code: ${response.statusCode}, response: ${response.text}")
         }
 
         val json = response.jsonObject
