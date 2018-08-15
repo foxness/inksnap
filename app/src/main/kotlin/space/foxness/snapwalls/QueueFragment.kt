@@ -11,7 +11,6 @@ import android.os.Handler
 import android.support.v4.app.Fragment
 import android.support.v4.content.LocalBroadcastManager
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory
-import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SearchView
@@ -615,6 +614,6 @@ abstract class QueueFragment : Fragment()
         
         private const val REQUEST_CODE_NEW_POST = 0
         private const val REQUEST_CODE_EDIT_POST = 1
-        private const val TIMER_UPDATE_INTERVAL_MS: Long = 100 // 0.1 seconds
+        private const val TIMER_UPDATE_INTERVAL_MS: Long = 1000
     }
 }

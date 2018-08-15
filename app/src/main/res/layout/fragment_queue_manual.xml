@@ -40,7 +40,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="monospace"
             android:textSize="18sp"
-            tools:text="144:00:05.0"
+            tools:text="144:00:05"
             android:gravity="center"
             />
 

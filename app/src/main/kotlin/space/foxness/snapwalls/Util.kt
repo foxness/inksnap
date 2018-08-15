@@ -56,11 +56,6 @@ object Util
             a.intendedSubmitDate!!.compareTo(b.intendedSubmitDate!!)
         }
     }
-
-    private val periodformatter =
-            PeriodFormatterBuilder().printZeroAlways().minimumPrintedDigits(2) // gives the '01'
-                    .appendHours().appendSeparator(":").appendMinutes().appendSeparator(":")
-                    .appendSecondsWithMillis().toFormatter()
     
     fun toast(ctx: Context?, text: String) = Toast.makeText(ctx, text, Toast.LENGTH_SHORT).show()
 
@@ -76,7 +71,22 @@ object Util
         Log.d("$APPNAME.$className", text)
     }
 
-    fun Duration.toNice(): String = periodformatter.print(toPeriod()).dropLast(2)
+    private val periodformatter = PeriodFormatterBuilder()
+            .appendDays()
+            .appendSeparator(":")
+            .minimumPrintedDigits(2)
+            .printZeroAlways()
+            .appendHours()
+            .appendSeparator(":")
+            .appendMinutes()
+            .appendSeparator(":")
+            .appendSeconds()
+            .toFormatter()
+
+    fun Duration.toNice(): String
+    {
+        return periodformatter.print(toPeriod())
+    }
 
     fun String.isImageUrl() = isValidUrl(this) && listOf(".png", ".jpg").any { this.endsWith(it) }
 
