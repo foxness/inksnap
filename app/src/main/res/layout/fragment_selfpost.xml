@@ -14,13 +14,17 @@
 
     <Button
         android:id="@+id/intended_submit_date_button"
+        style="?android:attr/buttonBarButtonStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
+        android:gravity="start|center_vertical"
+        android:layout_marginStart="4dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:layout_marginEnd="4dp"
         android:layout_marginTop="2dp"
-        android:layout_marginBottom="12dp"
-        tools:text="Formatted datetime here"
+        android:paddingBottom="12dp"
+        tools:text="Set the date"
         />
 
     <View

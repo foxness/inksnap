@@ -32,9 +32,9 @@ class LinkpostFragment : BasepostFragment()
         pasteButton = v.findViewById(R.id.paste_button)
         val clipboard = context!!.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         pasteButton.setOnClickListener {
-            if (clipboard.hasPrimaryClip() && clipboard.primaryClipDescription.hasMimeType(MIMETYPE_TEXT_PLAIN))
+            if (clipboard.hasPrimaryClip() && clipboard.primaryClipDescription?.hasMimeType(MIMETYPE_TEXT_PLAIN) == true)
             {
-                val pasteData = clipboard.primaryClip.getItemAt(0).text
+                val pasteData = clipboard.primaryClip?.getItemAt(0)?.text
                 if (pasteData != null)
                 {
                     urlEdit.setText(pasteData)

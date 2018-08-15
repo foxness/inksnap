@@ -45,7 +45,7 @@ abstract class BasepostFragment : Fragment()
     {
         intendedSubmitDateButton.text = if (intendedSubmitDate == null)
         {
-            "Date not set"
+            "Set the date" // todo: extract
         }
         else
         {
