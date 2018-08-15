@@ -7,6 +7,7 @@ import android.net.ConnectivityManager
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import android.view.View
 import android.webkit.CookieManager
 import android.webkit.URLUtil.isValidUrl
 import android.webkit.WebView
@@ -251,6 +252,10 @@ object Util
                     srcBmp.width)
         }
     }
+    
+    fun getVisibilityConstant(visible: Boolean) = if (visible) View.VISIBLE else View.INVISIBLE
+    
+    fun getVisibilityGoneConstant(visible: Boolean) = if (visible) View.VISIBLE else View.GONE
     
     fun httpGet(
             url: String,

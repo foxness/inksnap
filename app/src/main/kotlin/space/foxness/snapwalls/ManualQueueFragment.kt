@@ -20,6 +20,7 @@ class ManualQueueFragment : QueueFragment()
     override val fragmentLayoutId = R.layout.fragment_queue_manual
     
     private lateinit var timerLabel: TextView // todo: move to queuefragment
+    private lateinit var emptyView: TextView // todo: move to queuefragment
 
     override val allowIntendedSubmitDateEditing = true
 
@@ -42,6 +43,7 @@ class ManualQueueFragment : QueueFragment()
         super.onInitUi(v)
         
         timerLabel = v.findViewById(R.id.queue_timer_label)
+        emptyView = v.findViewById(R.id.queue_empty_view)
     }
 
     override fun toggleAutosubmit(on: Boolean)
@@ -124,7 +126,7 @@ class ManualQueueFragment : QueueFragment()
     
     private fun updateTimerVisibility(visible: Boolean)
     {
-        val flag = if (visible) View.VISIBLE else View.INVISIBLE
+        val flag = Util.getVisibilityConstant(visible)
         timerText.visibility = flag
         timerLabel.visibility = flag
     }
@@ -191,6 +193,17 @@ class ManualQueueFragment : QueueFragment()
             startTimer(timeLeft)
             updateTimerVisibility(true)
         }
+    }
+
+    override fun onPostsChanged(count: Int)
+    {
+        super.onPostsChanged(count)
+        
+        val emptyViewVisible = count == 0
+        val recyclerViewVisible = !emptyViewVisible
+        
+        emptyView.visibility = Util.getVisibilityGoneConstant(emptyViewVisible)
+        recyclerView.visibility = Util.getVisibilityGoneConstant(recyclerViewVisible)
     }
 
     override fun onTimerFinish()

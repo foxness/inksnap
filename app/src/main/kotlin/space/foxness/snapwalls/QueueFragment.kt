@@ -498,10 +498,13 @@ abstract class QueueFragment : Fragment()
         {
             posts = posts_
             notifyDataSetChanged()
+            onPostsChanged(posts_.size)
         }
 
         override fun getItemCount() = posts.size
     }
+    
+    protected open fun onPostsChanged(count: Int) { }
 
     protected inner class PostHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
     {
