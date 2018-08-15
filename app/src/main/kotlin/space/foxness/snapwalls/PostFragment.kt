@@ -19,15 +19,7 @@ class PostFragment : Fragment()
     private var newPost = false
     private var allowIntendedSubmitDateEditing = false
     
-    private val selectedFragment get() = adapter.getItem(viewPager.currentItem)
-    
-    private val unselectedFragments: List<BasepostFragment>
-        get()
-        {
-            return (0 until adapter.count)
-                    .filter { it != viewPager.currentItem }
-                    .map { adapter.getItem(it) }
-        }
+    private var currentTabIndex = 0
     
     private class PostFragmentPagerAdapter(fragmentManager: FragmentManager) : FragmentPagerAdapter(fragmentManager)
     {
@@ -94,16 +86,47 @@ class PostFragment : Fragment()
         viewPager = v.findViewById(R.id.newpost_viewpager)
         viewPager.adapter = adapter
         viewPager.currentItem = if (post.isLink) LINKPOST_TAB_INDEX else SELFPOST_TAB_INDEX
+
+        currentTabIndex = viewPager.currentItem
         
         val opcl = object : ViewPager.OnPageChangeListener
         {
+            private var dragStarted = false
+
+            private fun synchronizePost()
+            {
+                unloadFragmentToPost()
+                
+                val unselectedFragments = (0 until adapter.count)
+                        .filter { it != currentTabIndex }
+                        .map { adapter.getItem(it) }
+                
+                unselectedFragments.forEach {
+                    it.applyPost(post)
+                }
+            }
+            
             override fun onPageScrollStateChanged(state: Int)
             {
-                if (state == ViewPager.SCROLL_STATE_DRAGGING)
+                when (state)
                 {
-                    unloadFragmentToPost()
-                    unselectedFragments.forEach { 
-                        it.applyPost(post)
+                    ViewPager.SCROLL_STATE_DRAGGING ->
+                    {
+                        dragStarted = true
+                        synchronizePost()
+                    }
+                    
+                    ViewPager.SCROLL_STATE_SETTLING ->
+                    {
+                        // there is no drag when user presses on tab
+                        // so we need to synchronize here
+                        
+                        if (!dragStarted)
+                        {
+                            synchronizePost()
+                        }
+                        
+                        dragStarted = false
                     }
                 }
             }
@@ -112,7 +135,10 @@ class PostFragment : Fragment()
                                         positionOffset: Float,
                                         positionOffsetPixels: Int) { }
 
-            override fun onPageSelected(position: Int) { }
+            override fun onPageSelected(position: Int)
+            {
+                currentTabIndex = position
+            }
         }
         
         viewPager.addOnPageChangeListener(opcl)
@@ -166,6 +192,7 @@ class PostFragment : Fragment()
 
     private fun unloadFragmentToPost()
     {
+        val selectedFragment = adapter.getItem(currentTabIndex)
         post = selectedFragment.getThePost()
     }
     
