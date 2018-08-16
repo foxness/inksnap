@@ -26,6 +26,8 @@ abstract class SingleFragmentActivity : AppCompatActivity()
     companion object
     {
         protected const val SINGLE_FRAGMENT_LAYOUT = R.layout.activity_fragment
-        protected const val FRAGMENT_CONTAINER = R.id.fragment_container
+        
+        // protected not yet supported
+        const val FRAGMENT_CONTAINER = R.id.fragment_container
     }
 }

@@ -1,12 +1,14 @@
 package space.foxness.snapwalls
 
 import android.app.Activity
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.view.ViewPager
+import android.support.v7.app.AlertDialog
 import android.view.*
 import space.foxness.snapwalls.Util.toast
 
@@ -16,7 +18,11 @@ class PostFragment : Fragment()
     private lateinit var adapter: PostFragmentPagerAdapter
     
     private lateinit var post: Post
-    private var newPost = false
+    private lateinit var originalPost: Post
+    
+    var newPost = false 
+        private set
+    
     private var allowIntendedSubmitDateEditing = false
     
     private var currentTabIndex = 0
@@ -63,6 +69,17 @@ class PostFragment : Fragment()
         {
             post = args.getSerializable(ARG_POST) as Post
         }
+        
+        // todo: use data class & copy()
+        
+        originalPost = Post()
+        originalPost.content = post.content
+        originalPost.intendedSubmitDate = post.intendedSubmitDate
+        originalPost.isLink = post.isLink
+        originalPost.title = post.title
+        originalPost.subreddit = post.subreddit
+        
+        // ---
 
         allowIntendedSubmitDateEditing = args.getBoolean(ARG_ALLOW_INTENDED_SUBMIT_DATE_EDITING)
         
@@ -142,6 +159,18 @@ class PostFragment : Fragment()
         
         return v
     }
+    
+    fun areThereUnsavedChanges(): Boolean
+    {
+        unloadFragmentToPost()
+        
+        // todo: use data class && check equality with ==
+        return originalPost.content != post.content 
+               || originalPost.intendedSubmitDate != post.intendedSubmitDate 
+               || originalPost.isLink != post.isLink 
+               || originalPost.title != post.title 
+               || originalPost.subreddit != post.subreddit
+    }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater)
     {
@@ -181,10 +210,24 @@ class PostFragment : Fragment()
 
     private fun deletePost()
     {
-        val i = Intent()
-        i.putExtra(RESULT_DELETED_POST_ID, post.id)
-        activity!!.setResult(RESULT_CODE_DELETED, i)
-        activity!!.finish()
+        val onDelete = { dialogInterface: DialogInterface, which: Int ->
+            val i = Intent()
+            i.putExtra(RESULT_DELETED_POST_ID, post.id)
+            activity!!.setResult(RESULT_CODE_DELETED, i)
+            activity!!.finish()
+        }
+        
+        val onCancel = { dialogInterface: DialogInterface, which: Int ->
+            dialogInterface.cancel()
+        }
+        
+        val dialog = AlertDialog.Builder(context!!)
+                .setMessage("Are you sure you want to delete this post?") // todo: extract
+                .setPositiveButton("Delete", onDelete) // todo: extract
+                .setNegativeButton(android.R.string.cancel, onCancel)
+                .create()
+        
+        dialog.show()
     }
 
     private fun unloadFragmentToPost()

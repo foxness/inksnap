@@ -1,8 +1,11 @@
 package space.foxness.snapwalls
 
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.support.v4.app.Fragment
+import android.support.v7.app.AlertDialog
+import android.view.MenuItem
 
 class PostActivity : SingleFragmentActivity()
 {
@@ -23,6 +26,61 @@ class PostActivity : SingleFragmentActivity()
         }
 
         return PostFragment.newInstance(post, allowIntendedSubmitDateEditing)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean
+    {
+        if (item.itemId == android.R.id.home)
+        {
+            showDiscardDialogIfNeeded {
+                // maybe it should be this? v
+                // navigateUpTo(MainActivity.newIntent(this))
+                
+                finish()
+            }
+            
+            return true
+        }
+        
+        return super.onOptionsItemSelected(item)
+    }
+    
+    private fun showDiscardDialogIfNeeded(onDiscard: () -> Unit)
+    {
+        val postFragment = supportFragmentManager.findFragmentById(FRAGMENT_CONTAINER) as PostFragment
+
+        if (postFragment.areThereUnsavedChanges())
+        {
+            val onDiscardInternal = { dialogInterface: DialogInterface, which: Int ->
+                onDiscard()
+            }
+
+            val onCancel = { dialogInterface: DialogInterface, which: Int ->
+                dialogInterface.cancel()
+            }
+
+            // todo: extract
+            val msg = if (postFragment.newPost) "Discard the post?" else "Discard the changes?"
+
+            val dialog = AlertDialog.Builder(this)
+                    .setMessage(msg)
+                    .setPositiveButton("Discard", onDiscardInternal) // todo: extract
+                    .setNegativeButton(android.R.string.cancel, onCancel)
+                    .create()
+
+            dialog.show()
+        }
+        else
+        {
+            onDiscard()
+        }
+    }
+
+    override fun onBackPressed()
+    {
+        showDiscardDialogIfNeeded {
+            super.onBackPressed()
+        }
     }
     
     companion object
