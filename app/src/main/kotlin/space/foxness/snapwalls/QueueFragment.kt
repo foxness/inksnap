@@ -192,10 +192,8 @@ abstract class QueueFragment : Fragment()
                     // todo: also add url that corresponds to the thumbnail
                 }
                 
-                val squared = Util.squareBitmap(thumbnail)
-                
-                thumbnailCache.add(target.post.getThumbnailId(), squared)
-                target.setThumbnail(squared)
+                thumbnailCache.add(target.post.getThumbnailId(), thumbnail)
+                target.setThumbnail(thumbnail)
             }
         }
         

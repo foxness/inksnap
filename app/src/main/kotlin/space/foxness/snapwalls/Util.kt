@@ -34,6 +34,8 @@ object Util
     const val STATE_LENGTH = 10
 
     const val MILLIS_IN_MINUTE: Long = 60 * 1000
+    
+    private const val THUMBNAIL_SIZE = 200
 
     private val messageDigest = MessageDigest.getInstance("SHA-256")
     
@@ -164,11 +166,6 @@ object Util
         }
     }
     
-    fun getBitmapFromBytes(bytes: ByteArray): Bitmap?
-    {
-        return BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-    }
-    
     fun clearCookiesAndCache(webView: WebView)
     {
         val cm = CookieManager.getInstance()
@@ -240,7 +237,33 @@ object Util
         return ani?.isConnected == true // same as (ani?.isConnected ?: false)
     }
     
-    fun squareBitmap(srcBmp: Bitmap): Bitmap
+    fun convertToThumbnail(imageBytes: ByteArray): Bitmap
+    {
+        // todo: optimize
+        val image = getBitmapFromBytes(imageBytes)!!
+        val reduced = reduceBitmapToThumbnail(image)
+        val squared = squareBitmap(reduced)
+        return squared
+    }
+
+    private fun getBitmapFromBytes(bytes: ByteArray): Bitmap?
+    {
+        return BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+    }
+    
+    private fun reduceBitmapToThumbnail(srcBmp: Bitmap): Bitmap
+    {
+        val min = Math.min(srcBmp.width, srcBmp.height)
+        val factor = THUMBNAIL_SIZE / min.toFloat()
+        
+        val newWidth = Math.round(srcBmp.width * factor)
+        val newHeight = Math.round(srcBmp.height * factor)
+        
+        val resized = Bitmap.createScaledBitmap(srcBmp, newWidth, newHeight, true)
+        return resized
+    }
+    
+    private fun squareBitmap(srcBmp: Bitmap): Bitmap
     {
         return if (srcBmp.width >= srcBmp.height)
         {

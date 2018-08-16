@@ -61,8 +61,12 @@ class ThumbnailDownloader<T>(private val responseHandler: Handler) : HandlerThre
     {
         val url = requestMap[target] ?: return
 
-        val thumbnailBytes = Util.downloadBytesFromUrl(url)!!
-        val thumbnailBitmap = Util.getBitmapFromBytes(thumbnailBytes)!!
+        val imageBytes = Util.downloadBytesFromUrl(url)!!
+        
+        // todo: do the processing somewhere else
+        // so it doesn't hinder the downloading of other thumbnails?
+        
+        val thumbnail = Util.convertToThumbnail(imageBytes)
 
         responseHandler.post {
             if (requestMap[target] != url)
@@ -71,7 +75,7 @@ class ThumbnailDownloader<T>(private val responseHandler: Handler) : HandlerThre
             }
 
             requestMap.remove(target)
-            thumbnailDownloadListener.onThumbnailDownloaded(target, thumbnailBitmap)
+            thumbnailDownloadListener.onThumbnailDownloaded(target, thumbnail)
         }
     }
     
