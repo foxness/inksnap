@@ -1,16 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="10dp"
-    android:focusable="true"
-    android:focusableInTouchMode="true"
-    android:id="@+id/post_layout"
     tools:context=".LinkpostFragment"
     >
+
+    <!--THIS DUMMY ELEMENT IS NEEDED SO THAT THE FOCUS GOES TO THIS ELEMENT-->
+    <!--AND NOT TO OTHER ELEMENTS AND POPS THE KEYBOARD-->
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        tools:ignore="UselessLeaf"
+        />
 
     <Button
         android:id="@+id/intended_submit_date_button"
@@ -41,7 +49,7 @@
         android:layout_marginTop="12dp"
         android:layout_marginBottom="12dp"
         >
-        
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

@@ -61,14 +61,6 @@ class SettingsFragment : Fragment()
         imgurButton.text = if (imgurAccount.isLoggedIn) "Log out" else "Log in"
         imgurButton.setOnClickListener { onImgurButtonClick() }
 
-        // DEBUG DONT POST -------------------
-
-        val debugDontPostSwitch = v.findViewById<Switch>(R.id.debug_dont_post_switch)
-        debugDontPostSwitch.isChecked = settingsManager.debugDontPost
-        debugDontPostSwitch.setOnCheckedChangeListener { buttonView, isChecked ->
-            onDebugDontPostCheckedChanged(isChecked)
-        }
-
         // AUTOSUBMIT TYPE -------------------
 
         autosubmitTypeButton = v.findViewById(R.id.autosubmit_button)
@@ -173,11 +165,6 @@ class SettingsFragment : Fragment()
         }
 
         adb.show()
-    }
-
-    private fun onDebugDontPostCheckedChanged(checked: Boolean)
-    {
-        settingsManager.debugDontPost = checked // todo: save only on activity destroy?
     }
 
     @SuppressLint("SetTextI18n") // todo: fixeroni

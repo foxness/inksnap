@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
+import android.widget.ScrollView
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 
@@ -67,11 +68,6 @@ abstract class BasepostFragment : Fragment()
     
     protected open fun initUi(v: View)
     {
-        // LAYOUT -----------------------------
-
-        val layout = v.findViewById<LinearLayout>(R.id.post_layout)
-        layout.requestFocus()
-
         // TITLE EDIT -------------------------
 
         titleEdit = v.findViewById(R.id.post_title)

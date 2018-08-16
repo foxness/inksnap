@@ -212,7 +212,7 @@ class AutosubmitService : Service()
                             val link: String?
                             try
                             {
-                                link = reddit.submit(post, false, RESUBMIT, SEND_REPLIES)
+                                link = reddit.submit(post, RESUBMIT, SEND_REPLIES)
                             }
                             catch (error: Exception)
                             {

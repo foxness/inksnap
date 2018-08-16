@@ -21,7 +21,6 @@ class SettingsManager private constructor(context: Context)
         imgurAccessTokenExpirationDate = null
         sortBy = SortBy.Date
         notFirstLaunch = false
-        debugDontPost = false
         autosubmitType = AutosubmitType.Manual
         period = Duration.standardHours(3)
         notificationIdCounter = NotificationFactory.INITIAL_NOTIFICATION_ID
@@ -75,10 +74,6 @@ class SettingsManager private constructor(context: Context)
     var notFirstLaunch: Boolean // getBool()'s default value should be false for this to work
         get() = getBool(PREF_NOT_FIRST_LAUNCH)
         set(value) = setBool(PREF_NOT_FIRST_LAUNCH, value)
-    
-    var debugDontPost: Boolean // todo: get rid of this
-        get() = getBool(PREF_DEBUG_DONT_POST)
-        set(value) = setBool(PREF_DEBUG_DONT_POST, value)
 
     enum class AutosubmitType
     { Manual, Periodic }
@@ -173,7 +168,6 @@ class SettingsManager private constructor(context: Context)
         private const val PREF_IMGUR_ACCESS_TOKEN_EXPIRATION_DATE = "imgurAccessTokenExpirationDate"
         private const val PREF_SORT_BY = "sortBy"
         private const val PREF_NOT_FIRST_LAUNCH = "notFirstLaunch"
-        private const val PREF_DEBUG_DONT_POST = "debugDontPost"
         private const val PREF_AUTOSUBMIT_TYPE = "autosubmitType"
         private const val PREF_PERIOD = "period"
         private const val PREF_WALLPAPER_MODE = "wallpaperMode"
