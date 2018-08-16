@@ -41,7 +41,7 @@
     <string name="subreddit">subreddit</string>
     <string name="your_text_post_optional">Your text post (optional)</string>
     <string name="check_service">Check service</string>
-    <string name="queue_bottom_navbar">Queue</string>
+    <string name="queue_bottom_navbar">Queued</string>
     <string name="posted_bottom_navbar">Posted</string>
     <string name="failed_bottom_navbar">Failed</string>
     <string name="next_post_in">Next post in</string>

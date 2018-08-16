@@ -3,9 +3,9 @@ package space.foxness.snapwalls
 import android.view.View
 import android.widget.EditText
 
-class SelfpostFragment : BasepostFragment()
+class TextpostFragment : BasepostFragment()
 {
-    override val layoutId = R.layout.fragment_selfpost
+    override val layoutId = R.layout.fragment_textpost
     
     private lateinit var contentEdit: EditText
 
@@ -43,11 +43,11 @@ class SelfpostFragment : BasepostFragment()
 
     companion object
     {
-        fun newInstance(post: Post?, allowIntendedSubmitDateEditing: Boolean): SelfpostFragment
+        fun newInstance(post: Post?, allowIntendedSubmitDateEditing: Boolean): TextpostFragment
         {
             val args = BasepostFragment.newArguments(post, allowIntendedSubmitDateEditing)
             
-            val fragment = SelfpostFragment()
+            val fragment = TextpostFragment()
             fragment.arguments = args
             
             return fragment

@@ -39,7 +39,7 @@ class PostFragment : Fragment()
         {
             return when (position)
             {
-                SELFPOST_TAB_INDEX -> "self" // todo: extract
+                TEXTPOST_TAB_INDEX -> "text" // todo: extract
                 LINKPOST_TAB_INDEX -> "link"
                 else -> throw Exception("how")
             }
@@ -66,7 +66,7 @@ class PostFragment : Fragment()
 
         allowIntendedSubmitDateEditing = args.getBoolean(ARG_ALLOW_INTENDED_SUBMIT_DATE_EDITING)
         
-        val self = SelfpostFragment.newInstance(post, allowIntendedSubmitDateEditing)
+        val self = TextpostFragment.newInstance(post, allowIntendedSubmitDateEditing)
         val link = LinkpostFragment.newInstance(post, allowIntendedSubmitDateEditing)
         
         adapter = PostFragmentPagerAdapter(childFragmentManager)
@@ -82,7 +82,7 @@ class PostFragment : Fragment()
         
         viewPager = v.findViewById(R.id.newpost_viewpager)
         viewPager.adapter = adapter
-        viewPager.currentItem = if (post.isLink) LINKPOST_TAB_INDEX else SELFPOST_TAB_INDEX
+        viewPager.currentItem = if (post.isLink) LINKPOST_TAB_INDEX else TEXTPOST_TAB_INDEX
 
         currentTabIndex = viewPager.currentItem
         
@@ -195,7 +195,7 @@ class PostFragment : Fragment()
     
     companion object
     {
-        private const val SELFPOST_TAB_INDEX = 0
+        private const val TEXTPOST_TAB_INDEX = 0
         private const val LINKPOST_TAB_INDEX = 1
         
         private const val ARG_POST = "post"
