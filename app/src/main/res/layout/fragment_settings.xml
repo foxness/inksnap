@@ -28,6 +28,7 @@
 
             <Button
                 android:id="@+id/reddit_toggle"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
@@ -56,40 +57,13 @@
 
             <Button
                 android:id="@+id/imgur_toggle"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:layout_marginEnd="22dp"
                 android:text="@string/log_out" />
-
-        </RelativeLayout>
-
-        <View style="@style/divider"/>
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="70dp"
-            >
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:layout_marginStart="22dp"
-                android:text="@string/debug_dont_post"
-                android:textColor="@android:color/primary_text_dark"
-                android:textSize="16sp" />
-
-            <Switch
-                android:id="@+id/debug_dont_post_switch"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="22dp"
-                />
 
         </RelativeLayout>
 
