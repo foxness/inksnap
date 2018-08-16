@@ -21,6 +21,7 @@ import org.joda.time.format.PeriodFormatterBuilder
 import java.io.ByteArrayOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
+import java.security.MessageDigest
 import java.util.*
 
 
@@ -33,6 +34,8 @@ object Util
     const val STATE_LENGTH = 10
 
     const val MILLIS_IN_MINUTE: Long = 60 * 1000
+
+    private val messageDigest = MessageDigest.getInstance("SHA-256")
     
     val titlePostComparator = Comparator { a: Post, b -> a.title.compareTo(b.title) }
 
@@ -56,6 +59,12 @@ object Util
         {
             a.intendedSubmitDate!!.compareTo(b.intendedSubmitDate!!)
         }
+    }
+    
+    fun String.sha256(): String
+    {
+        val bytes = messageDigest.digest(toByteArray())
+        return bytes.fold("") { str, it -> str + "%02x".format(it) }
     }
     
     fun toast(ctx: Context?, text: String) = Toast.makeText(ctx, text, Toast.LENGTH_SHORT).show()

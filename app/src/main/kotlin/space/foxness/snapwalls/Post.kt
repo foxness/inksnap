@@ -6,6 +6,7 @@ import android.arch.persistence.room.PrimaryKey
 import android.webkit.URLUtil.isValidUrl
 import org.joda.time.DateTime
 import java.io.Serializable
+import space.foxness.snapwalls.Util.sha256
 import java.util.*
 
 @Entity(tableName = "queue")
@@ -26,6 +27,8 @@ class Post : Serializable
     var isLink = false
 
     var scheduled = false
+
+    fun getThumbnailId() = content.sha256()
     
     fun isValid(dateMustBeValidForPostToBeValid: Boolean): Boolean
     {

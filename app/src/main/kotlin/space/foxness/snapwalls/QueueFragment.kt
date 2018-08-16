@@ -183,7 +183,7 @@ abstract class QueueFragment : Fragment()
         {
             override fun onThumbnailDownloaded(target: PostHolder, thumbnail: Bitmap)
             {
-                if (thumbnailCache.contains(target.getPostId()))
+                if (thumbnailCache.contains(target.post.getThumbnailId()))
                 {
                     throw Exception("How did this even happen?")
                     // todo: have each thumbnail download request contain the post id
@@ -194,7 +194,7 @@ abstract class QueueFragment : Fragment()
                 
                 val squared = Util.squareBitmap(thumbnail)
                 
-                thumbnailCache.add(target.getPostId(), squared)
+                thumbnailCache.add(target.post.getThumbnailId(), squared)
                 target.setThumbnail(squared)
             }
         }
@@ -473,7 +473,7 @@ abstract class QueueFragment : Fragment()
             var thumbnailUrl: String? = null
             if (post.isLink)
             {
-                val cachedThumbnail = thumbnailCache.get(post.id)
+                val cachedThumbnail = thumbnailCache.get(post.getThumbnailId())
                 if (cachedThumbnail == null)
                 {
                     thumbnailUrl = ServiceProcessor.tryGetThumbnailUrl(post.content)
@@ -514,7 +514,8 @@ abstract class QueueFragment : Fragment()
         private val datetimeView: TextView
         private val subredditView: TextView
 
-        private lateinit var post: Post
+        lateinit var post: Post
+            private set
 
         init
         {
@@ -557,8 +558,6 @@ abstract class QueueFragment : Fragment()
             val thumbnail = resources.getDrawable(thumbId, context?.theme)
             setThumbnail(thumbnail)
         }
-        
-        fun getPostId() = post.id
         
         // warning: thumbnail must be a square, not a rectangle
         fun setThumbnail(thumbnail: Bitmap)
