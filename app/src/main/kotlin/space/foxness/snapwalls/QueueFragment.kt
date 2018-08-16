@@ -535,7 +535,10 @@ abstract class QueueFragment : Fragment()
         {
             post = p
             titleView.text = post.title
+            
+            contentView.visibility = Util.getVisibilityGoneConstant(post.content.isNotBlank())
             contentView.text = post.content
+            
             subredditView.text = "/r/" + post.subreddit
             
             val postIsd = post.intendedSubmitDate
