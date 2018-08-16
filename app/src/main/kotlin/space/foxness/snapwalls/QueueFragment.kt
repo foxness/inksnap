@@ -470,13 +470,13 @@ abstract class QueueFragment : Fragment()
             val post = posts[position]
             holder.bindPost(post)
             
-            var thumbnailUrl: String? = null
+            var thumbnailUrlToBeQueued: String? = null
             if (post.isLink)
             {
                 val cachedThumbnail = thumbnailCache.get(post.getThumbnailId())
                 if (cachedThumbnail == null)
                 {
-                    thumbnailUrl = ServiceProcessor.tryGetThumbnailUrl(post.content)
+                    thumbnailUrlToBeQueued = ServiceProcessor.tryGetThumbnailUrl(post.content)
                 }
                 else
                 {
@@ -484,13 +484,13 @@ abstract class QueueFragment : Fragment()
                 }
             }
             
-            if (thumbnailUrl == null)
+            if (thumbnailUrlToBeQueued == null)
             {
                 thumbnailDownloader.unqueueThumbnail(holder)
             }
             else
             {
-                thumbnailDownloader.queueThumbnail(holder, thumbnailUrl)
+                thumbnailDownloader.queueThumbnail(holder, thumbnailUrlToBeQueued)
             }
         }
 
