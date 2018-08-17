@@ -18,19 +18,27 @@ import android.widget.TextView
 class PostedFragment : Fragment()
 {
     private lateinit var recyclerView: RecyclerView
+    private lateinit var emptyView: TextView
     
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View
     {
         val v = inflater.inflate(R.layout.fragment_posted, container, false)
+
+        val postedPostRepository = PostedPostRepository.getInstance(context!!)
+        val postedPosts = postedPostRepository.postedPosts
+        val noPostedPosts = postedPosts.isEmpty()
         
         recyclerView = v.findViewById(R.id.posted_recyclerview)
         recyclerView.layoutManager = LinearLayoutManager(context!!)
-
-        val postedPostRepository = PostedPostRepository.getInstance(context!!)
-        val adapter = PostedPostAdapter(postedPostRepository.postedPosts) // todo: refactor to not have args?
+        recyclerView.visibility = Util.getVisibilityGoneConstant(!noPostedPosts)
+        
+        val adapter = PostedPostAdapter(postedPosts) // todo: refactor to not have args?
         recyclerView.adapter = adapter
+        
+        emptyView = v.findViewById(R.id.posted_empty_view)
+        emptyView.visibility = Util.getVisibilityGoneConstant(noPostedPosts)
         
         return v
     }
