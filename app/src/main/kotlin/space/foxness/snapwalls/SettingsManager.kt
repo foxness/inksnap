@@ -14,6 +14,7 @@ class SettingsManager private constructor(context: Context)
         redditRefreshToken = null
         redditAccessTokenExpirationDate = null
         redditLastSubmissionDate = null
+        redditName = null
         autosubmitEnabled = false
         timeLeft = Duration.standardHours(3)
         imgurAccessToken = null
@@ -43,6 +44,10 @@ class SettingsManager private constructor(context: Context)
     var redditLastSubmissionDate: DateTime?
         get() = getDateTime(PREF_REDDIT_LAST_SUBMISSION_DATE)
         set(value) = setDateTime(PREF_REDDIT_LAST_SUBMISSION_DATE, value)
+
+    var redditName: String?
+        get() = getString(PREF_REDDIT_NAME)
+        set(value) = setString(PREF_REDDIT_NAME, value)
 
     var autosubmitEnabled: Boolean
         get() = getBool(PREF_AUTOSUBMIT_ENABLED)
@@ -161,6 +166,7 @@ class SettingsManager private constructor(context: Context)
         private const val PREF_REDDIT_ACCESS_TOKEN_EXPIRATION_DATE =
                 "redditAccessTokenExpirationDate"
         private const val PREF_REDDIT_LAST_SUBMISSION_DATE = "redditLastSubmissionDate"
+        private const val PREF_REDDIT_NAME = "redditName"
         private const val PREF_AUTOSUBMIT_ENABLED = "autosubmitEnabled"
         private const val PREF_TIME_LEFT = "timeLeft"
         private const val PREF_IMGUR_ACCESS_TOKEN = "imgurAccessToken"

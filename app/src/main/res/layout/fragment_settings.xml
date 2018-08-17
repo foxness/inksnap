@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     >
@@ -10,33 +11,77 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         >
-        
-        <RelativeLayout
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="70dp"
+            android:gravity="center_vertical"
             >
-
-            <TextView
-                android:layout_width="wrap_content"
+            
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
                 android:layout_marginStart="22dp"
-                android:text="@string/reddit_account"
-                android:textColor="@android:color/primary_text_dark"
-                android:textSize="16sp" />
+                android:gravity="center_vertical"
+                android:orientation="vertical"
+                >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/reddit_account"
+                    android:textColor="@android:color/primary_text_dark"
+                    android:textSize="16sp"
+                    />
+
+                <TextView
+                    android:id="@+id/reddit_account_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="/u/randomName"
+                    android:textColor="#999"
+                    android:textSize="14sp"
+                    />
+                
+            </LinearLayout>
 
             <Button
                 android:id="@+id/reddit_toggle"
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
                 android:layout_marginEnd="22dp"
-                android:text="@string/log_out" />
-            
-        </RelativeLayout>
+                tools:text="@string/log_out"
+                />
+
+        </LinearLayout>
+        
+        <!--<LinearLayout-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="70dp"-->
+            <!--android:gravity="center_vertical"-->
+            <!--&gt;-->
+
+            <!--<TextView-->
+                <!--android:layout_width="0dp"-->
+                <!--android:layout_weight="1"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_marginStart="22dp"-->
+                <!--android:text="@string/reddit_account"-->
+                <!--android:textColor="@android:color/primary_text_dark"-->
+                <!--android:textSize="16sp" />-->
+
+            <!--<Button-->
+                <!--android:id="@+id/reddit_toggle"-->
+                <!--style="?android:attr/buttonBarButtonStyle"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_marginEnd="22dp"-->
+                <!--tools:text="@string/log_out"-->
+                <!--/>-->
+            <!---->
+        <!--</LinearLayout>-->
 
         <View style="@style/divider"/>
 

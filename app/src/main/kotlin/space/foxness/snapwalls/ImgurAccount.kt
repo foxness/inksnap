@@ -5,6 +5,7 @@ import android.webkit.URLUtil.isValidUrl
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import space.foxness.snapwalls.Util.randomState
+import java.net.HttpURLConnection
 
 class ImgurAccount(private val callbacks: Callbacks)
 {
@@ -103,7 +104,7 @@ class ImgurAccount(private val callbacks: Callbacks)
 
         val response = Util.httpPostAsync(url = ACCESS_TOKEN_ENDPOINT, headers = headers, data = data).await()
 
-        if (response.statusCode != 200)
+        if (response.statusCode != HttpURLConnection.HTTP_OK)
         {
             throw Exception("Response code: ${response.statusCode}, response: ${response.text}")
         }
@@ -140,7 +141,7 @@ class ImgurAccount(private val callbacks: Callbacks)
 
         val response = Util.httpPostAsync(url = IMAGE_UPLOAD_ENDPOINT, headers = headers, data = data).await()
 
-        if (response.statusCode != 200)
+        if (response.statusCode != HttpURLConnection.HTTP_OK)
         {
             throw Exception("Response code: ${response.statusCode}, response: ${response.text}")
         }

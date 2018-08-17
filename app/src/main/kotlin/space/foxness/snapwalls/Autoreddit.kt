@@ -21,6 +21,7 @@ class Autoreddit private constructor(context: Context)
         reddit.refreshToken = settingsManager.redditRefreshToken
         reddit.accessTokenExpirationDate = settingsManager.redditAccessTokenExpirationDate
         reddit.lastSubmissionDate = settingsManager.redditLastSubmissionDate
+        reddit.name = settingsManager.redditName
     }
 
     private inner class Saver : Reddit.Callbacks
@@ -39,6 +40,11 @@ class Autoreddit private constructor(context: Context)
         override fun onNewLastSubmissionDate()
         {
             settingsManager.redditLastSubmissionDate = reddit.lastSubmissionDate
+        }
+
+        override fun onNewName()
+        {
+            settingsManager.redditName = reddit.name
         }
     }
 

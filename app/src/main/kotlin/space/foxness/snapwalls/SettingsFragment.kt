@@ -16,6 +16,7 @@ import android.webkit.WebViewClient
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Switch
+import android.widget.TextView
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 import org.joda.time.Duration
@@ -27,6 +28,7 @@ class SettingsFragment : Fragment()
     private lateinit var imgurButton: Button
     private lateinit var autosubmitTypeButton: Button
     private lateinit var timerPeriodButton: Button
+    private lateinit var redditNameView: TextView
 
     private lateinit var settingsManager: SettingsManager
     private lateinit var redditAccount: Reddit
@@ -49,13 +51,18 @@ class SettingsFragment : Fragment()
     {
         val v = inflater.inflate(R.layout.fragment_settings, container, false)
 
-        // REDDIT ACCOUNT --------------------
+        // REDDIT BUTTON ---------------------
 
         redditButton = v.findViewById(R.id.reddit_toggle)
         redditButton.text = if (redditAccount.isLoggedIn) "Log out" else "Log in"
         redditButton.setOnClickListener { onRedditButtonClick() }
+        
+        // REDDIT ACCOUNT --------------------
+        
+        redditNameView = v.findViewById(R.id.reddit_account_name)
+        updateRedditName()
 
-        // IMGUR ACCOUNT ---------------------
+        // IMGUR BUTTON ----------------------
 
         imgurButton = v.findViewById(R.id.imgur_toggle)
         imgurButton.text = if (imgurAccount.isLoggedIn) "Log out" else "Log in"
@@ -91,6 +98,17 @@ class SettingsFragment : Fragment()
         redditButton.isEnabled = autosubmitNotEnabled
         timerPeriodButton.isEnabled = settingsManager.autosubmitType ==
                 SettingsManager.AutosubmitType.Periodic && autosubmitNotEnabled
+    }
+    
+    @SuppressLint("SetTextI18n") // todo: fix
+    private fun updateRedditName()
+    {
+        redditNameView.visibility = Util.getVisibilityGoneConstant(redditAccount.isLoggedIn)
+        
+        if (redditAccount.isLoggedIn)
+        {
+            redditNameView.text = "/u/" + redditAccount.name
+        }
     }
     
     private fun onWallpaperModeCheckedChanged(checked: Boolean)
@@ -240,6 +258,7 @@ class SettingsFragment : Fragment()
                 {
                     redditAccount.logout()
                     redditButton.text = "Log in"
+                    updateRedditName()
                     toast("Logged out of Reddit")
                 }
             }
@@ -278,7 +297,10 @@ class SettingsFragment : Fragment()
 
                 if (redditAccount.tryExtractCode(url))
                 {
-                    val fetchJob = launch { redditAccount.fetchAuthTokens() }
+                    val fetchJob = launch {
+                        redditAccount.fetchAuthTokens()
+                        redditAccount.fetchName()
+                    }
                     
                     redditButton.isEnabled = false
                     
@@ -295,6 +317,8 @@ class SettingsFragment : Fragment()
                         {
                             redditButton.text = "Log out"
                         }
+                        
+                        updateRedditName()
                     }
                 }
             }

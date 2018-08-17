@@ -1,5 +1,7 @@
 package space.foxness.snapwalls
 
+import java.net.HttpURLConnection
+
 object Wallhaven
 {
     private val wallhavenRegex = """https://alpha\.wallhaven\.cc/wallpaper/(?<id>\d+)/?""".toRegex()
@@ -11,7 +13,7 @@ object Wallhaven
             val headers = mapOf("User-Agent" to Util.USER_AGENT)
             val response = Util.httpGetAsync(url = url, headers = headers).await()
 
-            if (response.statusCode != 200)
+            if (response.statusCode != HttpURLConnection.HTTP_OK)
             {
                 return null
             }

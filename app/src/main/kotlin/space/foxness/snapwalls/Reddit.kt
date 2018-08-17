@@ -5,6 +5,7 @@ import khttp.structures.authorization.BasicAuthorization
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import space.foxness.snapwalls.Util.randomState
+import java.net.HttpURLConnection
 
 class Reddit private constructor(private val callbacks: Callbacks)
 {
@@ -15,6 +16,7 @@ class Reddit private constructor(private val callbacks: Callbacks)
     var refreshToken: String? = null
     var accessTokenExpirationDate: DateTime? = null
     var lastSubmissionDate: DateTime? = null
+    var name: String? = null
 
     val isLoggedIn get() = refreshToken != null
 
@@ -42,6 +44,7 @@ class Reddit private constructor(private val callbacks: Callbacks)
         fun onNewAccessToken() // todo: make these pass args like imgur's callbacks
         fun onNewRefreshToken()
         fun onNewLastSubmissionDate()
+        fun onNewName()
     }
     
     fun logout()
@@ -52,10 +55,12 @@ class Reddit private constructor(private val callbacks: Callbacks)
         refreshToken = null
         accessTokenExpirationDate = null
         lastSubmissionDate = null
+        name = null
         
         callbacks.onNewAccessToken()
         callbacks.onNewRefreshToken()
         callbacks.onNewLastSubmissionDate()
+        callbacks.onNewName()
     }
 
     suspend fun submit(post: Post,
@@ -84,9 +89,9 @@ class Reddit private constructor(private val callbacks: Callbacks)
 
         val response = Util.httpPostAsync(url = SUBMIT_ENDPOINT, headers = headers, data = data).await()
 
-        if (response.statusCode != 200)
+        if (response.statusCode != HttpURLConnection.HTTP_OK)
         {
-            throw Exception("Response code: ${response.statusCode}, response: $response")
+            throw Exception("Response code: ${response.statusCode}, response: ${response.text}")
         }
 
         val json = response.jsonObject.getJSONObject("json")
@@ -120,6 +125,27 @@ class Reddit private constructor(private val callbacks: Callbacks)
         }
     }
 
+    suspend fun fetchName()
+    {
+        ensureValidAccessToken()
+
+        val headers =
+                mapOf("User-Agent" to USER_AGENT,
+                      "Authorization" to "bearer ${accessToken!!}")
+        
+        val response = Util.httpGetAsync(url = NAME_ENDPOINT, headers = headers).await()
+
+        if (response.statusCode != HttpURLConnection.HTTP_OK)
+        {
+            throw Exception("Response code: ${response.statusCode}, response: ${response.text}")
+        }
+        
+        val json = response.jsonObject
+        
+        name = json.getString("name")
+        callbacks.onNewName()
+    }
+
     private suspend fun ensureValidAccessToken()
     {
         if (accessToken != null && accessTokenExpirationDate!! > DateTime.now())
@@ -138,9 +164,9 @@ class Reddit private constructor(private val callbacks: Callbacks)
 
         val response = Util.httpPostAsync(url = ACCESS_TOKEN_ENDPOINT, headers = headers, data = data, auth = auth).await()
 
-        if (response.statusCode != 200)
+        if (response.statusCode != HttpURLConnection.HTTP_OK)
         {
-            throw Exception("Response code: ${response.statusCode}, response: $response")
+            throw Exception("Response code: ${response.statusCode}, response: ${response.text}")
         }
 
         val json = response.jsonObject
@@ -173,9 +199,9 @@ class Reddit private constructor(private val callbacks: Callbacks)
 
         val response = Util.httpPostAsync(url = ACCESS_TOKEN_ENDPOINT, headers = headers, data = data, auth = auth).await()
 
-        if (response.statusCode != 200)
+        if (response.statusCode != HttpURLConnection.HTTP_OK)
         {
-            throw Exception("Response code: ${response.statusCode}, response: $response")
+            throw Exception("Response code: ${response.statusCode}, response: ${response.text}")
         }
 
         val json = response.jsonObject
@@ -218,9 +244,10 @@ class Reddit private constructor(private val callbacks: Callbacks)
         private const val AUTORIZE_ENDPOINT = "https://www.reddit.com/api/v1/authorize.compact"
         private const val ACCESS_TOKEN_ENDPOINT = "https://www.reddit.com/api/v1/access_token"
         private const val SUBMIT_ENDPOINT = "https://oauth.reddit.com/api/submit"
+        private const val NAME_ENDPOINT = "https://oauth.reddit.com/api/v1/me"
 
         private const val AUTH_DURATION = "permanent"
-        private const val AUTH_SCOPE = "submit"
+        private const val AUTH_SCOPE = "identity submit"
         private const val AUTH_RESPONSE_TYPE = "code"
         private const val USER_AGENT = Util.USER_AGENT
 
