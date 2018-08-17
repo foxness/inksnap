@@ -57,7 +57,7 @@ class LinkpostFragment : BasepostFragment()
     {
         super.unloadViewsToPost()
         
-        post.content = urlEdit.text.toString()
+        post.content = urlEdit.text.toString().trim()
         post.isLink = true
     }
 

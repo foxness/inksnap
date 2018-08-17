@@ -33,24 +33,38 @@ class Post : Serializable
     fun isValid(dateMustBeValidForPostToBeValid: Boolean): Boolean
     {
         val notBlankTitle = title.isNotBlank()
-        val notBlankSubreddit = subreddit.isNotBlank()
+        val validTitleLength = title.trim().length <= Reddit.POST_TITLE_LENGTH_LIMIT
+        
+        val validSubredditLength = subreddit.trim().length <= Reddit.SUBREDDIT_NAME_LENGTH_LIMIT
+        val subredditCharRegex = """\w+""".toRegex()
+        val validSubredditCharacters = subreddit.trim().matches(subredditCharRegex)
+        
         val validContent = !isLink || isValidUrl(content)
+        val validContentLength = isLink || content.length <= Reddit.POST_TEXT_LENGTH_LIMIT
         
         val isd = intendedSubmitDate
         // && has higher precedence than ||
         val validDate = !dateMustBeValidForPostToBeValid || isd != null && isd > DateTime.now()
 
-        return notBlankTitle && notBlankSubreddit && validContent && validDate
+        return notBlankTitle
+               && validTitleLength
+               && validSubredditLength
+               && validSubredditCharacters
+               && validContent
+               && validContentLength
+               && validDate
     }
     
     fun reasonWhyInvalid(dateMustBeValidForPostToBeValid: Boolean): String
     {
-        val ex = Exception("The post was not invalid")
         return when
         {
             title.isBlank() -> "Title must not be blank"
-            subreddit.isBlank() -> "Subreddit must not be blank"
+            title.trim().length > Reddit.POST_TITLE_LENGTH_LIMIT -> "Title cannot have more than ${Reddit.POST_TITLE_LENGTH_LIMIT} characters"
+            subreddit.trim().length > Reddit.SUBREDDIT_NAME_LENGTH_LIMIT -> "Subreddit name cannot have more than ${Reddit.SUBREDDIT_NAME_LENGTH_LIMIT} characters"
+            !subreddit.trim().matches("""\w+""".toRegex()) -> "Subreddit name cannot contain non-alphanumeric characters"
             isLink && !isValidUrl(content) -> "Link posts must have a valid url"
+            !isLink && content.length > Reddit.POST_TEXT_LENGTH_LIMIT -> "Post text cannot have more than ${Reddit.POST_TEXT_LENGTH_LIMIT} characters"
             dateMustBeValidForPostToBeValid ->
             {
                 val isd = intendedSubmitDate
@@ -58,10 +72,10 @@ class Post : Serializable
                 {
                     isd == null -> "Date should be set"
                     isd <= DateTime.now() -> "Date should not be in the past"
-                    else -> throw ex
+                    else -> throw Exception("how")
                 }
             }
-            else -> throw ex
+            else -> throw Exception("how")
         }
     }
     

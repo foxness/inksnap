@@ -71,6 +71,7 @@
                 android:inputType="text"
                 android:selectAllOnFocus="true"
                 android:background="@android:color/transparent"
+                android:maxLength="20"
                 />
 
         </LinearLayout>
@@ -90,6 +91,7 @@
             android:layout_marginTop="12dp"
             android:layout_marginBottom="12dp"
             android:textStyle="bold"
+            android:maxLength="300"
             />
 
         <View style="@style/soft_divider"/>
@@ -109,6 +111,7 @@
             android:layout_marginBottom="12dp"
             android:minLines="10"
             android:gravity="top|start"
+            android:maxLength="40000"
             />
 
     </LinearLayout>

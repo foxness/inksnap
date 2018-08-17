@@ -252,5 +252,9 @@ class Reddit private constructor(private val callbacks: Callbacks)
         private const val USER_AGENT = Util.USER_AGENT
 
         const val RATELIMIT_MS: Long = 10 * 60 * 1000 // 10 minutes, required to be long
+        
+        const val POST_TITLE_LENGTH_LIMIT = 300
+        const val POST_TEXT_LENGTH_LIMIT = 40000
+        const val SUBREDDIT_NAME_LENGTH_LIMIT = 20
     }
 }

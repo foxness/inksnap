@@ -157,8 +157,8 @@ abstract class BasepostFragment : Fragment()
 
     protected open fun unloadViewsToPost()
     {
-        post.title = titleEdit.text.toString()
-        post.subreddit = subredditEdit.text.toString()
+        post.title = titleEdit.text.toString().trim()
+        post.subreddit = subredditEdit.text.toString().trim()
         post.intendedSubmitDate = intendedSubmitDate
     }
     

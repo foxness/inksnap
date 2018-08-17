@@ -37,7 +37,7 @@ class TextpostFragment : BasepostFragment()
     {
         super.unloadViewsToPost()
         
-        post.content = contentEdit.text.toString()
+        post.content = contentEdit.text.toString() // intentionally no trim
         post.isLink = false
     }
 
