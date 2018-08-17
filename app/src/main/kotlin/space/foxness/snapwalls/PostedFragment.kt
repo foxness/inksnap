@@ -12,6 +12,7 @@ import android.text.format.DateUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 
 class PostedFragment : Fragment()
@@ -42,6 +43,7 @@ class PostedFragment : Fragment()
         private val contentView: TextView
         private val subredditView: TextView
         private val datetimeView: TextView
+        private val thumbnailView: ImageView
         
         private lateinit var postedPost: PostedPost
         
@@ -56,6 +58,7 @@ class PostedFragment : Fragment()
             contentView = itemView.findViewById(R.id.posted_post_content)
             subredditView = itemView.findViewById(R.id.posted_post_subreddit)
             datetimeView = itemView.findViewById(R.id.posted_post_datetime)
+            thumbnailView = itemView.findViewById(R.id.posted_post_post_thumbnail)
         }
         
         @SuppressLint("SetTextI18n") // todo: fix
@@ -72,6 +75,10 @@ class PostedFragment : Fragment()
                             0)
 
             datetimeView.text = relativeDateString
+
+            val thumbId = if (postedPost.isLink) R.drawable.link_thumb else R.drawable.self_thumb
+            val thumbnail = resources.getDrawable(thumbId, context?.theme)
+            thumbnailView.setImageDrawable(thumbnail)
         }
     }
     

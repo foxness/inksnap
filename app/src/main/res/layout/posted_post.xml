@@ -5,7 +5,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:gravity="center_vertical"
     >
+    
+    <ImageView
+        android:id="@+id/posted_post_post_thumbnail"
+        android:layout_width="54dp"
+        android:layout_height="54dp"
+        android:layout_marginStart="22dp"
+        android:contentDescription="@string/post_thumbnail"
+        android:src="@drawable/self_thumb"
+        android:scaleType="fitCenter"
+        />
     
     <RelativeLayout
         android:paddingTop="12dp"
