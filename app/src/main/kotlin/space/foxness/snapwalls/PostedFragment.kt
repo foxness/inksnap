@@ -27,8 +27,6 @@ class PostedFragment : Fragment()
         
         recyclerView = v.findViewById(R.id.posted_recyclerview)
         recyclerView.layoutManager = LinearLayoutManager(context!!)
-        recyclerView.addItemDecoration(DividerItemDecoration(recyclerView.context,
-                                                             DividerItemDecoration.VERTICAL))
 
         val postedPostRepository = PostedPostRepository.getInstance(context!!)
         val adapter = PostedPostAdapter(postedPostRepository.postedPosts) // todo: refactor to not have args?
