@@ -36,6 +36,16 @@
             tools:text="Post content"
             />
 
+        <TextView
+            android:id="@+id/posted_post_datetime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/posted_post_content"
+            android:layout_marginStart="22dp"
+            android:layout_marginTop="8dp"
+            tools:text="x seconds ago"
+            />
+
     </RelativeLayout>
 
     <TextView

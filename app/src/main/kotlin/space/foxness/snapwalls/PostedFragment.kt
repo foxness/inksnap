@@ -1,5 +1,6 @@
 package space.foxness.snapwalls
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -7,6 +8,7 @@ import android.support.v4.app.Fragment
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.text.format.DateUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -39,6 +41,7 @@ class PostedFragment : Fragment()
         private val titleView: TextView
         private val contentView: TextView
         private val subredditView: TextView
+        private val datetimeView: TextView
         
         private lateinit var postedPost: PostedPost
         
@@ -52,14 +55,23 @@ class PostedFragment : Fragment()
             titleView = itemView.findViewById(R.id.posted_post_title)
             contentView = itemView.findViewById(R.id.posted_post_content)
             subredditView = itemView.findViewById(R.id.posted_post_subreddit)
+            datetimeView = itemView.findViewById(R.id.posted_post_datetime)
         }
         
+        @SuppressLint("SetTextI18n") // todo: fix
         fun bindPostedPost(pp: PostedPost)
         {
             postedPost = pp
             titleView.text = postedPost.title
             contentView.text = postedPost.content
-            subredditView.text = postedPost.subreddit
+            subredditView.text = "/r/" + postedPost.subreddit
+
+            val relativeDateString = DateUtils.getRelativeTimeSpanString(
+                            postedPost.intendedSubmitDate.millis,
+                            System.currentTimeMillis(),
+                            0)
+
+            datetimeView.text = relativeDateString
         }
     }
     
