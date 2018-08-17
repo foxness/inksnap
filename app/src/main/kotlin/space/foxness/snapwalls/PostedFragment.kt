@@ -58,7 +58,7 @@ class PostedFragment : Fragment()
             contentView = itemView.findViewById(R.id.posted_post_content)
             subredditView = itemView.findViewById(R.id.posted_post_subreddit)
             datetimeView = itemView.findViewById(R.id.posted_post_datetime)
-            thumbnailView = itemView.findViewById(R.id.posted_post_post_thumbnail)
+            thumbnailView = itemView.findViewById(R.id.posted_post_thumbnail)
         }
         
         @SuppressLint("SetTextI18n") // todo: fix
