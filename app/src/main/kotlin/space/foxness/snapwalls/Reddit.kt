@@ -255,6 +255,6 @@ class Reddit private constructor(private val callbacks: Callbacks)
         
         const val POST_TITLE_LENGTH_LIMIT = 300
         const val POST_TEXT_LENGTH_LIMIT = 40000
-        const val SUBREDDIT_NAME_LENGTH_LIMIT = 20
+        const val SUBREDDIT_NAME_LENGTH_LIMIT = 21
     }
 }
