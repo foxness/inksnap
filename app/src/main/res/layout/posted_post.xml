@@ -27,20 +27,10 @@
             />
 
         <TextView
-            android:id="@+id/posted_post_url"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/posted_post_title"
-            android:layout_marginStart="22dp"
-            android:layout_marginTop="8dp"
-            tools:text="Post url"
-            />
-
-        <TextView
             android:id="@+id/posted_post_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/posted_post_url"
+            android:layout_below="@id/posted_post_title"
             android:layout_marginStart="22dp"
             android:layout_marginTop="8dp"
             tools:text="Post content"

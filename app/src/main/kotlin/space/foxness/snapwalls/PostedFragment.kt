@@ -37,7 +37,6 @@ class PostedFragment : Fragment()
     private inner class PostedPostHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
     {
         private val titleView: TextView
-        private val urlView: TextView
         private val contentView: TextView
         private val subredditView: TextView
         
@@ -51,7 +50,6 @@ class PostedFragment : Fragment()
             }
             
             titleView = itemView.findViewById(R.id.posted_post_title)
-            urlView = itemView.findViewById(R.id.posted_post_url)
             contentView = itemView.findViewById(R.id.posted_post_content)
             subredditView = itemView.findViewById(R.id.posted_post_subreddit)
         }
@@ -60,7 +58,6 @@ class PostedFragment : Fragment()
         {
             postedPost = pp
             titleView.text = postedPost.title
-            urlView.text = postedPost.url
             contentView.text = postedPost.content
             subredditView.text = postedPost.subreddit
         }
