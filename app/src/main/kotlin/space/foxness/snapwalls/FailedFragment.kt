@@ -12,6 +12,7 @@ import android.text.format.DateUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 
 class FailedFragment : Fragment()
@@ -43,6 +44,7 @@ class FailedFragment : Fragment()
         private val subredditView: TextView
         private val failReasonView: TextView
         private val datetimeView: TextView
+        private val thumbnailView: ImageView
 
         private lateinit var failedPost: FailedPost
 
@@ -57,6 +59,7 @@ class FailedFragment : Fragment()
             subredditView = itemView.findViewById(R.id.failed_post_subreddit)
             failReasonView = itemView.findViewById(R.id.failed_post_fail_reason)
             datetimeView = itemView.findViewById(R.id.failed_post_datetime)
+            thumbnailView = itemView.findViewById(R.id.failed_post_thumbnail)
         }
         
         private fun openDetailedReasonDialog()
@@ -86,6 +89,10 @@ class FailedFragment : Fragment()
                     0)
 
             datetimeView.text = relativeDateString
+
+            val thumbId = if (failedPost.isLink) R.drawable.link_thumb else R.drawable.self_thumb
+            val thumbnail = resources.getDrawable(thumbId, context?.theme)
+            thumbnailView.setImageDrawable(thumbnail)
         }
     }
 

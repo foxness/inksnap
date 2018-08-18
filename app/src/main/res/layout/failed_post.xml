@@ -56,8 +56,19 @@
         android:layout_marginStart="22dp"
         android:layout_marginEnd="22dp"
         android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
         tools:text="Fail reason"
+        />
+    
+    <ImageView
+        android:id="@+id/failed_post_thumbnail"
+        android:layout_width="54dp"
+        android:layout_height="54dp"
+        android:layout_marginStart="22dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:src="@drawable/self_thumb"
+        android:contentDescription="@string/post_thumbnail"
+        android:scaleType="fitCenter"
         />
 
 </LinearLayout>
