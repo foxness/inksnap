@@ -252,6 +252,7 @@ class SettingsFragment : Fragment()
             {
                 if (settingsManager.autosubmitEnabled)
                 {
+                    // todo: remove because this is unreachable because the button is disabled
                     toast("Can't change account while posts are scheduled")
                 }
                 else

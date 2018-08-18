@@ -1,8 +1,10 @@
 package space.foxness.snapwalls
 
 import android.annotation.SuppressLint
+import android.content.DialogInterface
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v7.app.AlertDialog
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -39,17 +41,30 @@ class FailedFragment : Fragment()
         private val contentView: TextView
         private val subredditView: TextView
         private val failReasonView: TextView
-        private val detailedReasonView: TextView
 
         private lateinit var failedPost: FailedPost
 
         init
         {
+            itemView.setOnClickListener {
+                openDetailedReasonDialog()
+            }
+            
             titleView = itemView.findViewById(R.id.failed_post_title)
             contentView = itemView.findViewById(R.id.failed_post_content)
             subredditView = itemView.findViewById(R.id.failed_post_subreddit)
             failReasonView = itemView.findViewById(R.id.failed_post_fail_reason)
-            detailedReasonView = itemView.findViewById(R.id.failed_post_detailed_reason)
+        }
+        
+        private fun openDetailedReasonDialog()
+        {
+            val dialog = AlertDialog.Builder(context!!)
+                    .setTitle(failedPost.failReason)
+                    .setMessage(failedPost.detailedReason)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .create()
+
+            dialog.show()
         }
 
         @SuppressLint("SetTextI18n") // todo: fix
@@ -61,7 +76,6 @@ class FailedFragment : Fragment()
             contentView.text = failedPost.content
             subredditView.text = "/r/${failedPost.subreddit}"
             failReasonView.text = failedPost.failReason
-            detailedReasonView.text = failedPost.detailedReason
         }
     }
 
