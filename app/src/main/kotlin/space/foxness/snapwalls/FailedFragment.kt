@@ -27,8 +27,6 @@ class FailedFragment : Fragment()
 
         recyclerView = v.findViewById(R.id.failed_recyclerview)
         recyclerView.layoutManager = LinearLayoutManager(context!!)
-        recyclerView.addItemDecoration(DividerItemDecoration(recyclerView.context,
-                                                             DividerItemDecoration.VERTICAL))
 
         val failedPostRepository = FailedPostRepository.getInstance(context!!)
         val adapter = FailedPostAdapter(failedPostRepository.failedPosts) // todo: refactor to not have args?
