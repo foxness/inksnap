@@ -72,7 +72,10 @@ class PostedFragment : Fragment()
         {
             postedPost = pp
             titleView.text = postedPost.title
+
+            contentView.visibility = Util.getVisibilityGoneConstant(postedPost.content.isNotBlank())
             contentView.text = postedPost.content
+            
             subredditView.text = "/r/" + postedPost.subreddit
 
             val relativeDateString = DateUtils.getRelativeTimeSpanString(

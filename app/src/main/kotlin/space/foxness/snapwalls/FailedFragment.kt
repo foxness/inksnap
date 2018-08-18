@@ -79,7 +79,10 @@ class FailedFragment : Fragment()
             failedPost = fp
             
             titleView.text = failedPost.title
+
+            contentView.visibility = Util.getVisibilityGoneConstant(failedPost.content.isNotBlank())
             contentView.text = failedPost.content
+            
             subredditView.text = "/r/" + failedPost.subreddit
             failReasonView.text = "Fail reason: " + failedPost.failReason
 
