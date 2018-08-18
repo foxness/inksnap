@@ -13,8 +13,8 @@
     <!--THIS DUMMY ELEMENT IS NEEDED SO THAT THE FOCUS GOES TO THIS ELEMENT-->
     <!--AND NOT TO OTHER ELEMENTS AND POPS THE KEYBOARD-->
     <FrameLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:focusable="true"
         android:focusableInTouchMode="true"
         tools:ignore="UselessLeaf"
@@ -96,9 +96,9 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="12dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginTop="0dp"
+        android:layout_marginBottom="0dp"
         >
 
         <EditText
@@ -119,9 +119,10 @@
             android:id="@+id/paste_button"
             style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
-            android:layout_height="20dp"
+            android:layout_height="wrap_content"
             android:text="@string/paste"
-            android:padding="0dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
             />
 
     </LinearLayout>
