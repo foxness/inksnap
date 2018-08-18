@@ -38,6 +38,16 @@
         android:layout_marginTop="8dp"
         tools:text="Post subreddit"
         />
+
+    <TextView
+        android:id="@+id/failed_post_datetime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="22dp"
+        android:layout_marginEnd="22dp"
+        android:layout_marginTop="8dp"
+        tools:text="x seconds ago"
+        />
     
     <TextView
         android:id="@+id/failed_post_fail_reason"

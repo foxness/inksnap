@@ -8,6 +8,7 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.text.format.DateUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -41,6 +42,7 @@ class FailedFragment : Fragment()
         private val contentView: TextView
         private val subredditView: TextView
         private val failReasonView: TextView
+        private val datetimeView: TextView
 
         private lateinit var failedPost: FailedPost
 
@@ -54,6 +56,7 @@ class FailedFragment : Fragment()
             contentView = itemView.findViewById(R.id.failed_post_content)
             subredditView = itemView.findViewById(R.id.failed_post_subreddit)
             failReasonView = itemView.findViewById(R.id.failed_post_fail_reason)
+            datetimeView = itemView.findViewById(R.id.failed_post_datetime)
         }
         
         private fun openDetailedReasonDialog()
@@ -76,6 +79,13 @@ class FailedFragment : Fragment()
             contentView.text = failedPost.content
             subredditView.text = "/r/${failedPost.subreddit}"
             failReasonView.text = failedPost.failReason
+
+            val relativeDateString = DateUtils.getRelativeTimeSpanString(
+                    failedPost.intendedSubmitDate.millis,
+                    System.currentTimeMillis(),
+                    0)
+
+            datetimeView.text = relativeDateString
         }
     }
 
