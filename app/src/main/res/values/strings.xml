@@ -45,4 +45,5 @@
     <string name="failed_bottom_navbar">Failed</string>
     <string name="next_post_in">Next post in</string>
     <string name="no_posts_found">No posts here.</string>
+    <string name="fail_reason">Fail reason:\u0020</string>
 </resources>

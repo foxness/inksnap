@@ -80,8 +80,8 @@ class FailedFragment : Fragment()
             
             titleView.text = failedPost.title
             contentView.text = failedPost.content
-            subredditView.text = "/r/${failedPost.subreddit}"
-            failReasonView.text = failedPost.failReason
+            subredditView.text = "/r/" + failedPost.subreddit
+            failReasonView.text = "Fail reason: " + failedPost.failReason
 
             val relativeDateString = DateUtils.getRelativeTimeSpanString(
                     failedPost.intendedSubmitDate.millis,
