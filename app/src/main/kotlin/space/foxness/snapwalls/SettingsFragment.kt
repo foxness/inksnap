@@ -142,16 +142,9 @@ class SettingsFragment : Fragment()
                 val minutes = input.text.toString().toInt()
                 val millis = minutes * Util.MILLIS_IN_MINUTE
 
-                if (millis > Reddit.RATELIMIT_MS)
-                {
-                    periodDialog.dismiss()
-                    val period = Duration(millis)
-                    settingsManager.period = period
-                }
-                else
-                {
-                    toast("The period cannot be 10 minutes or less (a rule imposed by Reddit)")
-                }
+                periodDialog.dismiss() // todo: im pretty sure this is done automatically
+                val period = Duration(millis)
+                settingsManager.period = period
             }
             
             negativeButton.setOnClickListener {

@@ -135,113 +135,102 @@ class AutosubmitService : Service()
                         throw Exception("Wasn't logged into Reddit")
                     }
 
-                    val notRatelimited = !reddit.isRestrictedByRatelimit
-                    if (!notRatelimited)
+                    if (!Util.isNetworkAvailable(ctx))
                     {
-                        val failReason = "Ratelimited by Reddit"
-                        val detailedReason = "A post cannot be submitted within 10 minutes of another post. This rule is imposed by Reddit."
-                        
+                        val failReason = "No internet"
+                        val detailedReason = "The device was not connected to the internet while the post was being submitted"
+
                         generateFailedPost(failReason, detailedReason, post)
                     }
                     else
                     {
-                        if (!Util.isNetworkAvailable(ctx))
-                        {
-                            val failReason = "No internet"
-                            val detailedReason = "The device was not connected to the internet while the post was being submitted"
+                        val imgurAccount = Autoimgur.getInstance(ctx).imgurAccount
 
-                            generateFailedPost(failReason, detailedReason, post)
+                        val isLinkPost = post.isLink
+                        val loggedIntoImgur = imgurAccount.isLoggedIn
+
+                        if (isLinkPost)
+                        {
+                            val directUrl = ServiceProcessor.tryGetDirectUrl(post.content)
+
+                            if (directUrl != null)
+                            {
+                                log.log("Recognized url:\nOld: \"${post.content}\"\nNew: \"$directUrl\"")
+                                post.content = directUrl
+                            }
+                        }
+
+                        val isImageUrl = post.content.isImageUrl()
+
+                        if (isLinkPost && isImageUrl && loggedIntoImgur)
+                        {
+                            log.log("Uploading ${post.content} to imgur...")
+
+                            val imgurImg = imgurAccount.uploadImage(post.content)
+
+                            log.log("Success. New link: ${imgurImg.link}")
+
+                            post.content = imgurImg.link
+
+                            val sm = SettingsManager.getInstance(ctx)
+                            if (sm.wallpaperMode)
+                            {
+                                val oldTitle = post.title
+                                post.title += " [${imgurImg.width}×${imgurImg.height}]"
+
+                                log.log("Changed post title from \"$oldTitle\" to \"${post.title}\" before posting")
+                            }
                         }
                         else
                         {
-                            val imgurAccount = Autoimgur.getInstance(ctx).imgurAccount
-
-                            val isLinkPost = post.isLink
-                            val loggedIntoImgur = imgurAccount.isLoggedIn
-
-                            if (isLinkPost)
+                            if (!isLinkPost)
                             {
-                                val directUrl = ServiceProcessor.tryGetDirectUrl(post.content)
-
-                                if (directUrl != null)
-                                {
-                                    log.log("Recognized url:\nOld: \"${post.content}\"\nNew: \"$directUrl\"")
-                                    post.content = directUrl
-                                }
+                                log.log("Not uploading to imgur because it's not a link")
                             }
 
-                            val isImageUrl = post.content.isImageUrl()
-
-                            if (isLinkPost && isImageUrl && loggedIntoImgur)
+                            if (!isImageUrl)
                             {
-                                log.log("Uploading ${post.content} to imgur...")
-
-                                val imgurImg = imgurAccount.uploadImage(post.content)
-
-                                log.log("Success. New link: ${imgurImg.link}")
-
-                                post.content = imgurImg.link
-
-                                val sm = SettingsManager.getInstance(ctx)
-                                if (sm.wallpaperMode)
-                                {
-                                    val oldTitle = post.title
-                                    post.title += " [${imgurImg.width}×${imgurImg.height}]"
-
-                                    log.log("Changed post title from \"$oldTitle\" to \"${post.title}\" before posting")
-                                }
-                            }
-                            else
-                            {
-                                if (!isLinkPost)
-                                {
-                                    log.log("Not uploading to imgur because it's not a link")
-                                }
-
-                                if (!isImageUrl)
-                                {
-                                    log.log("Not uploading to imgur because it's not an image url")
-                                }
-
-                                if (!loggedIntoImgur)
-                                {
-                                    log.log("Not uploading to imgur because not logged into imgur")
-                                }
+                                log.log("Not uploading to imgur because it's not an image url")
                             }
 
-                            val link: String?
-                            try
+                            if (!loggedIntoImgur)
                             {
-                                link = reddit.submit(post, RESUBMIT, SEND_REPLIES)
+                                log.log("Not uploading to imgur because not logged into imgur")
                             }
-                            catch (error: Exception)
-                            {
-                                // todo: handle this
-                                throw error
-                            }
-
-                            successfullyPosted = true
-
-                            val realSubmittedTime = DateTime.now()
-
-                            notificationFactory.showSuccessNotification(post.title)
-
-                            log.log("Successfully submitted a post. Link: $link")
-
-                            val difference = Duration(post.intendedSubmitDate, realSubmittedTime)
-
-                            log.log("Real vs intended time difference: ${difference.toNice()}")
-
-                            val postedPost = PostedPost.from(post, link)
-                            val postedPostRepository = PostedPostRepository.getInstance(ctx)
-                            postedPostRepository.addPostedPost(postedPost)
-
-                            log.log("Added to posted post repository")
-
-                            queue.deletePost(post.id)
-
-                            log.log("Deleted the submitted post from the database")
                         }
+
+                        val link: String?
+                        try
+                        {
+                            link = reddit.submit(post, RESUBMIT, SEND_REPLIES)
+                        }
+                        catch (error: Exception)
+                        {
+                            // todo: handle this
+                            throw error
+                        }
+
+                        successfullyPosted = true
+
+                        val realSubmittedTime = DateTime.now()
+
+                        notificationFactory.showSuccessNotification(post.title)
+
+                        log.log("Successfully submitted a post. Link: $link")
+
+                        val difference = Duration(post.intendedSubmitDate, realSubmittedTime)
+
+                        log.log("Real vs intended time difference: ${difference.toNice()}")
+
+                        val postedPost = PostedPost.from(post, link)
+                        val postedPostRepository = PostedPostRepository.getInstance(ctx)
+                        postedPostRepository.addPostedPost(postedPost)
+
+                        log.log("Added to posted post repository")
+
+                        queue.deletePost(post.id)
+
+                        log.log("Deleted the submitted post from the database")
                     }
                 }
             }

@@ -205,30 +205,6 @@ object Util
     {
         return map { it.intendedSubmitDate!! }.min()
     }
-    
-    fun List<Post>.compatibleWithRatelimit(): Boolean
-    {
-        if (size < 2)
-        {
-            return true
-        }
-        
-        val sorted = sortedWith(datePostComparator)
-        val minWindow = Duration(Reddit.RATELIMIT_MS)
-        
-        for (i in 0..size - 2)
-        {
-            val current = sorted[i].intendedSubmitDate!!
-            val next = sorted[i + 1].intendedSubmitDate!!
-            val window = Duration(current, next)
-            if (window <= minWindow)
-            {
-                return false
-            }
-        }
-        
-        return true
-    }
 
     fun isNetworkAvailable(context: Context): Boolean
     {

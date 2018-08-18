@@ -20,12 +20,6 @@ class Reddit private constructor(private val callbacks: Callbacks)
 
     val isLoggedIn get() = refreshToken != null
 
-    val isRestrictedByRatelimit
-        get() = lastSubmissionDate != null && DateTime.now() < lastSubmissionDate!! + Duration(
-                RATELIMIT_MS)
-
-    val canSubmitRightNow get() = isLoggedIn && !isRestrictedByRatelimit
-
     val authorizationUrl: String
         get()
         {
@@ -250,8 +244,6 @@ class Reddit private constructor(private val callbacks: Callbacks)
         private const val AUTH_SCOPE = "identity submit"
         private const val AUTH_RESPONSE_TYPE = "code"
         private const val USER_AGENT = Util.USER_AGENT
-
-        const val RATELIMIT_MS: Long = 10 * 60 * 1000 // 10 minutes, required to be long
         
         const val POST_TITLE_LENGTH_LIMIT = 300
         const val POST_TEXT_LENGTH_LIMIT = 40000
