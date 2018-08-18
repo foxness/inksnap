@@ -18,6 +18,7 @@ import android.widget.TextView
 class FailedFragment : Fragment()
 {
     private lateinit var recyclerView: RecyclerView
+    private lateinit var emptyView: TextView
 
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
@@ -25,12 +26,19 @@ class FailedFragment : Fragment()
     {
         val v = inflater.inflate(R.layout.fragment_failed, container, false)
 
+        val failedPostRepository = FailedPostRepository.getInstance(context!!)
+        val failedPosts = failedPostRepository.failedPosts
+        val noFailedPosts = failedPosts.isEmpty()
+
         recyclerView = v.findViewById(R.id.failed_recyclerview)
         recyclerView.layoutManager = LinearLayoutManager(context!!)
-
-        val failedPostRepository = FailedPostRepository.getInstance(context!!)
-        val adapter = FailedPostAdapter(failedPostRepository.failedPosts) // todo: refactor to not have args?
+        recyclerView.visibility = Util.getVisibilityGoneConstant(!noFailedPosts)
+        
+        val adapter = FailedPostAdapter(failedPosts) // todo: refactor to not have args?
         recyclerView.adapter = adapter
+        
+        emptyView = v.findViewById(R.id.failed_empty_view)
+        emptyView.visibility = Util.getVisibilityGoneConstant(noFailedPosts)
 
         return v
     }

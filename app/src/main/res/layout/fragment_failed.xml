@@ -10,9 +10,19 @@
     <android.support.v7.widget.RecyclerView
         android:id="@+id/failed_recyclerview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         tools:listitem="@layout/failed_post"
         android:scrollbars="vertical"
+        />
+    
+    <TextView
+        android:id="@+id/failed_empty_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:text="@string/no_posts_found"
+        android:gravity="center"
         />
 
 </LinearLayout>
