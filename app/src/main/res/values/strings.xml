@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Snapwalls</string>
+    <string name="app_name">Inksnap</string>
     <string name="title_label">Title</string>
     <string name="title_hint">Enter a title for the post</string>
     <string name="content_label">Content</string>

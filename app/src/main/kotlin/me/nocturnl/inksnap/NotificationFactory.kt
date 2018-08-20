@@ -104,7 +104,7 @@ class NotificationFactory private constructor(private val context: Context)
     
     companion object : SingletonHolder<NotificationFactory, Context>(::NotificationFactory)
     {
-        private const val ICON = R.drawable.snapwalls_icon
+        private const val ICON = R.drawable.notification_icon
         
         const val SERVICE_NOTIFICATION_ID = 1 // must not be 0
         

@@ -27,9 +27,9 @@ import java.util.*
 
 object Util
 {
-    const val APPNAME = "Snapwalls"
+    const val APPNAME = "Inksnap"
     
-    const val USER_AGENT = "Snapwalls by /u/foxneZz"
+    const val USER_AGENT = "Inksnap by /u/foxneZz"
 
     const val STATE_LENGTH = 10
 
