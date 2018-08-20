@@ -7,10 +7,11 @@
     >
     
     <ImageView
+        android:id="@+id/app_icon"
         android:layout_marginTop="20dp"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:src="@mipmap/ic_launcher_round"
+        android:src="@mipmap/ic_launcher"
         android:contentDescription="@string/app_icon"
         android:layout_gravity="center_horizontal"
         />

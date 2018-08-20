@@ -25,6 +25,7 @@ class SettingsManager private constructor(context: Context)
         autosubmitType = AutosubmitType.Manual
         period = Duration.standardHours(3)
         notificationIdCounter = NotificationFactory.INITIAL_NOTIFICATION_ID
+        developerOptionsUnlocked = false
     }
     
     private val sharedPreferences = context.getSharedPreferences(NAME, Context.MODE_PRIVATE)
@@ -99,6 +100,10 @@ class SettingsManager private constructor(context: Context)
         get() = getInt(PREF_NOTIFICATION_ID_COUNTER)!!
         set(value) = setInt(PREF_NOTIFICATION_ID_COUNTER, value)
 
+    var developerOptionsUnlocked: Boolean
+        get() = getBool(PREF_DEVELOPER_OPTIONS_UNLOCKED)
+        set(value) = setBool(PREF_DEVELOPER_OPTIONS_UNLOCKED, value)
+
     private fun getString(key: String) = sharedPreferences.getString(key, null)
 
     private fun setString(key: String, value: String?) =
@@ -161,6 +166,7 @@ class SettingsManager private constructor(context: Context)
     {
         private const val NAME = "settings"
         
+        // todo: separate preferences and other stored values
         private const val PREF_REDDIT_ACCESS_TOKEN = "redditAccessToken"
         private const val PREF_REDDIT_REFRESH_TOKEN = "redditRefreshToken"
         private const val PREF_REDDIT_ACCESS_TOKEN_EXPIRATION_DATE =
@@ -178,6 +184,7 @@ class SettingsManager private constructor(context: Context)
         private const val PREF_PERIOD = "period"
         private const val PREF_WALLPAPER_MODE = "wallpaperMode"
         private const val PREF_NOTIFICATION_ID_COUNTER = "notificationIdCounter"
+        private const val PREF_DEVELOPER_OPTIONS_UNLOCKED = "developerOptionsUnlocked"
 
         private const val LONG_NULL_SUBSTITUTE = Long.MIN_VALUE
         private const val INT_NULL_SUBSTITUTE = Int.MIN_VALUE
