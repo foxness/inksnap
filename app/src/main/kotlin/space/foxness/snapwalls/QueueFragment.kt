@@ -229,6 +229,14 @@ abstract class QueueFragment : Fragment()
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.menu_queue, menu)
 
+        val developerOptionsUnlocked = settingsManager.developerOptionsUnlocked
+
+        val checkServiceItem = menu.findItem(R.id.menu_queue_check_service)
+        val extractItem = menu.findItem(R.id.menu_queue_extract)
+
+        checkServiceItem.isVisible = developerOptionsUnlocked
+        extractItem.isVisible = developerOptionsUnlocked
+
         val searchItem = menu.findItem(R.id.menu_queue_search)
         val searchView = searchItem.actionView as SearchView
         

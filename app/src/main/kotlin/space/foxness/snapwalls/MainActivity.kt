@@ -58,6 +58,15 @@ class MainActivity : AppCompatActivity()
     override fun onCreateOptionsMenu(menu: Menu): Boolean
     {
         menuInflater.inflate(R.menu.menu_main, menu)
+        
+        val developerOptionsUnlocked = settingsManager.developerOptionsUnlocked
+        
+        val testItem = menu.findItem(R.id.menu_main_test)
+        val logItem = menu.findItem(R.id.menu_main_log)
+        
+        testItem.isVisible = developerOptionsUnlocked
+        logItem.isVisible = developerOptionsUnlocked
+        
         return true
     }
 
