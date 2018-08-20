@@ -55,10 +55,7 @@ abstract class QueueFragment : Fragment()
     
     protected lateinit var thumbnailDownloader: ThumbnailDownloader<PostHolder>
 
-    protected open fun onAutosubmitServiceDoneReceived(context: Context, intent: Intent)
-    {
-        toast("service is done :O")
-    }
+    protected open fun onAutosubmitServiceDoneReceived(context: Context, intent: Intent) { }
     
     protected open fun onInitUi(v: View)
     {

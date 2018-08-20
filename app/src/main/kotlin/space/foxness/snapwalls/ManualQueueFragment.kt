@@ -29,6 +29,17 @@ class ManualQueueFragment : QueueFragment()
 
         // todo: do something with this?
         val successfullyPosted = AutosubmitService.getSuccessfullyPostedFromIntent(intent)
+        
+        val toastString = if (successfullyPosted)
+        {
+            "Your post has successfully been posted"
+        }
+        else
+        {
+            "There was an error when submitting your post"
+        }
+        
+        toast(toastString)
 
         startTimerForEarliestPostDateFromNow()
 
