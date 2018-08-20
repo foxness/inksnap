@@ -46,4 +46,6 @@
     <string name="next_post_in">Next post in</string>
     <string name="no_posts_found">No posts here.</string>
     <string name="help_icon">help icon</string>
+    <string name="app_icon">App icon</string>
+    <string name="about">About</string>
 </resources>
