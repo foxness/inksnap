@@ -41,6 +41,8 @@
             android:name=".PostActivity"
             android:parentActivityName=".MainActivity"
             />
+        
+        <activity android:name=".RedditAuthActivity" />
 
         <service android:name=".AutosubmitService" />
         

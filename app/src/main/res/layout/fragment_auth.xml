@@ -4,11 +4,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     >
-    
+
     <WebView
-        android:id="@+id/auth_webview"
+        android:id="@+id/authentification_webview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         />
-    
+
 </FrameLayout>

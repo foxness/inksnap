@@ -3,6 +3,7 @@ package space.foxness.snapwalls
 import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.DialogInterface
+import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -187,7 +188,6 @@ class SettingsFragment : Fragment()
             {
                 imgurAccount.logout()
                 imgurButton.text = "Log in"
-                toast("Logged out of Imgur")
             }
             else
             {
@@ -253,7 +253,6 @@ class SettingsFragment : Fragment()
                     redditAccount.logout()
                     redditButton.text = "Log in"
                     updateRedditName()
-                    toast("Logged out of Reddit")
                 }
             }
             else
@@ -269,56 +268,31 @@ class SettingsFragment : Fragment()
 
     private fun showRedditLoginDialog()
     {
-        val authDialog = Dialog(context!!)
-        authDialog.setContentView(R.layout.dialog_auth)
+        val i = RedditAuthActivity.newIntent(context!!)
+        startActivityForResult(i, REQUEST_CODE_REDDIT_AUTH)
+    }
 
-        authDialog.setOnCancelListener {
-            toast("Fail")
-        }
-
-        val authWebview = authDialog.findViewById<WebView>(R.id.auth_webview)
-
-        authDialog.setOnDismissListener {
-            Util.clearCookiesAndCache(authWebview)
-        }
-
-        authWebview.webViewClient = object : WebViewClient()
+    @SuppressLint("SetTextI18n") // todo: fix
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
+    {
+        when (requestCode)
         {
-            @SuppressLint("SetTextI18n") // todo: fixeroni
-            override fun onPageFinished(view: WebView, url: String)
+            REQUEST_CODE_REDDIT_AUTH ->
             {
-                super.onPageFinished(view, url)
-
-                if (redditAccount.tryExtractCode(url))
+                if (redditAccount.isLoggedIn)
                 {
-                    val fetchJob = launch {
-                        redditAccount.fetchAuthTokens()
-                        redditAccount.fetchName()
-                    }
-                    
-                    redditButton.isEnabled = false
-                    
-                    authDialog.dismiss()
-                    
-                    launch(UI) {
-                        fetchJob.join()
-
-                        redditButton.isEnabled = true
-
-                        toast(if (redditAccount.isLoggedIn) "Success" else "Fail")
-
-                        if (redditAccount.isLoggedIn)
-                        {
-                            redditButton.text = "Log out"
-                        }
-                        
-                        updateRedditName()
-                    }
+                    redditButton.text = "Log out"
                 }
-            }
-        }
 
-        authWebview.loadUrl(redditAccount.authorizationUrl)
-        authDialog.show()
+                updateRedditName()
+            }
+            
+            else -> super.onActivityResult(requestCode, resultCode, data)
+        }
+    }
+    
+    companion object
+    {
+        private const val REQUEST_CODE_REDDIT_AUTH = 0
     }
 }
