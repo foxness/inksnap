@@ -14,10 +14,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import android.widget.Button
-import android.widget.EditText
-import android.widget.Switch
-import android.widget.TextView
+import android.widget.*
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 import org.joda.time.Duration
@@ -86,6 +83,31 @@ class SettingsFragment : Fragment()
         wallpaperModeSwitch.setOnCheckedChangeListener { buttonView, isChecked ->
             onWallpaperModeCheckedChanged(isChecked)
         }
+        
+        // -----------------------------------
+        
+        val imgurAccountSetting = v.findViewById<RelativeLayout>(R.id.imgur_account_setting)
+        val wallpaperModeSetting = v.findViewById<RelativeLayout>(R.id.wallpaper_mode_setting)
+        val autosubmitTypeSetting = v.findViewById<RelativeLayout>(R.id.autosubmit_type_setting)
+        val timerPeriodSetting = v.findViewById<RelativeLayout>(R.id.timer_period_setting)
+
+        val imgurAccountSettingDivider = v.findViewById<View>(R.id.imgur_account_setting_divider)
+        val wallpaperModeSettingDivider = v.findViewById<View>(R.id.wallpaper_mode_setting_divider)
+        val autosubmitTypeSettingDivider = v.findViewById<View>(R.id.autosubmit_type_setting_divider)
+        val timerPeriodSettingDivider = v.findViewById<View>(R.id.timer_period_setting_divider)
+
+        val developerOptionsUnlocked = settingsManager.developerOptionsUnlocked
+        val visibilityConstant = Util.getVisibilityGoneConstant(developerOptionsUnlocked)
+        
+        imgurAccountSetting.visibility = visibilityConstant
+        wallpaperModeSetting.visibility = visibilityConstant
+        autosubmitTypeSetting.visibility = visibilityConstant
+        timerPeriodSetting.visibility = visibilityConstant
+        
+        imgurAccountSettingDivider.visibility = visibilityConstant
+        wallpaperModeSettingDivider.visibility = visibilityConstant
+        autosubmitTypeSettingDivider.visibility = visibilityConstant
+        timerPeriodSettingDivider.visibility = visibilityConstant
 
         return v
     }
@@ -294,5 +316,7 @@ class SettingsFragment : Fragment()
     companion object
     {
         private const val REQUEST_CODE_REDDIT_AUTH = 0
+        
+        fun newInstance() = SettingsFragment()
     }
 }

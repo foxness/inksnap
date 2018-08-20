@@ -24,6 +24,7 @@ class AboutFragment : Fragment()
         appIconView.setOnClickListener {
             when (++timesTapped)
             {
+                1 -> settingsManager.developerOptionsUnlocked = false
                 DEVELOPER_TAP_COUNT -> settingsManager.developerOptionsUnlocked = true
                 DEVELOPER_TAP_COUNT + 1 -> settingsManager.developerOptionsUnlocked = false
             }

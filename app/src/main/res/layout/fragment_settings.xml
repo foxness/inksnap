@@ -86,6 +86,7 @@
         <View style="@style/divider"/>
 
         <RelativeLayout
+            android:id="@+id/imgur_account_setting"
             android:layout_width="match_parent"
             android:layout_height="70dp"
             >
@@ -112,9 +113,13 @@
 
         </RelativeLayout>
 
-        <View style="@style/divider"/>
+        <View
+            android:id="@+id/imgur_account_setting_divider"
+            style="@style/divider"
+            />
 
         <RelativeLayout
+            android:id="@+id/wallpaper_mode_setting"
             android:layout_width="match_parent"
             android:layout_height="70dp"
             >
@@ -140,9 +145,13 @@
 
         </RelativeLayout>
 
-        <View style="@style/divider"/>
+        <View
+            android:id="@+id/wallpaper_mode_setting_divider"
+            style="@style/divider"
+            />
 
         <RelativeLayout
+            android:id="@+id/autosubmit_type_setting"
             android:layout_width="match_parent"
             android:layout_height="70dp"
             >
@@ -159,9 +168,13 @@
 
         </RelativeLayout>
 
-        <View style="@style/divider"/>
+        <View
+            android:id="@+id/autosubmit_type_setting_divider"
+            style="@style/divider"
+            />
 
         <RelativeLayout
+            android:id="@+id/timer_period_setting"
             android:layout_width="match_parent"
             android:layout_height="70dp"
             >
@@ -178,7 +191,10 @@
 
         </RelativeLayout>
 
-        <View style="@style/divider"/>
+        <View
+            android:id="@+id/timer_period_setting_divider"
+            style="@style/divider"
+            />
 
     </LinearLayout>
 

@@ -5,7 +5,7 @@ import android.content.Intent
 
 class SettingsActivity : SingleFragmentActivity()
 {
-    override fun createFragment() = SettingsFragment()
+    override fun createFragment() = SettingsFragment.newInstance()
     
     companion object
     {
