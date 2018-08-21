@@ -73,9 +73,7 @@ abstract class QueueFragment : Fragment()
         // TIMER TOGGLE -------------------------------
 
         timerToggle.setOnClickListener { button ->
-            button.isEnabled = false
             toggleAutosubmit(!settingsManager.autosubmitEnabled)
-            button.isEnabled = true
         }
     }
     
@@ -104,6 +102,7 @@ abstract class QueueFragment : Fragment()
             if (shouldBeRescheduled)
             {
                 postScheduler.cancelScheduledPost(postBeforeChange)
+                editedPost.scheduled = false
             }
 
             queue.updatePost(editedPost)
