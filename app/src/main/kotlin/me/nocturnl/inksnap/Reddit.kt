@@ -90,7 +90,7 @@ class Reddit private constructor(private val callbacks: Callbacks)
 
         val json = response.jsonObject.getJSONObject("json")
         val errors = json.getJSONArray("errors")
-
+        
         if (errors.length() == 0)
         {
             lastSubmissionDate = DateTime.now()
@@ -99,23 +99,35 @@ class Reddit private constructor(private val callbacks: Callbacks)
         }
         else
         {
-            var errorString = "You got ${errors.length()} errors: "
-            for (i in 0 until errors.length())
+            val error = errors.getJSONArray(0)
+            val errorName = error.getString(0)
+            val errorDescription = error.getString(1)
+            
+            val reasonTitle: String?
+            val detailedReason: String?
+            
+            when (errorName)
             {
-                val error = errors.getJSONArray(i)
-                val name = error.getString(0)
-                val description = error.getString(1)
-
-                val currentError = when (name)
+                "RATELIMIT" ->
                 {
-                    "RATELIMIT", "NO_URL" -> "[NAME]: $name [DESCRIPTION]: $description"
-                    else -> "[NAME OF AN UNKNOWN ERROR]: $name [DESCRIPTION OF AN UNKNOWN ERROR]: $description"
+                    reasonTitle = "Ratelimit"
+                    detailedReason = "Reddit does not allow posting too often.\n\nReddit says:\n$errorDescription"
                 }
-
-                errorString += "$currentError\n"
+                
+                "NO_URL" ->
+                {
+                    reasonTitle = "No url"
+                    detailedReason = "Reddit says:\n$errorDescription"
+                }
+                
+                else ->
+                {
+                    reasonTitle = errorName
+                    detailedReason = "Reddit says:\n$errorDescription"
+                }
             }
-
-            throw Exception(errorString)
+            
+            throw SubmissionException(reasonTitle!!, detailedReason)
         }
     }
 

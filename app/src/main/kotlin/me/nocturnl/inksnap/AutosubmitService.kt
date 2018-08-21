@@ -29,9 +29,9 @@ class AutosubmitService : Service()
             val underlyingPost = if (post == null)
             {
                 val placeholder = Post.newInstance()
-                placeholder.content = "placeholder content"
-                placeholder.title = "placeholder title"
-                placeholder.subreddit = "placeholder subreddit"
+                placeholder.content = ""
+                placeholder.title = "No post"
+                placeholder.subreddit = "No subreddit"
                 placeholder
             }
             else
@@ -232,6 +232,13 @@ class AutosubmitService : Service()
                         log.log("Deleted the submitted post from the database")
                     }
                 }
+            }
+            catch (submissionException: SubmissionException)
+            {
+                generateFailedPost(
+                        submissionException.reasonTitle,
+                        submissionException.detailedReason,
+                        post)
             }
             catch (exception: Exception)
             {
