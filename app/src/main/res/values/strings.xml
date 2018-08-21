@@ -50,4 +50,6 @@
     <string name="about">About</string>
     <string name="feedback_and_support">Feedback and support</string>
     <string name="inksnap_subreddit">/r/inksnap</string>
+    <string name="contact_the_developer">Contact the developer</string>
+    <string name="developer_email">nocturnlme@gmail.com</string>
 </resources>

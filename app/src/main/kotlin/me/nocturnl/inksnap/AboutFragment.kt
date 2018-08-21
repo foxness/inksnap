@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import me.nocturnl.inksnap.Util.toast
 
 class AboutFragment : Fragment()
 {
@@ -45,6 +46,19 @@ class AboutFragment : Fragment()
         feedbackAndSupport.setOnClickListener {
             val i = Intent(Intent.ACTION_VIEW, Uri.parse(SUPPORT_URL))
             i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            startActivity(i)
+        }
+
+        val devContact = v.findViewById<LinearLayout>(R.id.contact_the_dev)
+        devContact.setOnClickListener {
+            val developerEmail = resources.getString(R.string.developer_email)
+            
+            val i = Intent(Intent.ACTION_SENDTO)
+            i.data = Uri.parse("mailto:$developerEmail")
+            
+            // for some reason the result is a new task even if this is not present
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            
             startActivity(i)
         }
         
