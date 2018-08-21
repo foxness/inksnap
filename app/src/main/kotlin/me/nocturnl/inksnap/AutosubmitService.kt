@@ -85,7 +85,7 @@ class AutosubmitService : Service()
                 for (i in scheduledPosts.indices)
                 {
                     val realDelay = Duration(scheduledPosts[i].intendedSubmitDate!!, now)
-                    if (realDelay > Duration(POST_DELAY_LIMIT_MS))
+                    if (realDelay > Duration(POST_SUBMISSION_DELAY_LIMIT_MS))
                     {
                         lastFailedPostIndex = i
                     }
@@ -325,7 +325,7 @@ class AutosubmitService : Service()
         private const val SEND_REPLIES = true
         private const val RESUBMIT = true
         
-        private val POST_DELAY_LIMIT_MS: Long = 10 * 60 * 1000 // 10 minutes
+        private const val POST_SUBMISSION_DELAY_LIMIT_MS: Long = 20 * 60 * 1000 // 20 minutes
 
         fun newIntent(context: Context) = Intent(context, AutosubmitService::class.java)
         

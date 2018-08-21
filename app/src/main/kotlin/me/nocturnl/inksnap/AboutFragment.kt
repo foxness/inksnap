@@ -1,7 +1,6 @@
 package me.nocturnl.inksnap
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -12,7 +11,6 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import me.nocturnl.inksnap.Util.toast
 
 class AboutFragment : Fragment()
 {
