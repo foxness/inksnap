@@ -97,6 +97,11 @@ abstract class QueueFragment : Fragment()
         
         val runOnEnabledAutosubmit = { postBeforeChange: Post ->
             
+            // because editedPost's scheduled is outdated
+            // outdated because it was set when postholder binded the post to itself
+            editedPost.scheduled = postBeforeChange.scheduled
+            // -----------------------------------------------------------
+            
             val shouldBeRescheduled = !editedPost.intendedSubmitDate!!.isEqual(postBeforeChange.intendedSubmitDate)
 
             if (shouldBeRescheduled)
