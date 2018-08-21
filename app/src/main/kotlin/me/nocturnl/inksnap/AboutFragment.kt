@@ -1,12 +1,16 @@
 package me.nocturnl.inksnap
 
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 
 class AboutFragment : Fragment()
@@ -37,6 +41,13 @@ class AboutFragment : Fragment()
         val appVersionView = v.findViewById<TextView>(R.id.app_version_view)
         appVersionView.text = "version ${BuildConfig.VERSION_NAME}"
         
+        val feedbackAndSupport = v.findViewById<LinearLayout>(R.id.feedback_and_support)
+        feedbackAndSupport.setOnClickListener {
+            val i = Intent(Intent.ACTION_VIEW, Uri.parse(SUPPORT_URL))
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            startActivity(i)
+        }
+        
         return v
     }
     
@@ -45,5 +56,7 @@ class AboutFragment : Fragment()
         fun newInstance() = AboutFragment()
         
         private const val DEVELOPER_TAP_COUNT = 23
+        
+        private const val SUPPORT_URL = "https://reddit.com/r/inksnap" // todo: extract
     }
 }

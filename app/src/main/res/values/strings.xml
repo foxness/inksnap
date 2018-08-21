@@ -48,4 +48,6 @@
     <string name="help_icon">help icon</string>
     <string name="app_icon">App icon</string>
     <string name="about">About</string>
+    <string name="feedback_and_support">Feedback and support</string>
+    <string name="inksnap_subreddit">/r/inksnap</string>
 </resources>
