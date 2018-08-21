@@ -142,7 +142,7 @@ class PostScheduler private constructor(context: Context)
         
         val datetimeElapsed = Duration(SystemClock.elapsedRealtime()) + delay
 
-        alarmManager.setExact(type, datetimeElapsed.millis, pi)
+        alarmManager.setExactAndAllowWhileIdle(type, datetimeElapsed.millis, pi)
     }
     
     fun runServiceNow()
