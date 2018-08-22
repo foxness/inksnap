@@ -1,5 +1,6 @@
 package me.nocturnl.inksnap
 
+import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 
@@ -10,15 +11,22 @@ class LauncherActivity : AppCompatActivity()
         super.onCreate(savedInstanceState)
 
         val settingsManager = SettingsManager.getInstance(this)
+        
+        val intent: Intent
         if (!settingsManager.notFirstLaunch)
         {
             settingsManager.initializeDefaultSettings()
             NotificationFactory.getInstance(this).createNotificationChannels()
             settingsManager.notFirstLaunch = true
+            
+            intent = FirstLaunchCourseActivity.newIntent(this)
+        }
+        else
+        {
+            intent = MainActivity.newIntent(this)
         }
         
-        val i = MainActivity.newIntent(this)
-        startActivity(i)
+        startActivity(intent)
         finish()
     }
 }
