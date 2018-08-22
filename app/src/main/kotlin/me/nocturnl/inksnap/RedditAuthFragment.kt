@@ -9,19 +9,24 @@ import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.ProgressBar
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
-import me.nocturnl.inksnap.Util.toast
-import android.app.ProgressDialog
-import android.widget.ProgressBar
 
 
 class RedditAuthFragment : Fragment()
 {
     private lateinit var authWebview: WebView
+    private lateinit var progressBarView: ProgressBar
     
     var processing = false 
         private set
+    
+    private fun setLoadingIndicatorVisibility(visible: Boolean)
+    {
+        authWebview.visibility = Util.getVisibilityGoneConstant(!visible)
+        progressBarView.visibility = Util.getVisibilityGoneConstant(visible)
+    }
     
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
@@ -31,9 +36,10 @@ class RedditAuthFragment : Fragment()
         
         val redditAccount = Autoreddit.getInstance(context!!).reddit
         
-        val progressBarView = v.findViewById<ProgressBar>(R.id.progressbar_view)
-        
+        progressBarView = v.findViewById(R.id.progressbar_view)
         authWebview = v.findViewById(R.id.authentification_webview)
+        
+        setLoadingIndicatorVisibility(true)
 
         authWebview.webViewClient = object : WebViewClient()
         {
@@ -41,12 +47,15 @@ class RedditAuthFragment : Fragment()
             override fun onPageFinished(view: WebView, url: String)
             {
                 super.onPageFinished(view, url)
-
-                if (redditAccount.tryExtractCode(url))
+                
+                if (Reddit.isLoginUrl(url))
+                {
+                    setLoadingIndicatorVisibility(false)
+                }
+                else if (redditAccount.tryExtractCode(url))
                 {
                     processing = true
-                    authWebview.visibility = View.GONE
-                    progressBarView.visibility = View.VISIBLE
+                    setLoadingIndicatorVisibility(true)
                     
                     val fetchJob = launch {
                         redditAccount.fetchAuthTokens()

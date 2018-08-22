@@ -251,6 +251,8 @@ class Reddit private constructor(private val callbacks: Callbacks)
         private const val ACCESS_TOKEN_ENDPOINT = "https://www.reddit.com/api/v1/access_token"
         private const val SUBMIT_ENDPOINT = "https://oauth.reddit.com/api/submit"
         private const val NAME_ENDPOINT = "https://oauth.reddit.com/api/v1/me"
+        
+        private const val LOGIN_URL = "https://www.reddit.com/login.compact"
 
         private const val AUTH_DURATION = "permanent"
         private const val AUTH_SCOPE = "identity submit"
@@ -260,5 +262,7 @@ class Reddit private constructor(private val callbacks: Callbacks)
         const val POST_TITLE_LENGTH_LIMIT = 300
         const val POST_TEXT_LENGTH_LIMIT = 40000
         const val SUBREDDIT_NAME_LENGTH_LIMIT = 21
+        
+        fun isLoginUrl(url: String) = url.startsWith(LOGIN_URL)
     }
 }
