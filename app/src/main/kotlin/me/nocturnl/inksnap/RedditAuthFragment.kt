@@ -12,6 +12,7 @@ import android.webkit.WebViewClient
 import android.widget.ProgressBar
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
+import me.nocturnl.inksnap.Reddit.UserResponse.*
 
 
 class RedditAuthFragment : Fragment()
@@ -52,31 +53,48 @@ class RedditAuthFragment : Fragment()
                 {
                     setLoadingIndicatorVisibility(false)
                 }
-                else if (redditAccount.tryExtractCode(url))
+                else
                 {
-                    processing = true
-                    setLoadingIndicatorVisibility(true)
+                    val userResponse = redditAccount.getUserResponse(url)
                     
-                    val fetchJob = launch {
-                        redditAccount.fetchAuthTokens()
-                        redditAccount.fetchName()
-                    }
+                    // ignore this warning
+                    // when userResponse is none, we shouldn't do anything
+                    when (userResponse)
+                    {
+                        Allow ->
+                        {
+                            processing = true
+                            setLoadingIndicatorVisibility(true)
 
-                    launch(UI) {
-                        fetchJob.join()
-                        processing = false
-                        
-                        val result = if (redditAccount.isLoggedIn)
-                        {
-                            Activity.RESULT_OK
+                            val fetchJob = launch {
+                                redditAccount.fetchAuthTokens()
+                                redditAccount.fetchName()
+                            }
+
+                            launch(UI) {
+                                fetchJob.join()
+                                processing = false
+
+                                val result = if (redditAccount.isLoggedIn)
+                                {
+                                    Activity.RESULT_OK
+                                }
+                                else
+                                {
+                                    Activity.RESULT_CANCELED
+                                }
+
+                                activity!!.setResult(result)
+                                activity!!.finish()
+                            }
                         }
-                        else
-                        {
-                            Activity.RESULT_CANCELED
-                        }
                         
-                        activity!!.setResult(result)
-                        activity!!.finish()
+                        Decline ->
+                        {
+                            setLoadingIndicatorVisibility(true) // just for a split second
+                            activity!!.setResult(Activity.RESULT_CANCELED)
+                            activity!!.finish()
+                        }
                     }
                 }
             }

@@ -221,25 +221,28 @@ class Reddit private constructor(private val callbacks: Callbacks)
 
         callbacks.onNewRefreshToken()
     }
-
-    fun tryExtractCode(url: String): Boolean
+    
+    fun getUserResponse(url: String): UserResponse
     {
         if (!url.startsWith(APP_REDIRECT_URI) || authState == null)
         {
-            return false
+            return UserResponse.None
         }
 
         val uri = Uri.parse(url)
         val state = uri.getQueryParameter("state")
         if (state == null || state != authState)
         {
-            return false
+            return UserResponse.None
         }
 
         authState = null
+        
         authCode = uri.getQueryParameter("code")
-        return authCode != null // 'true' denotes success
+        return if (authCode != null) UserResponse.Allow else UserResponse.Decline
     }
+    
+    enum class UserResponse { Allow, Decline, None }
 
     companion object : SingletonHolder<Reddit, Callbacks>(::Reddit)
     {
