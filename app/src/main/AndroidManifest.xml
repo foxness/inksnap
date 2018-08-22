@@ -20,7 +20,7 @@
         tools:ignore="GoogleAppIndexingWarning"
         >
         
-        <activity android:name=".MainActivity" >
+        <activity android:name=".LauncherActivity">
             
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -28,6 +28,8 @@
             </intent-filter>
             
         </activity>
+
+        <activity android:name=".MainActivity" />
         
         <activity
             android:name=".SettingsActivity"

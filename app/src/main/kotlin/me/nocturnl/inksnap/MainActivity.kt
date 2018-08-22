@@ -29,12 +29,6 @@ class MainActivity : AppCompatActivity()
         setContentView(R.layout.activity_main)
 
         settingsManager = SettingsManager.getInstance(this)
-        if (!settingsManager.notFirstLaunch)
-        {
-            settingsManager.initializeDefaultSettings()
-            NotificationFactory.getInstance(this).createNotificationChannels()
-            settingsManager.notFirstLaunch = true
-        }
         
         fragmentManager = supportFragmentManager
         
