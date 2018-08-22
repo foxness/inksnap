@@ -52,4 +52,7 @@
     <string name="inksnap_subreddit">/r/inksnap</string>
     <string name="contact_the_developer">Contact the developer</string>
     <string name="developer_email">nocturnlme@gmail.com</string>
+    <string name="greeting">Welcome to Inksnap</string>
+    <string name="to_start_use_your_reddit_account_to_log_in">to start, use your Reddit account to log in</string>
+    <string name="log_in_with_reddit">Log in with Reddit</string>
 </resources>

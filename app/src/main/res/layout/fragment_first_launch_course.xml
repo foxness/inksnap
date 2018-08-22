@@ -1,12 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    >
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="40"
+        android:gravity="center_vertical"
+        android:layout_marginTop="20dp"
+        >
+
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:src="@mipmap/ic_launcher"
+            android:contentDescription="@string/app_icon"
+            />
+
+    </RelativeLayout>
+
     <TextView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello, firstlauncher"
+        android:layout_height="0dp"
+        android:layout_weight="20"
+        android:text="@string/greeting"
+        android:textSize="26sp"
+        android:fontFamily="sans-serif-thin"
+        android:gravity="center_vertical"
         />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="20"
+        android:text="@string/to_start_use_your_reddit_account_to_log_in"
+        android:textSize="16sp"
+        android:fontFamily="sans-serif-thin"
+        android:gravity="center_vertical"
+        />
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="40"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="20dp"
+        >
+
+        <Button
+            android:id="@+id/launcher_login_button"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/log_in_with_reddit"
+            />
+
+    </RelativeLayout>
 
 </LinearLayout>

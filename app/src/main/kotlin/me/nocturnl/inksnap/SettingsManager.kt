@@ -26,6 +26,7 @@ class SettingsManager private constructor(context: Context)
         period = Duration.standardHours(3)
         notificationIdCounter = NotificationFactory.INITIAL_NOTIFICATION_ID
         developerOptionsUnlocked = false
+        firstLaunchCourseCompleted = false
     }
     
     private val sharedPreferences = context.getSharedPreferences(NAME, Context.MODE_PRIVATE)
@@ -103,6 +104,10 @@ class SettingsManager private constructor(context: Context)
     var developerOptionsUnlocked: Boolean
         get() = getBool(PREF_DEVELOPER_OPTIONS_UNLOCKED)
         set(value) = setBool(PREF_DEVELOPER_OPTIONS_UNLOCKED, value)
+
+    var firstLaunchCourseCompleted: Boolean
+        get() = getBool(PREF_FIRST_LAUNCH_COURSE_COMPLETED)
+        set(value) = setBool(PREF_FIRST_LAUNCH_COURSE_COMPLETED, value)
 
     private fun getString(key: String) = sharedPreferences.getString(key, null)
 
@@ -185,6 +190,7 @@ class SettingsManager private constructor(context: Context)
         private const val PREF_WALLPAPER_MODE = "wallpaperMode"
         private const val PREF_NOTIFICATION_ID_COUNTER = "notificationIdCounter"
         private const val PREF_DEVELOPER_OPTIONS_UNLOCKED = "developerOptionsUnlocked"
+        private const val PREF_FIRST_LAUNCH_COURSE_COMPLETED = "firstLaunchCourseCompleted"
 
         private const val LONG_NULL_SUBSTITUTE = Long.MIN_VALUE
         private const val INT_NULL_SUBSTITUTE = Int.MIN_VALUE
