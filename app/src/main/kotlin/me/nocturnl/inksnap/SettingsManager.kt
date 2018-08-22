@@ -4,7 +4,7 @@ import android.content.Context
 import org.joda.time.DateTime
 import org.joda.time.Duration
 
-class SettingsManager private constructor(context: Context)
+class SettingsManager private constructor(context_: Context)
 {
     // these do not include Settings that are set by user in SettingsActivity
     // those settings are set to default by a different method
@@ -29,7 +29,7 @@ class SettingsManager private constructor(context: Context)
         firstLaunchCourseCompleted = false
     }
     
-    private val sharedPreferences = context.getSharedPreferences(NAME, Context.MODE_PRIVATE)
+    private val sharedPreferences = context_.applicationContext.getSharedPreferences(NAME, Context.MODE_PRIVATE)
 
     var redditAccessToken: String?
         get() = getString(PREF_REDDIT_ACCESS_TOKEN)

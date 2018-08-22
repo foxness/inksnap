@@ -11,8 +11,10 @@ import android.support.annotation.RequiresApi
 import android.support.v4.app.NotificationCompat
 import java.util.concurrent.atomic.AtomicInteger
 
-class NotificationFactory private constructor(private val context: Context)
+class NotificationFactory private constructor(context_: Context)
 {
+    private val context: Context = context_.applicationContext
+    
     private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     
     private val settingsManager = SettingsManager.getInstance(context)

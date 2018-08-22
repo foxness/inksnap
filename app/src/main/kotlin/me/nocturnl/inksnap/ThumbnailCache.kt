@@ -7,8 +7,10 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 
-class ThumbnailCache private constructor(private val context: Context)
+class ThumbnailCache private constructor(context_: Context)
 {
+    private val context: Context = context_.applicationContext
+    
     init
     {
         val thumbnailDirectory = getThumbnailDirectory()

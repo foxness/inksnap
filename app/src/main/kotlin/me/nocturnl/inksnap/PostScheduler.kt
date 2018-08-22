@@ -14,9 +14,9 @@ import me.nocturnl.inksnap.Util.timeLeftUntil
 
 // todo: make reddit not a singleton and rename it to reddit account
 
-class PostScheduler private constructor(context: Context)
+class PostScheduler private constructor(context_: Context)
 {
-    private val context = context.applicationContext!!
+    private val context: Context = context_.applicationContext
 
     private val queue = Queue.getInstance(context)
 

@@ -3,9 +3,9 @@ package me.nocturnl.inksnap
 import android.content.Context
 import me.nocturnl.inksnap.database.AppDatabase
 
-class PostedPostRepository private constructor(context: Context)
+class PostedPostRepository private constructor(context_: Context)
 {
-    private val postedPostDao = AppDatabase.getInstance(context).postedPostDao()
+    private val postedPostDao = AppDatabase.getInstance(context_.applicationContext).postedPostDao()
 
     val postedPosts: List<PostedPost> get() = postedPostDao.postedPosts
 

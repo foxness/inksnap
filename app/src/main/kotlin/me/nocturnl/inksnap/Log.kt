@@ -4,8 +4,10 @@ import android.content.Context
 import org.joda.time.DateTime
 import java.io.File
 
-class Log private constructor(private val context: Context)
+class Log private constructor(context_: Context)
 {
+    private val context: Context = context_.applicationContext
+    
     fun log(message: String)
     {
         val entry = "[${DateTime.now()}] $message\n"

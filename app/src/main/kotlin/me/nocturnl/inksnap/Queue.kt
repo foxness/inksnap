@@ -5,8 +5,10 @@ import me.nocturnl.inksnap.database.AppDatabase
 
 // todo: use cache instead of doing IO on every method call
 
-class Queue private constructor(context: Context) // todo: refactor the app to use viewmodel/livedata
+class Queue private constructor(context_: Context) // todo: refactor the app to use viewmodel/livedata
 {
+    private val context: Context = context_.applicationContext
+    
     private val postDao = AppDatabase.getInstance(context).postDao()
     
     private val thumbnailCache = ThumbnailCache.getInstance(context)

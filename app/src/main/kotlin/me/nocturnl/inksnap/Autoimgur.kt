@@ -3,9 +3,9 @@ package me.nocturnl.inksnap
 import android.content.Context
 import org.joda.time.DateTime
 
-class Autoimgur private constructor(context: Context)
+class Autoimgur private constructor(context_: Context)
 {
-    private val settingsManager = SettingsManager.getInstance(context)
+    private val settingsManager = SettingsManager.getInstance(context_.applicationContext)
 
     private val saver = Saver()
 
