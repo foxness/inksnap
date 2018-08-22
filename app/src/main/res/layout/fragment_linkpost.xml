@@ -22,7 +22,7 @@
 
     <Button
         android:id="@+id/intended_submit_date_button"
-        style="?android:attr/buttonBarButtonStyle"
+        style="@style/Widget.AppCompat.Button.Borderless.Colored"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="start|center_vertical"
@@ -117,7 +117,7 @@
 
         <Button
             android:id="@+id/paste_button"
-            style="?android:attr/buttonBarButtonStyle"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/paste"
