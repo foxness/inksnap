@@ -12,6 +12,9 @@ import android.webkit.WebViewClient
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 import me.nocturnl.inksnap.Util.toast
+import android.app.ProgressDialog
+import android.widget.ProgressBar
+
 
 class RedditAuthFragment : Fragment()
 {
@@ -28,6 +31,8 @@ class RedditAuthFragment : Fragment()
         
         val redditAccount = Autoreddit.getInstance(context!!).reddit
         
+        val progressBarView = v.findViewById<ProgressBar>(R.id.progressbar_view)
+        
         authWebview = v.findViewById(R.id.authentification_webview)
 
         authWebview.webViewClient = object : WebViewClient()
@@ -40,7 +45,8 @@ class RedditAuthFragment : Fragment()
                 if (redditAccount.tryExtractCode(url))
                 {
                     processing = true
-                    toast("Processing...")
+                    authWebview.visibility = View.GONE
+                    progressBarView.visibility = View.VISIBLE
                     
                     val fetchJob = launch {
                         redditAccount.fetchAuthTokens()
