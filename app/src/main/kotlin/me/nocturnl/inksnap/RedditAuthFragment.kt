@@ -25,20 +25,8 @@ class RedditAuthFragment : Fragment()
                               savedInstanceState: Bundle?): View
     {
         val v = inflater.inflate(R.layout.fragment_auth, container, false)
-
-        // todo: fix all of this mess by refactoring reddit
-        val dummyCallbacks = object: Reddit.Callbacks
-        {
-            override fun onNewAccessToken() { }
-
-            override fun onNewRefreshToken() { }
-
-            override fun onNewLastSubmissionDate() { }
-
-            override fun onNewName() { }
-        }
         
-        val redditAccount = Reddit.getInstance(dummyCallbacks)
+        val redditAccount = Autoreddit.getInstance(context!!).reddit
         
         authWebview = v.findViewById(R.id.authentification_webview)
 

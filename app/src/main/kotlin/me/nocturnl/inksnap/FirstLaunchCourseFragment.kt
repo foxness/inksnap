@@ -1,5 +1,7 @@
 package me.nocturnl.inksnap
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
@@ -17,20 +19,39 @@ class FirstLaunchCourseFragment : Fragment()
         
         val loginButton = v.findViewById<Button>(R.id.launcher_login_button)
         loginButton.setOnClickListener {
-            val ctx = context!!
-            val settingsManager = SettingsManager.getInstance(ctx)
-            settingsManager.firstLaunchCourseCompleted = true
-            
-            val i = MainActivity.newIntent(ctx)
-            startActivity(i)
-            activity!!.finish()
+            val i = RedditAuthActivity.newIntent(context!!)
+            startActivityForResult(i, REQUEST_CODE_REDDIT_AUTH)
         }
         
         return v
     }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
+    {
+        when (requestCode)
+        {
+            REQUEST_CODE_REDDIT_AUTH ->
+            {
+                if (resultCode == Activity.RESULT_OK)
+                {
+                    val ctx = context!!
+                    val settingsManager = SettingsManager.getInstance(ctx)
+                    settingsManager.firstLaunchCourseCompleted = true
+                    
+                    val i = MainActivity.newIntent(ctx)
+                    startActivity(i)
+                    activity!!.finish()
+                }
+            }
+            
+            else -> super.onActivityResult(requestCode, resultCode, data)
+        }
+    }
     
     companion object
     {
+        private const val REQUEST_CODE_REDDIT_AUTH = 0
+        
         fun newInstance() = FirstLaunchCourseFragment()
     }
 }
