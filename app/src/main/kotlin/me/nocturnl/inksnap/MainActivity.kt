@@ -54,6 +54,19 @@ class MainActivity : AppCompatActivity()
         }
     }
 
+    override fun onBackPressed() // controversial feature
+    {
+        if (selectedItemId == HOME_ITEM_ID)
+        {
+            super.onBackPressed()
+        }
+        else
+        {
+            bottomNavigation.selectedItemId = HOME_ITEM_ID
+            setFragmentBasedOnMenu(HOME_ITEM_ID)
+        }
+    }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean
     {
         menuInflater.inflate(R.menu.menu_main, menu)
