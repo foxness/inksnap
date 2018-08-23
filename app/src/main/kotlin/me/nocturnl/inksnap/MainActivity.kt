@@ -42,10 +42,15 @@ class MainActivity : AppCompatActivity()
         // todo: do this in every fragment
         currentFragment = fragmentManager.findFragmentById(FRAGMENT_CONTAINER)
         
+        val restoredItemId = savedInstanceState?.getInt(ARG_SELECTED_ITEM_ID) ?: HOME_ITEM_ID
+        
         if (currentFragment == null)
         {
-            val itemId = savedInstanceState?.getInt(ARG_SELECTED_ITEM_ID) ?: HOME_ITEM_ID
-            setFragmentBasedOnMenu(itemId)
+            setFragmentBasedOnMenu(restoredItemId)
+        }
+        else
+        {
+            selectedItemId = restoredItemId
         }
     }
 
