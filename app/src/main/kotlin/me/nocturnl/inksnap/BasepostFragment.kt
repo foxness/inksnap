@@ -34,6 +34,7 @@ abstract class BasepostFragment : Fragment()
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
+        retainInstance = true
 
         val args = arguments!!
         post = args.getSerializable(ARG_POST) as Post

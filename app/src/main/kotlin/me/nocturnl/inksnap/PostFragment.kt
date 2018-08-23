@@ -58,6 +58,7 @@ class PostFragment : Fragment()
     {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
+        retainInstance = true
         
         val args = arguments!!
         if (args.getBoolean(ARG_NEW_POST))
