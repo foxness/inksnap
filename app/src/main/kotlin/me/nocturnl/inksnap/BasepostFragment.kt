@@ -4,14 +4,13 @@ import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.os.Bundle
 import android.support.v4.app.Fragment
-import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import org.joda.time.DateTime
-import org.joda.time.format.DateTimeFormat
+import java.text.DateFormat
 
 abstract class BasepostFragment : Fragment()
 {
@@ -25,6 +24,8 @@ abstract class BasepostFragment : Fragment()
 
     protected lateinit var post: Post
     protected var allowIntendedSubmitDateEditing = false
+    
+    private lateinit var datetimeFormat: DateFormat
 
     // todo: account for submitservice (aka freeze when the submission process is coming)
     // example: submit service submits and deletes a post while you're editing it
@@ -35,6 +36,8 @@ abstract class BasepostFragment : Fragment()
     {
         super.onCreate(savedInstanceState)
         retainInstance = true
+        
+        datetimeFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT)
 
         val args = arguments!!
         post = args.getSerializable(ARG_POST) as Post
@@ -43,13 +46,14 @@ abstract class BasepostFragment : Fragment()
 
     private fun updateIntendedSubmitDateButtonText()
     {
-        intendedSubmitDateButton.text = if (intendedSubmitDate == null)
+        val isd = intendedSubmitDate
+        intendedSubmitDateButton.text = if (isd == null)
         {
             "Set the date" // todo: extract
         }
         else
         {
-            DateTimeFormat.forPattern(DATETIME_FORMAT).print(intendedSubmitDate)
+            datetimeFormat.format(isd.toDate())
         }
     }
 
@@ -83,7 +87,7 @@ abstract class BasepostFragment : Fragment()
         {
             intendedSubmitDateButton.setOnClickListener { _ ->
                 val context = context!!
-                val is24HourFormat = DateFormat.is24HourFormat(context)
+                val is24HourFormat = android.text.format.DateFormat.is24HourFormat(context)
 
                 // todo: maybe show now + 1 hour or something?
                 val dialogDatetime = intendedSubmitDate ?: DateTime.now()
@@ -190,8 +194,6 @@ abstract class BasepostFragment : Fragment()
         private const val ARG_POST = "post"
         private const val ARG_NEW_POST = "new_post"
         private const val ARG_ALLOW_INTENDED_SUBMIT_DATE_EDITING = "allow_intended_submit_date_editing"
-
-        private const val DATETIME_FORMAT = "yyyy/MM/dd EEE HH:mm" // todo: make dependent on region/locale
         
         fun newArguments(post: Post?, allowIntendedSubmitDateEditing: Boolean): Bundle
         {

@@ -28,7 +28,7 @@ object Util
 {
     const val APPNAME = "Inksnap"
     
-    const val USER_AGENT = "$APPNAME v${BuildConfig.VERSION_NAME} by /u/foxneZz"
+    const val USER_AGENT = "$APPNAME [${BuildConfig.APPLICATION_ID} ${BuildConfig.VERSION_NAME}] by /u/foxneZz"
 
     const val STATE_LENGTH = 10
 
