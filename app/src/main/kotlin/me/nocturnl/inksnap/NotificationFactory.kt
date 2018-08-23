@@ -88,7 +88,11 @@ class NotificationFactory private constructor(context_: Context)
     fun showSuccessNotification(postTitle: String)
     {
         val intent = MainActivity.newIntent(context)
-        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+        // I don't know why but it launches the main activity just the way I want without any flags
+        // if it exists already, brings it to the front
+        // and if there's something on top of it, it clears it
+        // without the clear_top flag, I don't know how
+        // if it's already in the front it does nothing, just like I want
         
         val pendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
 

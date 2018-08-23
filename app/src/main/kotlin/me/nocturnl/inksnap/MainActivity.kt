@@ -78,7 +78,8 @@ class MainActivity : AppCompatActivity()
 
     private fun testButton()
     {
-        toast(VariantVariables.VARIANT_NAME)
+        val nf = NotificationFactory.getInstance(this)
+        nf.showSuccessNotification("testy")
     }
 
     private fun openAbout()
