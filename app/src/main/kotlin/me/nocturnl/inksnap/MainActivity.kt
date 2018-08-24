@@ -40,8 +40,7 @@ class MainActivity : AppCompatActivity()
         // todo: do this in every fragment
         currentFragment = fragmentManager.findFragmentById(FRAGMENT_CONTAINER)
         
-        val itemId = savedInstanceState?.getInt(ARG_SELECTED_ITEM_ID) 
-                     ?: intent.getIntExtra(EXTRA_SELECTED_ITEM_ID, HOME_ITEM_ID)
+        val itemId = savedInstanceState?.getInt(ARG_SELECTED_ITEM_ID) ?: intent.extractItemId()
         
         if (currentFragment == null)
         {
@@ -51,6 +50,13 @@ class MainActivity : AppCompatActivity()
         {
             selectedItemId = itemId
         }
+    }
+
+    override fun onNewIntent(newIntent: Intent)
+    {
+        super.onNewIntent(newIntent)
+        
+        setFragmentBasedOnMenu(newIntent.extractItemId())
     }
 
     override fun onBackPressed() // controversial feature
@@ -209,5 +215,7 @@ class MainActivity : AppCompatActivity()
         fun newIntent(context: Context, navbarSelection: NavbarSelection = NavbarSelection.Queued) 
                 = Intent(context, MainActivity::class.java)
                 .apply { putExtra(EXTRA_SELECTED_ITEM_ID, navbarSelection.resId) }
+        
+        private fun Intent.extractItemId() = getIntExtra(EXTRA_SELECTED_ITEM_ID, HOME_ITEM_ID)
     }
 }
