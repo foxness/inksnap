@@ -9,11 +9,10 @@ import android.support.v4.app.FragmentManager
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
-import me.nocturnl.inksnap.Util.toast
 
 class MainActivity : AppCompatActivity()
 {
-    private lateinit var bottomNavigation: BottomNavigationView
+    private lateinit var navbar: BottomNavigationView
     
     private lateinit var fragmentManager: FragmentManager
     
@@ -32,25 +31,25 @@ class MainActivity : AppCompatActivity()
         
         fragmentManager = supportFragmentManager
         
-        bottomNavigation = findViewById(R.id.main_bottom_navigation)
-        bottomNavigation.setOnNavigationItemSelectedListener {
-            val itemId = it.itemId
-            setFragmentBasedOnMenu(itemId)
+        navbar = findViewById(R.id.main_bottom_navigation)
+        navbar.setOnNavigationItemSelectedListener {
+            setFragmentBasedOnMenu(it.itemId)
             true
         }
         
         // todo: do this in every fragment
         currentFragment = fragmentManager.findFragmentById(FRAGMENT_CONTAINER)
         
-        val restoredItemId = savedInstanceState?.getInt(ARG_SELECTED_ITEM_ID) ?: HOME_ITEM_ID
+        val itemId = savedInstanceState?.getInt(ARG_SELECTED_ITEM_ID) 
+                     ?: intent.getIntExtra(EXTRA_SELECTED_ITEM_ID, HOME_ITEM_ID)
         
         if (currentFragment == null)
         {
-            setFragmentBasedOnMenu(restoredItemId)
+            setFragmentBasedOnMenu(itemId)
         }
         else
         {
-            selectedItemId = restoredItemId
+            selectedItemId = itemId
         }
     }
 
@@ -62,7 +61,6 @@ class MainActivity : AppCompatActivity()
         }
         else
         {
-            bottomNavigation.selectedItemId = HOME_ITEM_ID
             setFragmentBasedOnMenu(HOME_ITEM_ID)
         }
     }
@@ -162,12 +160,13 @@ class MainActivity : AppCompatActivity()
         }
         
         selectedItemId = itemId
+        navbar.selectedItemId = itemId
         
         val newFragment = when (selectedItemId)
         {
-            R.id.action_queue -> getQueueFragment()
-            R.id.action_posted -> PostedFragment.newInstance()
-            R.id.action_failed -> FailedFragment.newInstance()
+            NavbarSelection.Queued.resId -> getQueueFragment()
+            NavbarSelection.Posted.resId -> PostedFragment.newInstance()
+            NavbarSelection.Failed.resId -> FailedFragment.newInstance()
             
             else -> throw Exception("what")
         }
@@ -196,9 +195,19 @@ class MainActivity : AppCompatActivity()
     companion object
     {
         private const val ARG_SELECTED_ITEM_ID = "arg_selected_item_id"
+        private const val EXTRA_SELECTED_ITEM_ID = "extra_selected_item_id"
         private const val HOME_ITEM_ID = R.id.action_queue
         private const val FRAGMENT_CONTAINER = R.id.main_fragment_container
         
-        fun newIntent(context: Context) = Intent(context, MainActivity::class.java)
+        enum class NavbarSelection(val resId: Int)
+        {
+            Queued(R.id.action_queue),
+            Posted(R.id.action_posted),
+            Failed(R.id.action_failed),
+        }
+        
+        fun newIntent(context: Context, navbarSelection: NavbarSelection = NavbarSelection.Queued) 
+                = Intent(context, MainActivity::class.java)
+                .apply { putExtra(EXTRA_SELECTED_ITEM_ID, navbarSelection.resId) }
     }
 }

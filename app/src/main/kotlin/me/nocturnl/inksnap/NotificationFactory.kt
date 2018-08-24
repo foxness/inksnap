@@ -5,11 +5,11 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import android.os.Build
 import android.support.annotation.RequiresApi
 import android.support.v4.app.NotificationCompat
 import java.util.concurrent.atomic.AtomicInteger
+import me.nocturnl.inksnap.MainActivity.Companion.NavbarSelection
 
 class NotificationFactory private constructor(context_: Context)
 {
@@ -87,7 +87,7 @@ class NotificationFactory private constructor(context_: Context)
     
     fun showSuccessNotification(postTitle: String)
     {
-        val intent = MainActivity.newIntent(context)
+        val intent = MainActivity.newIntent(context, NavbarSelection.Posted)
         
         val pendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
 
