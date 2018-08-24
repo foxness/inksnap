@@ -31,7 +31,10 @@
 
         <activity android:name=".FirstLaunchCourseActivity" />
 
-        <activity android:name=".MainActivity" />
+        <activity
+            android:name=".MainActivity"
+            android:launchMode="singleTask"
+            />
         
         <activity
             android:name=".SettingsActivity"
