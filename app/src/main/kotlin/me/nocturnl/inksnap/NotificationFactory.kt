@@ -75,8 +75,10 @@ class NotificationFactory private constructor(context_: Context)
     
     fun showErrorNotification()
     {
+        val id = getUniqueNotificationId()
+        
         val intent = MainActivity.newIntent(context, NavbarSelection.Failed)
-        val pendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
+        val pendingIntent = PendingIntent.getActivity(context, id, intent, 0)
         
         val notification = prebuildNotification(
                 ERROR_CHANNEL_ID,
@@ -85,15 +87,16 @@ class NotificationFactory private constructor(context_: Context)
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true)
                 .build()
-
-        val id = getUniqueNotificationId()
+        
         notify(id, notification)
     }
     
     fun showSuccessNotification(postTitle: String)
     {
+        val id = getUniqueNotificationId()
+        
         val intent = MainActivity.newIntent(context, NavbarSelection.Posted)
-        val pendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
+        val pendingIntent = PendingIntent.getActivity(context, id, intent, 0)
 
         val notification = prebuildNotification(
                 SUCCESS_CHANNEL_ID,
@@ -103,7 +106,6 @@ class NotificationFactory private constructor(context_: Context)
                 .setAutoCancel(true)
                 .build()
 
-        val id = getUniqueNotificationId()
         notify(id, notification)
     }
     

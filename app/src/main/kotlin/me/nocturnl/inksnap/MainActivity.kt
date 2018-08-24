@@ -101,7 +101,8 @@ class MainActivity : AppCompatActivity()
     private fun testButton()
     {
         val nf = NotificationFactory.getInstance(this)
-        nf.showSuccessNotification("testy")
+//        nf.showSuccessNotification("testy")
+        nf.showErrorNotification()
     }
 
     private fun openAbout()
