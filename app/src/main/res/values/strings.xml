@@ -55,4 +55,5 @@
     <string name="greeting">Welcome to Inksnap</string>
     <string name="to_start_use_your_reddit_account_to_log_in">to start, use your Reddit account to log in</string>
     <string name="log_in_with_reddit">Log in with Reddit</string>
+    <string name="explanation">Some settings can be changed only when submission is turned off</string>
 </resources>

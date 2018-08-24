@@ -11,6 +11,23 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         >
+        
+        <TextView
+            android:id="@+id/explanation_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/explanation"
+            android:textSize="12sp"
+            android:layout_marginStart="22dp"
+            android:layout_marginEnd="22dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"
+            />
+
+        <View
+            android:id="@+id/explanation_divider"
+            style="@style/divider"
+            />
 
         <LinearLayout
             android:layout_width="match_parent"

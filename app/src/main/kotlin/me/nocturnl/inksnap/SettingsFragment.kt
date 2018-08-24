@@ -25,6 +25,8 @@ class SettingsFragment : Fragment()
     private lateinit var autosubmitTypeButton: Button
     private lateinit var timerPeriodButton: Button
     private lateinit var redditNameView: TextView
+    private lateinit var explanationView: TextView
+    private lateinit var explanationDivider: View
 
     private lateinit var settingsManager: SettingsManager
     private lateinit var redditAccount: Reddit
@@ -83,6 +85,11 @@ class SettingsFragment : Fragment()
             onWallpaperModeCheckedChanged(isChecked)
         }
         
+        // EXPLANATION -----------------------
+
+        explanationView = v.findViewById(R.id.explanation_view)
+        explanationDivider = v.findViewById(R.id.explanation_divider)
+        
         // -----------------------------------
         
         val imgurAccountSetting = v.findViewById<RelativeLayout>(R.id.imgur_account_setting)
@@ -115,11 +122,16 @@ class SettingsFragment : Fragment()
     {
         super.onStart()
 
-        val autosubmitNotEnabled = !settingsManager.autosubmitEnabled
-        autosubmitTypeButton.isEnabled = autosubmitNotEnabled
-        redditButton.isEnabled = autosubmitNotEnabled
+        // todo: move all of these to oncreate(). why are they here in the first place?
+        val autosubmitEnabled = settingsManager.autosubmitEnabled
+        autosubmitTypeButton.isEnabled = !autosubmitEnabled
+        redditButton.isEnabled = !autosubmitEnabled
         timerPeriodButton.isEnabled = settingsManager.autosubmitType ==
-                SettingsManager.AutosubmitType.Periodic && autosubmitNotEnabled
+                SettingsManager.AutosubmitType.Periodic && !autosubmitEnabled
+        
+        val explanationVisibility = Util.getVisibilityGoneConstant(autosubmitEnabled)
+        explanationView.visibility = explanationVisibility
+        explanationDivider.visibility = explanationVisibility
     }
     
     @SuppressLint("SetTextI18n") // todo: fix
