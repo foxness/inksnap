@@ -75,12 +75,17 @@ class NotificationFactory private constructor(context_: Context)
     
     fun showErrorNotification()
     {
+        val intent = MainActivity.newIntent(context, NavbarSelection.Failed)
+        val pendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
+        
         val notification = prebuildNotification(
                 ERROR_CHANNEL_ID,
                 "Your post was not submitted", // todo: extract
                 "An error has occurred while submitting")
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true)
                 .build()
-        
+
         val id = getUniqueNotificationId()
         notify(id, notification)
     }
@@ -88,7 +93,6 @@ class NotificationFactory private constructor(context_: Context)
     fun showSuccessNotification(postTitle: String)
     {
         val intent = MainActivity.newIntent(context, NavbarSelection.Posted)
-        
         val pendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
 
         val notification = prebuildNotification(
