@@ -84,7 +84,7 @@ class PostedFragment : Fragment()
 
             datetimeView.text = relativeDateString
 
-            val thumbId = if (postedPost.isLink) R.drawable.link_thumb else R.drawable.self_thumb
+            val thumbId = if (postedPost.isLink) R.drawable.thumbnail_link_post else R.drawable.thumbnail_text_post
             val thumbnail = resources.getDrawable(thumbId, context?.theme)
             thumbnailView.setImageDrawable(thumbnail)
         }

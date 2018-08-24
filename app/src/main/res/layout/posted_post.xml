@@ -62,7 +62,7 @@
                 android:layout_width="54dp"
                 android:layout_height="54dp"
                 android:contentDescription="@string/post_thumbnail"
-                android:src="@drawable/self_thumb"
+                android:src="@drawable/thumbnail_text_post"
                 android:scaleType="fitCenter"
                 />
 
