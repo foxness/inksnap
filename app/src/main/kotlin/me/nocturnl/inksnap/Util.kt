@@ -67,6 +67,12 @@ object Util
         val bytes = messageDigest.digest(toByteArray())
         return bytes.fold("") { str, it -> str + "%02x".format(it) }
     }
+
+    fun showNoInternetMessage(ctx: Context)
+    {
+        // todo: extract, make toast long or use snackbar
+        toast(ctx, "Oops, looks like you're not connected to the internet")
+    }
     
     fun toast(ctx: Context?, text: String) = Toast.makeText(ctx, text, Toast.LENGTH_SHORT).show()
 

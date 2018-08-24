@@ -52,6 +52,7 @@ class SettingsFragment : Fragment()
         redditButton = v.findViewById(R.id.reddit_toggle)
         redditButton.text = if (redditAccount.isLoggedIn) "Log out" else "Log in"
         redditButton.setOnClickListener { onRedditButtonClick() }
+        // todo: make all other activities/fragments use this kind of on click listeners
         
         // REDDIT ACCOUNT --------------------
         
@@ -216,14 +217,8 @@ class SettingsFragment : Fragment()
         }
         else
         {
-            showNoInternetMessage()
+            Util.showNoInternetMessage(context!!)
         }
-    }
-    
-    private fun showNoInternetMessage()
-    {
-        // todo: extract, make toast long or use snackbar
-        toast("Oops, looks like you're not connected to the internet")
     }
 
     private fun showImgurLoginDialog()
@@ -282,7 +277,7 @@ class SettingsFragment : Fragment()
         }
         else
         {
-            showNoInternetMessage()
+            Util.showNoInternetMessage(context!!)
         }
     }
 

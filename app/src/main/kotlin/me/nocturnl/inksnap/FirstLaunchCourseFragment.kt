@@ -18,12 +18,23 @@ class FirstLaunchCourseFragment : Fragment()
         val v = inflater.inflate(R.layout.fragment_first_launch_course, container, false)
         
         val loginButton = v.findViewById<Button>(R.id.launcher_login_button)
-        loginButton.setOnClickListener {
-            val i = RedditAuthActivity.newIntent(context!!)
-            startActivityForResult(i, REQUEST_CODE_REDDIT_AUTH)
-        }
+        loginButton.setOnClickListener { onLoginButtonClick() }
         
         return v
+    }
+    
+    private fun onLoginButtonClick()
+    {
+        val ctx = context!!
+        if (Util.isNetworkAvailable(ctx))
+        {
+            val i = RedditAuthActivity.newIntent(ctx)
+            startActivityForResult(i, REQUEST_CODE_REDDIT_AUTH)
+        }
+        else
+        {
+            Util.showNoInternetMessage(ctx)
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
