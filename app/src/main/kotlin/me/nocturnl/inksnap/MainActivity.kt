@@ -135,12 +135,12 @@ class MainActivity : AppCompatActivity()
         {
             val currentType = when (currentFragment)
             {
-                is ManualQueueFragment -> SettingsManager.AutosubmitType.Manual
-                is PeriodicQueueFragment -> SettingsManager.AutosubmitType.Periodic
+                is ManualQueueFragment -> SettingsManager.SchedulingType.Manual
+                is PeriodicQueueFragment -> SettingsManager.SchedulingType.Periodic
                 else -> throw Exception("how?")
             }
             
-            if (currentType != settingsManager.autosubmitType)
+            if (currentType != settingsManager.schedulingType)
             {
                 val newFragment = getQueueFragment()
                 setFragment(newFragment)
@@ -152,10 +152,10 @@ class MainActivity : AppCompatActivity()
     
     private fun getQueueFragment(): QueueFragment
     {
-        return when (settingsManager.autosubmitType)
+        return when (settingsManager.schedulingType)
         {
-            SettingsManager.AutosubmitType.Manual -> ManualQueueFragment.newInstance()
-            SettingsManager.AutosubmitType.Periodic -> PeriodicQueueFragment.newInstance()
+            SettingsManager.SchedulingType.Manual -> ManualQueueFragment.newInstance()
+            SettingsManager.SchedulingType.Periodic -> PeriodicQueueFragment.newInstance()
         }
     }
 

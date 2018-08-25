@@ -15,14 +15,14 @@ class SettingsManager private constructor(context_: Context)
         redditAccessTokenExpirationDate = null
         redditLastSubmissionDate = null
         redditName = null
-        autosubmitEnabled = false
+        submissionEnabled = false
         timeLeft = Duration.standardHours(3)
         imgurAccessToken = null
         imgurRefreshToken = null
         imgurAccessTokenExpirationDate = null
         sortBy = SortBy.Date
         notFirstLaunch = false
-        autosubmitType = AutosubmitType.Manual
+        schedulingType = SchedulingType.Manual
         period = Duration.standardHours(3)
         notificationIdCounter = NotificationFactory.INITIAL_NOTIFICATION_ID
         developerOptionsUnlocked = false
@@ -51,9 +51,9 @@ class SettingsManager private constructor(context_: Context)
         get() = getString(PREF_REDDIT_NAME)
         set(value) = setString(PREF_REDDIT_NAME, value)
 
-    var autosubmitEnabled: Boolean
-        get() = getBool(PREF_AUTOSUBMIT_ENABLED)
-        set(value) = setBool(PREF_AUTOSUBMIT_ENABLED, value)
+    var submissionEnabled: Boolean
+        get() = getBool(PREF_SUBMISSION_ENABLED)
+        set(value) = setBool(PREF_SUBMISSION_ENABLED, value)
 
     var timeLeft: Duration? // todo: maybe make it non nullable?
         get() = getDuration(PREF_TIME_LEFT)
@@ -82,12 +82,12 @@ class SettingsManager private constructor(context_: Context)
         get() = getBool(PREF_NOT_FIRST_LAUNCH)
         set(value) = setBool(PREF_NOT_FIRST_LAUNCH, value)
 
-    enum class AutosubmitType
+    enum class SchedulingType
     { Manual, Periodic }
 
-    var autosubmitType: AutosubmitType
-        get() = AutosubmitType.values()[getInt(PREF_AUTOSUBMIT_TYPE)!!]
-        set(value) = setInt(PREF_AUTOSUBMIT_TYPE, value.ordinal)
+    var schedulingType: SchedulingType
+        get() = SchedulingType.values()[getInt(PREF_SCHEDULING_TYPE)!!]
+        set(value) = setInt(PREF_SCHEDULING_TYPE, value.ordinal)
     
     var period: Duration
         get() = getDuration(PREF_PERIOD)!!
@@ -178,14 +178,14 @@ class SettingsManager private constructor(context_: Context)
                 "redditAccessTokenExpirationDate"
         private const val PREF_REDDIT_LAST_SUBMISSION_DATE = "redditLastSubmissionDate"
         private const val PREF_REDDIT_NAME = "redditName"
-        private const val PREF_AUTOSUBMIT_ENABLED = "autosubmitEnabled"
+        private const val PREF_SUBMISSION_ENABLED = "submissionEnabled"
         private const val PREF_TIME_LEFT = "timeLeft"
         private const val PREF_IMGUR_ACCESS_TOKEN = "imgurAccessToken"
         private const val PREF_IMGUR_REFRESH_TOKEN = "imgurRefreshToken"
         private const val PREF_IMGUR_ACCESS_TOKEN_EXPIRATION_DATE = "imgurAccessTokenExpirationDate"
         private const val PREF_SORT_BY = "sortBy"
         private const val PREF_NOT_FIRST_LAUNCH = "notFirstLaunch"
-        private const val PREF_AUTOSUBMIT_TYPE = "autosubmitType"
+        private const val PREF_SCHEDULING_TYPE = "schedulingType"
         private const val PREF_PERIOD = "period"
         private const val PREF_WALLPAPER_MODE = "wallpaperMode"
         private const val PREF_NOTIFICATION_ID_COUNTER = "notificationIdCounter"

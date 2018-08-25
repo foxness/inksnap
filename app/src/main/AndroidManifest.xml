@@ -58,7 +58,7 @@
         
         <activity android:name=".RedditAuthActivity" />
 
-        <service android:name=".AutosubmitService" />
+        <service android:name=".SubmissionService" />
         
         <receiver android:name=".StartupReceiver">
             

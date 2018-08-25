@@ -22,7 +22,7 @@ class SettingsFragment : Fragment()
 {
     private lateinit var redditButton: Button
     private lateinit var imgurButton: Button
-    private lateinit var autosubmitTypeButton: Button
+    private lateinit var schedulingTypeButton: Button
     private lateinit var timerPeriodButton: Button
     private lateinit var redditNameView: TextView
     private lateinit var explanationView: TextView
@@ -67,10 +67,10 @@ class SettingsFragment : Fragment()
         imgurButton.text = if (imgurAccount.isLoggedIn) "Log out" else "Log in"
         imgurButton.setOnClickListener { onImgurButtonClick() }
 
-        // AUTOSUBMIT TYPE -------------------
+        // SCHEDULING TYPE -------------------
 
-        autosubmitTypeButton = v.findViewById(R.id.autosubmit_button)
-        autosubmitTypeButton.setOnClickListener { onAutosubmitTypeButtonClick() }
+        schedulingTypeButton = v.findViewById(R.id.scheduling_type_button)
+        schedulingTypeButton.setOnClickListener { onSchedulingTypeButtonClick() }
 
         // TIMER PERIOD ----------------------
 
@@ -94,12 +94,12 @@ class SettingsFragment : Fragment()
         
         val imgurAccountSetting = v.findViewById<RelativeLayout>(R.id.imgur_account_setting)
         val wallpaperModeSetting = v.findViewById<RelativeLayout>(R.id.wallpaper_mode_setting)
-        val autosubmitTypeSetting = v.findViewById<RelativeLayout>(R.id.autosubmit_type_setting)
+        val schedulingTypeSetting = v.findViewById<RelativeLayout>(R.id.scheduling_type_setting)
         val timerPeriodSetting = v.findViewById<RelativeLayout>(R.id.timer_period_setting)
 
         val imgurAccountSettingDivider = v.findViewById<View>(R.id.imgur_account_setting_divider)
         val wallpaperModeSettingDivider = v.findViewById<View>(R.id.wallpaper_mode_setting_divider)
-        val autosubmitTypeSettingDivider = v.findViewById<View>(R.id.autosubmit_type_setting_divider)
+        val schedulingTypeSettingDivider = v.findViewById<View>(R.id.scheduling_type_setting_divider)
         val timerPeriodSettingDivider = v.findViewById<View>(R.id.timer_period_setting_divider)
 
         val developerOptionsUnlocked = settingsManager.developerOptionsUnlocked
@@ -107,12 +107,12 @@ class SettingsFragment : Fragment()
         
         imgurAccountSetting.visibility = visibilityConstant
         wallpaperModeSetting.visibility = visibilityConstant
-        autosubmitTypeSetting.visibility = visibilityConstant
+        schedulingTypeSetting.visibility = visibilityConstant
         timerPeriodSetting.visibility = visibilityConstant
         
         imgurAccountSettingDivider.visibility = visibilityConstant
         wallpaperModeSettingDivider.visibility = visibilityConstant
-        autosubmitTypeSettingDivider.visibility = visibilityConstant
+        schedulingTypeSettingDivider.visibility = visibilityConstant
         timerPeriodSettingDivider.visibility = visibilityConstant
 
         return v
@@ -123,13 +123,13 @@ class SettingsFragment : Fragment()
         super.onStart()
 
         // todo: move all of these to oncreate(). why are they here in the first place?
-        val autosubmitEnabled = settingsManager.autosubmitEnabled
-        autosubmitTypeButton.isEnabled = !autosubmitEnabled
-        redditButton.isEnabled = !autosubmitEnabled
-        timerPeriodButton.isEnabled = settingsManager.autosubmitType ==
-                SettingsManager.AutosubmitType.Periodic && !autosubmitEnabled
+        val submissionEnabled = settingsManager.submissionEnabled
+        schedulingTypeButton.isEnabled = !submissionEnabled
+        redditButton.isEnabled = !submissionEnabled
+        timerPeriodButton.isEnabled = settingsManager.schedulingType ==
+                SettingsManager.SchedulingType.Periodic && !submissionEnabled
         
-        val explanationVisibility = Util.getVisibilityGoneConstant(autosubmitEnabled)
+        val explanationVisibility = Util.getVisibilityGoneConstant(submissionEnabled)
         explanationView.visibility = explanationVisibility
         explanationDivider.visibility = explanationVisibility
     }
@@ -189,24 +189,24 @@ class SettingsFragment : Fragment()
         periodDialog.show()
     }
 
-    private fun onAutosubmitTypeButtonClick()
+    private fun onSchedulingTypeButtonClick()
     {
         val types = arrayOf("Manual", "Periodic") // todo: extract hardcoded strings
-        val checkedItem = settingsManager.autosubmitType.ordinal
+        val checkedItem = settingsManager.schedulingType.ordinal
 
         val adb = AlertDialog.Builder(context!!)
 
-        adb.setTitle("Autosubmit type") // todo: same ^
+        adb.setTitle("Scheduling type") // todo: same ^
         adb.setNegativeButton("Cancel") { dialog: DialogInterface, which: Int ->
             dialog.dismiss()
         }
         adb.setSingleChoiceItems(types, checkedItem) { dialog: DialogInterface, which: Int ->
             dialog.dismiss()
-            val type = SettingsManager.AutosubmitType.values()[which]
-            settingsManager.autosubmitType = type
+            val type = SettingsManager.SchedulingType.values()[which]
+            settingsManager.schedulingType = type
 
-            // why? because if changed type then autosubmit must be off
-            timerPeriodButton.isEnabled = type == SettingsManager.AutosubmitType.Periodic
+            // why? because if changed type then submission must be off
+            timerPeriodButton.isEnabled = type == SettingsManager.SchedulingType.Periodic
         }
 
         adb.show()
@@ -270,7 +270,7 @@ class SettingsFragment : Fragment()
         {
             if (redditAccount.isLoggedIn)
             {
-                if (settingsManager.autosubmitEnabled)
+                if (settingsManager.submissionEnabled)
                 {
                     // todo: remove because this is unreachable because the button is disabled
                     toast("Can't change account while posts are scheduled")

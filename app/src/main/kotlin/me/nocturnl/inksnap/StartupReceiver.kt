@@ -18,12 +18,12 @@ class StartupReceiver : BroadcastReceiver()
         
         log.log("Log receiver has awoken")
         
-        if (settingsManager.autosubmitEnabled)
+        if (settingsManager.submissionEnabled)
         {
-            log.log("Autosubmit is enabled")
+            log.log("Submission is enabled")
             
             val scheduled = postScheduler.isServiceScheduled()
-            log.log("Is autosubmit service already scheduled? $scheduled")
+            log.log("Is submission service already scheduled? $scheduled")
             
             if (!scheduled)
             {
@@ -49,7 +49,7 @@ class StartupReceiver : BroadcastReceiver()
         }
         else
         {
-            log.log("Autosubmit is not enabled, going back to sleep")
+            log.log("Submission is not enabled, going back to sleep")
         }
     }
 }

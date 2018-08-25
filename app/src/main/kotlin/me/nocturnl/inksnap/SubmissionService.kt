@@ -15,7 +15,7 @@ import me.nocturnl.inksnap.Util.toNice
 import java.io.PrintWriter
 import java.io.StringWriter
 
-class AutosubmitService : Service()
+class SubmissionService : Service()
 {
     private lateinit var serviceLooper: Looper
     private lateinit var serviceHandler: ServiceHandler
@@ -41,7 +41,7 @@ class AutosubmitService : Service()
             
             val failedPost = FailedPost.from(underlyingPost, failReason, detailedReason)
             
-            val context = this@AutosubmitService
+            val context = this@SubmissionService
             
             val log = Log.getInstance(context)
             val failedPostRepository = FailedPostRepository.getInstance(context)
@@ -60,7 +60,7 @@ class AutosubmitService : Service()
         // todo: refactor this whole method
         suspend fun handle(msg: Message) // todo: refactor out of ServiceHandler to outer?
         {
-            val ctx = this@AutosubmitService
+            val ctx = this@SubmissionService
             val log = Log.getInstance(ctx)
             val queue = Queue.getInstance(ctx)
 
@@ -69,7 +69,7 @@ class AutosubmitService : Service()
             
             try
             {
-                log.log("Autosubmit service has awoken")
+                log.log("Submission service has awoken")
                 
                 // technically the "onlyScheduled()" part is not necessary because all of them are scheduled
                 val scheduledPosts = queue.posts.onlyScheduled().sortedBy { it.intendedSubmitDate!! }
@@ -270,7 +270,7 @@ class AutosubmitService : Service()
                     log.log("Scheduled service for the next post")
                 }
                 
-                val broadcastIntent = Intent(AUTOSUBMIT_SERVICE_DONE)
+                val broadcastIntent = Intent(SUBMISSION_SERVICE_DONE)
                 broadcastIntent.putExtra(EXTRA_SUCCESSFULLY_POSTED, successfullyPosted)
 
                 val lbm = LocalBroadcastManager.getInstance(ctx)
@@ -320,23 +320,20 @@ class AutosubmitService : Service()
     {
         private const val EXTRA_SUCCESSFULLY_POSTED = "successfullyPosted"
 
-        private const val AUTOSUBMIT_SERVICE_DONE = "autosubmitServiceDone"
+        private const val SUBMISSION_SERVICE_DONE = "submissionServiceDone"
 
         private const val SEND_REPLIES = true
         private const val RESUBMIT = true
         
         private const val POST_SUBMISSION_DELAY_LIMIT_MS: Long = 20 * 60 * 1000 // 20 minutes
 
-        fun newIntent(context: Context) = Intent(context, AutosubmitService::class.java)
+        fun newIntent(context: Context) = Intent(context, SubmissionService::class.java)
         
         fun getSuccessfullyPostedFromIntent(broadcastIntent: Intent): Boolean
         {
             return broadcastIntent.getBooleanExtra(EXTRA_SUCCESSFULLY_POSTED, false)
         }
         
-        fun getAutosubmitServiceDoneBroadcastIntentFilter(): IntentFilter
-        {
-            return IntentFilter(AUTOSUBMIT_SERVICE_DONE)
-        }
+        fun getSubmissionServiceDoneIntentFilter() = IntentFilter(SUBMISSION_SERVICE_DONE)
     }
 }

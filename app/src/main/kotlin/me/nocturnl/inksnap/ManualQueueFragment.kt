@@ -23,12 +23,12 @@ class ManualQueueFragment : QueueFragment()
 
     override val allowIntendedSubmitDateEditing = true
 
-    override fun onAutosubmitServiceDoneReceived(context: Context, intent: Intent) // assumes that autosubmit is on
+    override fun onSubmissionServiceDoneReceived(context: Context, intent: Intent) // assumes that submission is on
     {
-        super.onAutosubmitServiceDoneReceived(context, intent)
+        super.onSubmissionServiceDoneReceived(context, intent)
 
         // todo: do something with this?
-        val successfullyPosted = AutosubmitService.getSuccessfullyPostedFromIntent(intent)
+        val successfullyPosted = SubmissionService.getSuccessfullyPostedFromIntent(intent)
         
         val toastString = if (successfullyPosted)
         {
@@ -56,7 +56,7 @@ class ManualQueueFragment : QueueFragment()
         emptyView = v.findViewById(R.id.queue_empty_view)
     }
 
-    override fun toggleAutosubmit(on: Boolean)
+    override fun toggleSubmission(on: Boolean)
     {
         if (on)
         {
@@ -72,12 +72,12 @@ class ManualQueueFragment : QueueFragment()
                 return
             }
 
-            settingsManager.autosubmitEnabled = true
+            settingsManager.submissionEnabled = true
 
             val futurePosts = queue.posts.onlyFuture()
             if (futurePosts.isNotEmpty())
             {
-                registerAutosubmitServiceDoneReceiver()
+                registerSubmissionServiceDoneReceiver()
 
                 postScheduler.scheduleManualPosts(futurePosts)
 
@@ -86,14 +86,14 @@ class ManualQueueFragment : QueueFragment()
         }
         else
         {
-            settingsManager.autosubmitEnabled = false
+            settingsManager.submissionEnabled = false
 
             val futurePosts = queue.posts.onlyFuture()
             if (futurePosts.isNotEmpty())
             {
                 postScheduler.cancelScheduledPosts(futurePosts)
 
-                unregisterAutosubmitServiceDoneReceiver()
+                unregisterSubmissionServiceDoneReceiver()
 
                 log("Canceled ${futurePosts.size} scheduled post(s)")
             }
@@ -103,9 +103,9 @@ class ManualQueueFragment : QueueFragment()
     }
 
     @SuppressLint("SetTextI18n") // todo: deal with this
-    private fun updateToggleViews(autosubmitEnabled: Boolean) // todo: refactor to not use arg?
+    private fun updateToggleViews(submissionEnabled: Boolean) // todo: refactor to not use arg?
     {
-        timerToggle.text = if (autosubmitEnabled) "Turn off" else "Turn on"
+        timerToggle.text = if (submissionEnabled) "Turn off" else "Turn on"
         
         val earliestFromNow = queue.posts.earliestPostDateFromNow()
         
@@ -121,7 +121,7 @@ class ManualQueueFragment : QueueFragment()
             updateTimerText(timeLeft)
             updateTimerVisibility(true)
 
-            if (autosubmitEnabled)
+            if (submissionEnabled)
             {
                 startToggleRestrictorJob(timeLeft)
             }
@@ -149,7 +149,7 @@ class ManualQueueFragment : QueueFragment()
             settingsManager.timeLeft = settingsManager.period
         }
 
-        // todo: handle autosubmit type switches
+        // todo: handle scheduling type type switches
         // switching from periodic to manual leads to posts with no dates
         // posts with no dates cause manual to crash
         
@@ -159,13 +159,13 @@ class ManualQueueFragment : QueueFragment()
             val timeLeft = timeLeftUntil(earliestFromNow)
             startTimer(timeLeft)
 
-            if (settingsManager.autosubmitEnabled)
+            if (settingsManager.submissionEnabled)
             {
-                registerAutosubmitServiceDoneReceiver()
+                registerSubmissionServiceDoneReceiver()
             }
         }
 
-        updateToggleViews(settingsManager.autosubmitEnabled)
+        updateToggleViews(settingsManager.submissionEnabled)
         updatePostList()
     }
 
@@ -181,7 +181,7 @@ class ManualQueueFragment : QueueFragment()
         
         toggleRestrictorJob?.cancel()
 
-        unregisterAutosubmitServiceDoneReceiver() // maybe move this into the if?
+        unregisterSubmissionServiceDoneReceiver() // maybe move this into the if?
     }
     
     private fun startTimerForEarliestPostDateFromNow()
@@ -215,7 +215,7 @@ class ManualQueueFragment : QueueFragment()
         super.onTimerFinish()
         // todo: remove the submitted item from post list?
         
-        if (!settingsManager.autosubmitEnabled)
+        if (!settingsManager.submissionEnabled)
         {
             startTimerForEarliestPostDateFromNow()
         }
@@ -233,7 +233,7 @@ class ManualQueueFragment : QueueFragment()
         
         queue.addPost(newPost)
 
-        if (settingsManager.autosubmitEnabled)
+        if (settingsManager.submissionEnabled)
         {
             postScheduler.schedulePost(newPost)
         }
@@ -243,17 +243,17 @@ class ManualQueueFragment : QueueFragment()
     {
         super.onPostDeleted(deletedPostId)
 
-        val runOnEnabledAutosubmit = { postBeforeChange: Post ->
+        val runOnEnabledSubmission = { postBeforeChange: Post ->
             
             postScheduler.cancelScheduledPost(postBeforeChange)
             queue.deletePost(deletedPostId)
         }
 
-        val runOnDisabledAutosubmit = {
+        val runOnDisabledSubmission = {
             queue.deletePost(deletedPostId)
         }
         
-        postChangeSafeguard(deletedPostId, runOnEnabledAutosubmit, runOnDisabledAutosubmit)
+        postChangeSafeguard(deletedPostId, runOnEnabledSubmission, runOnDisabledSubmission)
     }
     
     companion object

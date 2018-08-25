@@ -168,25 +168,25 @@
             />
 
         <RelativeLayout
-            android:id="@+id/autosubmit_type_setting"
+            android:id="@+id/scheduling_type_setting"
             android:layout_width="match_parent"
             android:layout_height="70dp"
             >
 
             <Button
-                android:id="@+id/autosubmit_button"
+                android:id="@+id/scheduling_type_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
                 android:layout_marginStart="22dp"
-                android:text="@string/autosubmit_type"
+                android:text="@string/scheduling_type"
                 />
 
         </RelativeLayout>
 
         <View
-            android:id="@+id/autosubmit_type_setting_divider"
+            android:id="@+id/scheduling_type_setting_divider"
             style="@style/divider"
             />
 

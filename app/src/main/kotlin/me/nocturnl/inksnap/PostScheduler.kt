@@ -147,7 +147,7 @@ class PostScheduler private constructor(context_: Context)
     
     fun runServiceNow()
     {
-        val intent = AutosubmitService.newIntent(context)
+        val intent = SubmissionService.newIntent(context)
         
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
         {
@@ -170,7 +170,7 @@ class PostScheduler private constructor(context_: Context)
 
     private fun getPendingIntent(flags: Int = 0): PendingIntent?
     {
-        val intent = AutosubmitService.newIntent(context)
+        val intent = SubmissionService.newIntent(context)
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
         {
             PendingIntent.getForegroundService(context, REQUEST_CODE, intent, flags)

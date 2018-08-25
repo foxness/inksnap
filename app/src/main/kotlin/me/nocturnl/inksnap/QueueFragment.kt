@@ -51,11 +51,11 @@ abstract class QueueFragment : Fragment()
     
     protected abstract val fragmentLayoutId: Int
     
-    protected abstract fun toggleAutosubmit(on: Boolean)
+    protected abstract fun toggleSubmission(on: Boolean)
     
     protected lateinit var thumbnailDownloader: ThumbnailDownloader<PostHolder>
 
-    protected open fun onAutosubmitServiceDoneReceived(context: Context, intent: Intent) { }
+    protected open fun onSubmissionServiceDoneReceived(context: Context, intent: Intent) { }
     
     protected open fun onInitUi(v: View)
     {
@@ -73,7 +73,7 @@ abstract class QueueFragment : Fragment()
         // TIMER TOGGLE -------------------------------
 
         timerToggle.setOnClickListener { button ->
-            toggleAutosubmit(!settingsManager.autosubmitEnabled)
+            toggleSubmission(!settingsManager.submissionEnabled)
         }
     }
     
@@ -81,11 +81,11 @@ abstract class QueueFragment : Fragment()
     
     protected open fun onTimerTick(millisUntilFinished: Long) { }
 
-    private val autosubmitServiceDoneReceiver: BroadcastReceiver = object : BroadcastReceiver()
+    private val submissionServiceDoneReceiver: BroadcastReceiver = object : BroadcastReceiver()
     {
         override fun onReceive(context: Context, intent: Intent)
         {
-            onAutosubmitServiceDoneReceived(context, intent)
+            onSubmissionServiceDoneReceived(context, intent)
         }
     }
 
@@ -95,7 +95,7 @@ abstract class QueueFragment : Fragment()
     {
         val postBeforeChangeId = editedPost.id
         
-        val runOnEnabledAutosubmit = { postBeforeChange: Post ->
+        val runOnEnabledSubmission = { postBeforeChange: Post ->
             
             // because editedPost's scheduled is outdated
             // outdated because it was set when postholder binded the post to itself
@@ -118,19 +118,19 @@ abstract class QueueFragment : Fragment()
             }
         }
         
-        val runOnDisabledAutosubmit = {
+        val runOnDisabledSubmission = {
             queue.updatePost(editedPost)
         }
         
-        postChangeSafeguard(postBeforeChangeId, runOnEnabledAutosubmit, runOnDisabledAutosubmit)
+        postChangeSafeguard(postBeforeChangeId, runOnEnabledSubmission, runOnDisabledSubmission)
     }
 
     protected open fun onPostDeleted(deletedPostId: String) { }
     
     protected fun postChangeSafeguard(
             postBeforeChangeId: String,
-            runOnEnabledAutosubmit: (postBeforeChange: Post) -> Unit,
-            runOnDisabledAutosubmit: () -> Unit)
+            runOnEnabledSubmission: (postBeforeChange: Post) -> Unit,
+            runOnDisabledSubmission: () -> Unit)
     {
         val postBeforeChange = queue.getPost(postBeforeChangeId)
         
@@ -141,7 +141,7 @@ abstract class QueueFragment : Fragment()
         }
         else
         {
-            if (settingsManager.autosubmitEnabled)
+            if (settingsManager.submissionEnabled)
             {
                 val editThresholdDate = postBeforeChange.intendedSubmitDate!! - Duration(POST_EDIT_THRESHOLD_MS)
                 if (DateTime.now() > editThresholdDate)
@@ -151,12 +151,12 @@ abstract class QueueFragment : Fragment()
                 }
                 else
                 {
-                    runOnEnabledAutosubmit(postBeforeChange)
+                    runOnEnabledSubmission(postBeforeChange)
                 }
             }
             else
             {
-                runOnDisabledAutosubmit()
+                runOnDisabledSubmission()
             }
         }
     }
@@ -168,7 +168,7 @@ abstract class QueueFragment : Fragment()
 
         // todo: to be more efficient don't write to config on every change
         // write like in onPause or something
-        // im talking mostly about config.timeLeft and config.autosubmitEnabled
+        // im talking mostly about config.timeLeft and config.submissionEnabled
 
         val ctx = context!!
         settingsManager = SettingsManager.getInstance(ctx)
@@ -398,10 +398,10 @@ abstract class QueueFragment : Fragment()
     protected fun startTimerAndRegisterReceiver(timeLeft: Duration)
     {
         startTimer(timeLeft)
-        registerAutosubmitServiceDoneReceiver()
+        registerSubmissionServiceDoneReceiver()
     }
 
-    protected fun registerAutosubmitServiceDoneReceiver()
+    protected fun registerSubmissionServiceDoneReceiver()
     {
         if (receiverRegistered)
         {
@@ -411,11 +411,11 @@ abstract class QueueFragment : Fragment()
         receiverRegistered = true
 
         val lbm = LocalBroadcastManager.getInstance(activity!!)
-        val intentFilter = AutosubmitService.getAutosubmitServiceDoneBroadcastIntentFilter()
-        lbm.registerReceiver(autosubmitServiceDoneReceiver, intentFilter)
+        val intentFilter = SubmissionService.getSubmissionServiceDoneIntentFilter()
+        lbm.registerReceiver(submissionServiceDoneReceiver, intentFilter)
     }
 
-    protected fun unregisterAutosubmitServiceDoneReceiver()
+    protected fun unregisterSubmissionServiceDoneReceiver()
     {
         if (!receiverRegistered)
         {
@@ -425,7 +425,7 @@ abstract class QueueFragment : Fragment()
         receiverRegistered = false
 
         val lbm = LocalBroadcastManager.getInstance(activity!!)
-        lbm.unregisterReceiver(autosubmitServiceDoneReceiver)
+        lbm.unregisterReceiver(submissionServiceDoneReceiver)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
@@ -588,11 +588,11 @@ abstract class QueueFragment : Fragment()
 
     protected fun startToggleRestrictorJob(timeLeftUntilPost: Duration)
     {
-        val timeLeftUntilCantToggleAutosubmit = timeLeftUntilPost - Duration(AUTOSUBMIT_TOGGLE_THRESHOLD_MS)
-        if (timeLeftUntilCantToggleAutosubmit > Duration.ZERO)
+        val timeLeftUntilCantToggleSubmission = timeLeftUntilPost - Duration(SUBMISSION_TOGGLE_THRESHOLD_MS)
+        if (timeLeftUntilCantToggleSubmission > Duration.ZERO)
         {
             toggleRestrictorJob = launch(UI) {
-                delay(timeLeftUntilCantToggleAutosubmit.millis)
+                delay(timeLeftUntilCantToggleSubmission.millis)
 
                 if (isActive)
                 {
@@ -628,7 +628,7 @@ abstract class QueueFragment : Fragment()
         
         const val POST_EDIT_THRESHOLD_MS: Long = 3000
         
-        const val AUTOSUBMIT_TOGGLE_THRESHOLD_MS: Long = 3000
+        const val SUBMISSION_TOGGLE_THRESHOLD_MS: Long = 3000
         
         private const val REQUEST_CODE_NEW_POST = 0
         private const val REQUEST_CODE_EDIT_POST = 1

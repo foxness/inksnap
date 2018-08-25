@@ -117,7 +117,7 @@ class NotificationFactory private constructor(context_: Context)
         
         const val INITIAL_NOTIFICATION_ID = 1337
         
-        private const val SERVICE_CHANNEL_NAME = "Autosubmit" // todo: extract
+        private const val SERVICE_CHANNEL_NAME = "Submission Service" // todo: extract
         private const val ERROR_CHANNEL_NAME = "Failed post"
         private const val SUCCESS_CHANNEL_NAME = "Sucessful post"
         

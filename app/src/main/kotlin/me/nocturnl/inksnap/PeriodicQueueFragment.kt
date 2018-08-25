@@ -20,20 +20,20 @@ class PeriodicQueueFragment : QueueFragment()
     
     private lateinit var seekBar: SeekBar
 
-    override fun onAutosubmitServiceDoneReceived(context: Context, intent: Intent)
+    override fun onSubmissionServiceDoneReceived(context: Context, intent: Intent)
     {
-        super.onAutosubmitServiceDoneReceived(context, intent)
+        super.onSubmissionServiceDoneReceived(context, intent)
         
         // todo: do something with this?
-        val successfullyPosted = AutosubmitService.getSuccessfullyPostedFromIntent(intent)
+        val successfullyPosted = SubmissionService.getSuccessfullyPostedFromIntent(intent)
         
         if (queue.posts.isEmpty())
         {
-            settingsManager.autosubmitEnabled = false
+            settingsManager.submissionEnabled = false
             settingsManager.timeLeft = settingsManager.period
             updateToggleViews(false)
 
-            unregisterAutosubmitServiceDoneReceiver()
+            unregisterSubmissionServiceDoneReceiver()
         }
         else
         {
@@ -82,23 +82,23 @@ class PeriodicQueueFragment : QueueFragment()
         seekBar.setOnSeekBarChangeListener(changeListener)
     }
 
-    override fun toggleAutosubmit(on: Boolean)
+    override fun toggleSubmission(on: Boolean)
     {
         if (on)
         {
             if (!reddit.isLoggedIn)
             {
-                toast("You must be signed in to autosubmit")
+                toast("You must be signed in to schedule posts")
                 return
             }
 
             if (queue.posts.isEmpty())
             {
-                toast("No posts to autosubmit")
+                toast("No posts to schedule")
                 return
             }
 
-            settingsManager.autosubmitEnabled = true
+            settingsManager.submissionEnabled = true
 
             val timeLeft = settingsManager.timeLeft!!
 
@@ -110,9 +110,9 @@ class PeriodicQueueFragment : QueueFragment()
         }
         else
         {
-            settingsManager.autosubmitEnabled = false
+            settingsManager.submissionEnabled = false
 
-            unregisterAutosubmitServiceDoneReceiver()
+            unregisterSubmissionServiceDoneReceiver()
 
             timerObject.cancel()
 
@@ -140,12 +140,12 @@ class PeriodicQueueFragment : QueueFragment()
     }
 
     @SuppressLint("SetTextI18n") // todo: deal with this
-    private fun updateToggleViews(autosubmitEnabled: Boolean) // todo: refactor to not use arg
+    private fun updateToggleViews(submissionEnabled: Boolean) // todo: refactor to not use arg
     {
-        timerToggle.text = if (autosubmitEnabled) "Turn off" else "Turn on"
-        seekBar.isEnabled = !autosubmitEnabled
+        timerToggle.text = if (submissionEnabled) "Turn off" else "Turn on"
+        seekBar.isEnabled = !submissionEnabled
         
-        if (autosubmitEnabled)
+        if (submissionEnabled)
         {
             val timeLeft = timeLeftUntil(queue.posts.earliestPostDate()!!)
             startToggleRestrictorJob(timeLeft)
@@ -186,11 +186,11 @@ class PeriodicQueueFragment : QueueFragment()
             settingsManager.timeLeft = settingsManager.period
         }
 
-        if (settingsManager.autosubmitEnabled)
+        if (settingsManager.submissionEnabled)
         {
             if (queue.posts.isEmpty())
             {
-                settingsManager.autosubmitEnabled = false
+                settingsManager.submissionEnabled = false
                 settingsManager.timeLeft = settingsManager.period
             }
             else
@@ -208,7 +208,7 @@ class PeriodicQueueFragment : QueueFragment()
             }
         }
 
-        updateToggleViews(settingsManager.autosubmitEnabled)
+        updateToggleViews(settingsManager.submissionEnabled)
         updatePostList()
     }
 
@@ -216,14 +216,14 @@ class PeriodicQueueFragment : QueueFragment()
     {
         super.onStop()
 
-        if (settingsManager.autosubmitEnabled)
+        if (settingsManager.submissionEnabled)
         {
             timerObject.cancel()
         }
         
         toggleRestrictorJob?.cancel()
 
-        unregisterAutosubmitServiceDoneReceiver() // maybe move this into the if?
+        unregisterSubmissionServiceDoneReceiver() // maybe move this into the if?
     }
 
     override fun onNewPostAdded(newPost: Post)
@@ -232,7 +232,7 @@ class PeriodicQueueFragment : QueueFragment()
         
         queue.addPost(newPost)
 
-        if (settingsManager.autosubmitEnabled)
+        if (settingsManager.submissionEnabled)
         {
             postScheduler.scheduleUnscheduledPostsPeriodic(settingsManager.period)
         }
@@ -242,7 +242,7 @@ class PeriodicQueueFragment : QueueFragment()
     {
         super.onPostDeleted(deletedPostId)
         
-        val runOnEnabledAutosubmit = { postBeforeChange: Post ->
+        val runOnEnabledSubmission = { postBeforeChange: Post ->
             
             val earliestPostDate = queue.posts.earliestPostDate()!!
             val timeLeft = timeLeftUntil(earliestPostDate)
@@ -251,7 +251,7 @@ class PeriodicQueueFragment : QueueFragment()
 
             if (queue.posts.isEmpty())
             {
-                settingsManager.autosubmitEnabled = false
+                settingsManager.submissionEnabled = false
                 settingsManager.timeLeft = settingsManager.period
             }
             else
@@ -262,11 +262,11 @@ class PeriodicQueueFragment : QueueFragment()
             // todo: why is settingsManager.timeLeft nullable? maybe make it non-nullable?
         }
 
-        val runOnDisabledAutosubmit = {
+        val runOnDisabledSubmission = {
             queue.deletePost(deletedPostId)
         }
         
-        postChangeSafeguard(deletedPostId, runOnEnabledAutosubmit, runOnDisabledAutosubmit)
+        postChangeSafeguard(deletedPostId, runOnEnabledSubmission, runOnDisabledSubmission)
     }
 
     companion object
