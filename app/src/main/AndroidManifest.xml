@@ -29,7 +29,10 @@
             
         </activity>
 
-        <activity android:name=".FirstLaunchCourseActivity" />
+        <activity
+            android:name=".FirstLaunchCourseActivity"
+            android:label="Welcome"
+            />
 
         <activity
             android:name=".MainActivity"
@@ -39,24 +42,31 @@
         <activity
             android:name=".SettingsActivity"
             android:parentActivityName=".MainActivity"
+            android:label="Settings"
             />
         
         <activity
             android:name=".LogActivity"
             android:parentActivityName=".MainActivity"
+            android:label="Log"
             />
         
         <activity
             android:name=".PostActivity"
             android:parentActivityName=".MainActivity"
+            android:label="Post"
             />
 
         <activity
             android:name=".AboutActivity"
             android:parentActivityName=".MainActivity"
+            android:label="About"
             />
         
-        <activity android:name=".RedditAuthActivity" />
+        <activity
+            android:name=".RedditAuthActivity"
+            android:label="Reddit Login"
+            />
 
         <service android:name=".SubmissionService" />
         
