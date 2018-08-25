@@ -11,3 +11,5 @@
 /.idea/gradle.xml
 /.idea/caches
 /.idea/assetWizardSettings.xml
+/app/release/**
+keystore.properties
