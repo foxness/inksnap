@@ -68,6 +68,11 @@
             android:label="Reddit Login"
             />
 
+        <activity
+            android:name=".KillswitchActivity"
+            android:launchMode="singleTask"
+            />
+
         <service android:name=".SubmissionService" />
         
         <receiver android:name=".StartupReceiver">

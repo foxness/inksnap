@@ -56,4 +56,6 @@
     <string name="log_in_with_reddit">Log in with Reddit</string>
     <string name="explanation">Some settings can be changed only when submission is turned off</string>
     <string name="scheduling_type">Scheduling Type</string>
+    <string name="killswitch_text">Please update it using Google Play Store. Sorry for the inconvenience.</string>
+    <string name="killswitch_title">This app is out of date</string>
 </resources>

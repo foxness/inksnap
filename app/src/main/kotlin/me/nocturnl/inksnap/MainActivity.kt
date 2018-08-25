@@ -86,6 +86,18 @@ class MainActivity : AppCompatActivity()
         return true
     }
 
+    override fun onResume()
+    {
+        super.onResume()
+        
+        if (System.currentTimeMillis() >= KILLSWITCH_DATE)
+        {
+            val i = KillswitchActivity.newIntent(this)
+            startActivity(i)
+            finish()
+        }
+    }
+
     private fun openSettings()
     {
         val i = SettingsActivity.newIntent(this)
@@ -205,6 +217,8 @@ class MainActivity : AppCompatActivity()
         private const val EXTRA_SELECTED_ITEM_ID = "extra_selected_item_id"
         private const val HOME_ITEM_ID = R.id.action_queue
         private const val FRAGMENT_CONTAINER = R.id.main_fragment_container
+        
+        private const val KILLSWITCH_DATE: Long = 1538033601420
         
         enum class NavbarSelection(val resId: Int)
         {
