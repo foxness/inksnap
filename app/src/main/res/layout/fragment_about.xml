@@ -91,7 +91,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/developer_email"
+            android:text="@string/contact_email"
             android:textColor="#999"
             android:textSize="14sp"
             android:fontFamily="sans-serif-thin"

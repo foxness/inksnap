@@ -41,17 +41,18 @@ class AboutFragment : Fragment()
         
         val feedbackAndSupport = v.findViewById<LinearLayout>(R.id.feedback_and_support)
         feedbackAndSupport.setOnClickListener {
-            val i = Intent(Intent.ACTION_VIEW, Uri.parse(SUPPORT_URL))
+            val supportUri = Uri.parse(resources.getString(R.string.support_url))
+            val i = Intent(Intent.ACTION_VIEW, supportUri)
             i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             startActivity(i)
         }
 
         val devContact = v.findViewById<LinearLayout>(R.id.contact_the_dev)
         devContact.setOnClickListener {
-            val developerEmail = resources.getString(R.string.developer_email)
+            val contactEmail = resources.getString(R.string.contact_email)
             
             val i = Intent(Intent.ACTION_SENDTO)
-            i.data = Uri.parse("mailto:$developerEmail")
+            i.data = Uri.parse("mailto:$contactEmail")
             
             // for some reason the result is a new task even if this is not present
             i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -67,7 +68,5 @@ class AboutFragment : Fragment()
         fun newInstance() = AboutFragment()
         
         private const val DEVELOPER_TAP_COUNT = 23
-        
-        private const val SUPPORT_URL = "https://reddit.com/r/inksnap" // todo: extract
     }
 }
