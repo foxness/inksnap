@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -57,6 +58,13 @@ class AboutFragment : Fragment()
             // for some reason the result is a new task even if this is not present
             i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             
+            startActivity(i)
+        }
+        
+        val privacyPolicyView = v.findViewById<FrameLayout>(R.id.privacy_policy_view)
+        privacyPolicyView.setOnClickListener {
+            val privacyPolicyUri = Uri.parse(resources.getString(R.string.privacy_policy_url))
+            val i = Intent(Intent.ACTION_VIEW, privacyPolicyUri)
             startActivity(i)
         }
         
