@@ -40,10 +40,17 @@ android {
             applicationIdSuffix '.debug'
             versionNameSuffix '-debug'
         }
-        usableDebug {
-            initWith debug
-            applicationIdSuffix '.usableDebug'
-            versionNameSuffix '-usableDebug'
+        usable {
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            debuggable false
+            jniDebuggable false
+            signingConfig signingConfigs.config
+            renderscriptDebuggable false
+            renderscriptOptimLevel 3
+            minifyEnabled true
+            applicationIdSuffix '.usable'
+            versionNameSuffix '-usable'
+            zipAlignEnabled true
         }
     }
     compileOptions {
@@ -53,7 +60,7 @@ android {
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin/'
         debug.java.srcDirs += 'src/debug/kotlin/'
-        usableDebug.java.srcDirs += 'src/usableDebug/kotlin/'
+        usable.java.srcDirs += 'src/usable/kotlin/'
         release.java.srcDirs += 'src/release/kotlin/'
     }
     productFlavors {

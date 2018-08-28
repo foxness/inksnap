@@ -2,7 +2,7 @@ package me.nocturnl.inksnap
 
 object VariantVariables
 {
-    const val VARIANT_NAME = "usableDebug"
+    const val VARIANT_NAME = "usable"
     
     const val REDDIT_CLIENT_ID = "208oBwec8N-zRw"
     const val REDDIT_CLIENT_SECRET = ""
