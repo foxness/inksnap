@@ -20,4 +20,4 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
--dontwarn org.joda.convert.**
+#-dontwarn org.joda.convert.**
