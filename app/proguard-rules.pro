@@ -21,3 +21,8 @@
 #-renamesourcefileattribute SourceFile
 
 #-dontwarn org.joda.convert.**
+
+-keep class org.joda.time.** {*;}
+
+#-dontshrink
+#-dontobfuscate
