@@ -68,7 +68,7 @@ android {
 }
 
 dependencies {
-    def support_version = "28.0.0-rc01" // todo: use androidx instead of support library
+    def support_version = "28.0.0" // todo: use androidx instead of support library
     def room_version = "1.1.1"
     def khttp_version = "0.1.0"
     def jodatime_version = "2.10"
