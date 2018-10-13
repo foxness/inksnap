@@ -17,6 +17,7 @@ import khttp.structures.authorization.Authorization
 import kotlinx.coroutines.experimental.async
 import org.joda.time.DateTime
 import org.joda.time.Duration
+import org.joda.time.LocalTime
 import org.joda.time.format.PeriodFormatterBuilder
 import java.io.ByteArrayOutputStream
 import java.net.HttpURLConnection
@@ -37,6 +38,11 @@ object Util
     private const val THUMBNAIL_SIZE = 200
 
     private val messageDigest = MessageDigest.getInstance("SHA-256")
+    
+    private val random = Random()
+
+    private val randomStartTime = LocalTime(16, 0) // 16:00
+    private val randomEndTime = LocalTime(18, 0) // 18:00
     
     val titlePostComparator = Comparator { a: Post, b -> a.title.compareTo(b.title) }
 
@@ -111,8 +117,7 @@ object Util
 
     fun randomAlphaString(length: Int): String
     {
-        val rand = Random()
-        fun randomInt(min: Int, max: Int) = rand.nextInt(max - min + 1) + min // inclusive end
+        fun randomInt(min: Int, max: Int) = random.nextInt(max - min + 1) + min // inclusive end
 
         val alpha = 'a'..'z' // possible characters of the string
         return List(length) {
@@ -269,6 +274,22 @@ object Util
     fun getVisibilityConstant(visible: Boolean) = if (visible) View.VISIBLE else View.INVISIBLE
     
     fun getVisibilityGoneConstant(visible: Boolean) = if (visible) View.VISIBLE else View.GONE
+    
+    fun generatePostDate(startingDate: DateTime, index: Int): DateTime
+    {
+        val randomMillis = randomStartTime.millisOfDay + random.nextInt(randomEndTime.millisOfDay - randomStartTime.millisOfDay)
+        val time = Duration(randomMillis.toLong())
+        
+        return startingDate.plusDays(index).withTimeAtStartOfDay().plus(time)
+    }
+    
+    fun generatePostDates(now: DateTime, length: Int): List<DateTime>
+    {
+        val dates = (0 until length).map { generatePostDate(now, it) }.dropWhile { it < now }.toMutableList()
+        while (dates.size < length)
+            dates.add(generatePostDate(now, dates.size + 1))
+        return dates
+    }
     
     fun httpGet(
             url: String,

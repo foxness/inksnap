@@ -17,7 +17,6 @@ import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SearchView
 import android.text.InputType
 import android.text.format.DateUtils
-import android.util.Log
 import android.view.*
 import android.widget.Button
 import android.widget.EditText
@@ -27,7 +26,7 @@ import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
-import me.nocturnl.inksnap.Util.log
+import me.nocturnl.inksnap.Util.earliestPostDateFromNow
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import me.nocturnl.inksnap.Util.toast
@@ -381,9 +380,41 @@ abstract class QueueFragment : Fragment()
         input.setLines(5)
         input.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
         
-        val onOk = { di: DialogInterface, which: Int ->
+        val onOk = { di: DialogInterface, which: Int -> Unit
             
-            log(input.text.toString())
+            val posts = input.text.toString()
+                    .replace("\r", "")
+                    .split("\n\n")
+                    
+            val generatedDates = Util.generatePostDates(DateTime.now(), posts.size)
+            
+            posts.asSequence().map { it.split("\n") }
+                    .mapIndexed { index, list ->
+                        val post = Post.newInstance()
+                        post.title = list[0]
+                        post.content = list[1]
+                        post.isLink = true
+                        post.subreddit = "wallpapers"
+                        post.intendedSubmitDate = generatedDates[index]
+                        post
+                    }.toList()
+                    .forEach { 
+                        onNewPostAdded(it)
+                    }
+
+            val earliestFromNow = queue.posts.earliestPostDateFromNow()
+            if (earliestFromNow != null)
+            {
+                val timeLeft = Util.timeLeftUntil(earliestFromNow)
+                startTimer(timeLeft)
+
+                if (settingsManager.submissionEnabled)
+                {
+                    registerSubmissionServiceDoneReceiver()
+                }
+            }
+
+            updatePostList()
         }
 
         val inputDialog = AlertDialog.Builder(ctx)
