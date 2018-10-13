@@ -44,8 +44,8 @@
     </item>
     
     <item
-        android:id="@+id/menu_queue_extract"
-        android:title="@string/menu_extract"
+        android:id="@+id/menu_queue_export"
+        android:title="@string/menu_export"
         />
 
     <item

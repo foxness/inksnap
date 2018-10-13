@@ -236,10 +236,10 @@ abstract class QueueFragment : Fragment()
         val developerOptionsUnlocked = settingsManager.developerOptionsUnlocked
 
         val checkServiceItem = menu.findItem(R.id.menu_queue_check_service)
-        val extractItem = menu.findItem(R.id.menu_queue_extract)
+        val exportItem = menu.findItem(R.id.menu_queue_export)
 
         checkServiceItem.isVisible = developerOptionsUnlocked
-        extractItem.isVisible = developerOptionsUnlocked
+        exportItem.isVisible = developerOptionsUnlocked
 
         val searchItem = menu.findItem(R.id.menu_queue_search)
         val searchView = searchItem.actionView as SearchView
@@ -357,7 +357,7 @@ abstract class QueueFragment : Fragment()
         return when (item.itemId)
         {
             R.id.menu_queue_add -> { createNewPost(); true }
-            R.id.menu_queue_extract -> { extractPosts(); true }
+            R.id.menu_queue_export -> { exportPosts(); true }
             R.id.menu_queue_sort_by_title -> { sortByTitle(); true }
             R.id.menu_queue_sort_by_date -> { sortByDate(); true }
             R.id.menu_queue_check_service -> { checkService(); true }
@@ -365,7 +365,7 @@ abstract class QueueFragment : Fragment()
         }
     }
     
-    protected fun extractPosts()
+    protected fun exportPosts()
     {
         val result = queue.posts.joinToString(separator = "") { "${it.title}\n${it.content}\n\n" }.trimEnd()
         val clipboard = context!!.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
