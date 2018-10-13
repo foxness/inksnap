@@ -195,6 +195,11 @@ object Util
         return map { it.intendedSubmitDate!! }.earliestFromNow()
     }
 
+    fun List<Post>.latestPostDate(): DateTime?
+    {
+        return map { it.intendedSubmitDate!! }.max()
+    }
+
     fun List<Post>.onlyFuture(): List<Post>
     {
         val now = DateTime.now()
@@ -283,9 +288,9 @@ object Util
         return startingDate.plusDays(index).withTimeAtStartOfDay().plus(time)
     }
     
-    fun generatePostDates(now: DateTime, length: Int): List<DateTime>
+    fun generatePostDates(startingDate: DateTime, now: DateTime, length: Int): List<DateTime>
     {
-        val dates = (0 until length).map { generatePostDate(now, it) }.dropWhile { it < now }.toMutableList()
+        val dates = (0 until length).map { generatePostDate(startingDate, it) }.dropWhile { it < now }.toMutableList()
         while (dates.size < length)
             dates.add(generatePostDate(now, dates.size + 1))
         return dates

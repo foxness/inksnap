@@ -169,6 +169,26 @@ class ManualQueueFragment : QueueFragment()
         updatePostList()
     }
 
+    override fun onImport()
+    {
+        super.onImport()
+
+        val earliestFromNow = queue.posts.earliestPostDateFromNow()
+        if (earliestFromNow != null)
+        {
+            val timeLeft = timeLeftUntil(earliestFromNow)
+            startTimer(timeLeft)
+
+            if (settingsManager.submissionEnabled)
+            {
+                registerSubmissionServiceDoneReceiver()
+            }
+        }
+
+        updateToggleViews(settingsManager.submissionEnabled)
+        updatePostList()
+    }
+
     override fun onStop()
     {
         super.onStop()

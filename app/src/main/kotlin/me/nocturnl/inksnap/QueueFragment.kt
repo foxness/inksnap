@@ -26,10 +26,10 @@ import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
-import me.nocturnl.inksnap.Util.earliestPostDateFromNow
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import me.nocturnl.inksnap.Util.toast
+import me.nocturnl.inksnap.Util.latestPostDate
 
 abstract class QueueFragment : Fragment()
 {
@@ -60,6 +60,8 @@ abstract class QueueFragment : Fragment()
     protected lateinit var thumbnailDownloader: ThumbnailDownloader<PostHolder>
 
     protected open fun onSubmissionServiceDoneReceived(context: Context, intent: Intent) { }
+
+    protected open fun onImport() { }
     
     protected open fun onInitUi(v: View)
     {
@@ -385,8 +387,10 @@ abstract class QueueFragment : Fragment()
             val posts = input.text.toString()
                     .replace("\r", "")
                     .split("\n\n")
-                    
-            val generatedDates = Util.generatePostDates(DateTime.now(), posts.size)
+            
+            val now = DateTime.now()
+            val startingDate = queue.posts.latestPostDate()?.plusDays(1) ?: now
+            val generatedDates = Util.generatePostDates(startingDate, now, posts.size)
             
             posts.asSequence().map { it.split("\n") }
                     .mapIndexed { index, list ->
@@ -402,19 +406,7 @@ abstract class QueueFragment : Fragment()
                         onNewPostAdded(it)
                     }
 
-            val earliestFromNow = queue.posts.earliestPostDateFromNow()
-            if (earliestFromNow != null)
-            {
-                val timeLeft = Util.timeLeftUntil(earliestFromNow)
-                startTimer(timeLeft)
-
-                if (settingsManager.submissionEnabled)
-                {
-                    registerSubmissionServiceDoneReceiver()
-                }
-            }
-
-            updatePostList()
+            onImport()
         }
 
         val inputDialog = AlertDialog.Builder(ctx)
