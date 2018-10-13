@@ -11,18 +11,23 @@ import android.os.Handler
 import android.support.v4.app.Fragment
 import android.support.v4.content.LocalBroadcastManager
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory
+import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SearchView
+import android.text.InputType
 import android.text.format.DateUtils
+import android.util.Log
 import android.view.*
 import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
+import me.nocturnl.inksnap.Util.log
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import me.nocturnl.inksnap.Util.toast
@@ -236,9 +241,11 @@ abstract class QueueFragment : Fragment()
         val developerOptionsUnlocked = settingsManager.developerOptionsUnlocked
 
         val checkServiceItem = menu.findItem(R.id.menu_queue_check_service)
+        val importItem = menu.findItem(R.id.menu_queue_import)
         val exportItem = menu.findItem(R.id.menu_queue_export)
 
         checkServiceItem.isVisible = developerOptionsUnlocked
+        importItem.isVisible = developerOptionsUnlocked
         exportItem.isVisible = developerOptionsUnlocked
 
         val searchItem = menu.findItem(R.id.menu_queue_search)
@@ -357,12 +364,36 @@ abstract class QueueFragment : Fragment()
         return when (item.itemId)
         {
             R.id.menu_queue_add -> { createNewPost(); true }
+            R.id.menu_queue_import -> { importPosts(); true }
             R.id.menu_queue_export -> { exportPosts(); true }
             R.id.menu_queue_sort_by_title -> { sortByTitle(); true }
             R.id.menu_queue_sort_by_date -> { sortByDate(); true }
             R.id.menu_queue_check_service -> { checkService(); true }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+    
+    protected fun importPosts()
+    {
+        val ctx = context!!
+
+        val input = EditText(ctx) // todo: switch to layout
+        input.setLines(5)
+        input.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
+        
+        val onOk = { di: DialogInterface, which: Int ->
+            
+            log(input.text.toString())
+        }
+
+        val inputDialog = AlertDialog.Builder(ctx)
+                .setView(input)
+                .setTitle("Posts") // todo: extracteroni
+                .setPositiveButton(android.R.string.ok, onOk)
+                .setNegativeButton(android.R.string.cancel, null)
+                .create()
+
+        inputDialog.show()
     }
     
     protected fun exportPosts()

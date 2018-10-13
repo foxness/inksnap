@@ -42,6 +42,11 @@
         </menu>
         
     </item>
+
+    <item
+        android:id="@+id/menu_queue_import"
+        android:title="@string/import_posts"
+        />
     
     <item
         android:id="@+id/menu_queue_export"
