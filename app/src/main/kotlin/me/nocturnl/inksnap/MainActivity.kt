@@ -217,8 +217,8 @@ class MainActivity : AppCompatActivity()
         private const val EXTRA_SELECTED_ITEM_ID = "extra_selected_item_id"
         private const val HOME_ITEM_ID = R.id.action_queue
         private const val FRAGMENT_CONTAINER = R.id.main_fragment_container
-        
-        private const val KILLSWITCH_DATE: Long = 1540959600420
+
+        private const val KILLSWITCH_DATE: Long = 1543638000420
         
         enum class NavbarSelection(val resId: Int)
         {
