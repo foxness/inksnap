@@ -21,8 +21,8 @@ android {
         applicationId "me.nocturnl.inksnap"
         minSdkVersion 23
         targetSdkVersion 28
-        versionCode 4
-        versionName "1.0.3"
+        versionCode 5
+        versionName "1.0.4"
         resConfigs "en"
 
         javaCompileOptions {
