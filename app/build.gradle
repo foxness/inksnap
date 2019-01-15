@@ -74,7 +74,7 @@ dependencies {
     def room_version = "1.1.1"
     def khttp_version = "0.1.0"
     def jodatime_version = "2.10"
-    def kotlinx_coroutines_version = "0.24.0"
+    def kotlinx_coroutines_version = "0.30.2"
     def jodaconvert_version = "2.1.1"
     
     implementation fileTree(include: ['*.jar'], dir: 'libs')
@@ -89,11 +89,12 @@ dependencies {
     
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinx_coroutines_version"
 
-    implementation "khttp:khttp:$khttp_version" // todo: get rid of this
+    implementation "io.karn:khttp-android:$khttp_version" // todo: get rid of this
 
     implementation "joda-time:joda-time:$jodatime_version"
     implementation group: 'org.joda', name: 'joda-convert', version: jodaconvert_version, classifier: 'classic'
 }
 repositories {
     mavenCentral()
+    maven { url 'https://jitpack.io' }
 }

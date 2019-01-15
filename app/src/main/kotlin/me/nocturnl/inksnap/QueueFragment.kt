@@ -25,6 +25,7 @@ import android.widget.TextView
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.isActive
 import kotlinx.coroutines.experimental.launch
 import org.joda.time.DateTime
 import org.joda.time.Duration
