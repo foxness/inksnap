@@ -43,16 +43,20 @@ android {
             versionNameSuffix '-debug'
         }
         usable {
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            debuggable false
-            jniDebuggable false
-            signingConfig signingConfigs.config
-            renderscriptDebuggable false
-            renderscriptOptimLevel 3
-            minifyEnabled true
+            initWith release
             applicationIdSuffix '.usable'
             versionNameSuffix '-usable'
-            zipAlignEnabled true
+            
+//            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+//            debuggable false
+//            jniDebuggable false
+//            signingConfig signingConfigs.config
+//            renderscriptDebuggable false
+//            renderscriptOptimLevel 3
+//            minifyEnabled true
+//            applicationIdSuffix '.usable'
+//            versionNameSuffix '-usable'
+//            zipAlignEnabled true
         }
     }
     compileOptions {

@@ -23,6 +23,11 @@
 #-dontwarn org.joda.convert.**
 
 -keep class org.joda.time.** {*;}
+-keep class kotlinx.coroutines.** {*;}
+
+-useuniqueclassmembernames
 
 #-dontshrink
+#-dontoptimize
 #-dontobfuscate
+#-dontpreverify
