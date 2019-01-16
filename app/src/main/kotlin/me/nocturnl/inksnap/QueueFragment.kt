@@ -22,7 +22,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
-import kotlinx.coroutines.experimental.*
+import kotlinx.coroutines.*
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import me.nocturnl.inksnap.Util.toast

@@ -14,10 +14,10 @@ import android.webkit.WebView
 import android.widget.Toast
 import khttp.responses.Response
 import khttp.structures.authorization.Authorization
-import kotlinx.coroutines.experimental.CoroutineStart
-import kotlinx.coroutines.experimental.Dispatchers
-import kotlinx.coroutines.experimental.GlobalScope
-import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import org.joda.time.LocalTime

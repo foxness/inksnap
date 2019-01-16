@@ -6,7 +6,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.*
 import android.support.v4.content.LocalBroadcastManager
-import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.runBlocking
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import me.nocturnl.inksnap.Util.isImageUrl

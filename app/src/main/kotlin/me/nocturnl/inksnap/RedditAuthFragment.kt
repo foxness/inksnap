@@ -10,10 +10,10 @@ import android.view.ViewGroup
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.ProgressBar
-import kotlinx.coroutines.experimental.CoroutineStart
-import kotlinx.coroutines.experimental.Dispatchers
-import kotlinx.coroutines.experimental.GlobalScope
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import me.nocturnl.inksnap.Reddit.UserResponse.Allow
 import me.nocturnl.inksnap.Reddit.UserResponse.Decline
 
