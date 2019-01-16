@@ -10,9 +10,12 @@ import android.view.ViewGroup
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.ProgressBar
-import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.CoroutineStart
+import kotlinx.coroutines.experimental.Dispatchers
+import kotlinx.coroutines.experimental.GlobalScope
 import kotlinx.coroutines.experimental.launch
-import me.nocturnl.inksnap.Reddit.UserResponse.*
+import me.nocturnl.inksnap.Reddit.UserResponse.Allow
+import me.nocturnl.inksnap.Reddit.UserResponse.Decline
 
 
 class RedditAuthFragment : Fragment()
@@ -66,12 +69,15 @@ class RedditAuthFragment : Fragment()
                             processing = true
                             setLoadingIndicatorVisibility(true)
 
-                            val fetchJob = launch {
-                                redditAccount.fetchAuthTokens()
-                                redditAccount.fetchName()
-                            }
+                            val fetchJob = GlobalScope.launch(Dispatchers.Default,
+                                                              CoroutineStart.DEFAULT,
+                                                              null,
+                                                              {
+                                                                  redditAccount.fetchAuthTokens()
+                                                                  redditAccount.fetchName()
+                                                              })
 
-                            launch(UI) {
+                            GlobalScope.launch(Dispatchers.Main, CoroutineStart.DEFAULT, null, {
                                 fetchJob.join()
                                 processing = false
 
@@ -86,7 +92,7 @@ class RedditAuthFragment : Fragment()
 
                                 activity!!.setResult(result)
                                 activity!!.finish()
-                            }
+                            })
                         }
                         
                         Decline ->

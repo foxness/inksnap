@@ -14,6 +14,9 @@ import android.webkit.WebView
 import android.widget.Toast
 import khttp.responses.Response
 import khttp.structures.authorization.Authorization
+import kotlinx.coroutines.experimental.CoroutineStart
+import kotlinx.coroutines.experimental.Dispatchers
+import kotlinx.coroutines.experimental.GlobalScope
 import kotlinx.coroutines.experimental.async
 import org.joda.time.DateTime
 import org.joda.time.Duration
@@ -318,17 +321,19 @@ object Util
             url: String,
             headers: Map<String, String> = mapOf(),
             data: Any? = null,
-            auth: Authorization? = null) = async {
+            auth: Authorization? = null) =
+            GlobalScope.async(Dispatchers.Default, CoroutineStart.DEFAULT, null, {
 
         httpGet(url = url, headers = headers, data = data, auth = auth)
-    }
+    })
 
     fun httpPostAsync(
             url: String,
             headers: Map<String, String> = mapOf(),
             data: Any? = null,
-            auth: Authorization? = null) = async {
+            auth: Authorization? = null) =
+            GlobalScope.async(Dispatchers.Default, CoroutineStart.DEFAULT, null, {
 
         httpPost(url = url, headers = headers, data = data, auth = auth)
-    }
+    })
 }

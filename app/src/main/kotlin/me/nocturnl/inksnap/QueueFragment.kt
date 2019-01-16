@@ -22,11 +22,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.isActive
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.*
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import me.nocturnl.inksnap.Util.toast
@@ -537,7 +533,7 @@ abstract class QueueFragment : Fragment()
                 val cachedThumbnail = thumbnailCache.get(post.getThumbnailId())
                 if (cachedThumbnail == null)
                 {
-                    launch {
+                    GlobalScope.launch(Dispatchers.Default, CoroutineStart.DEFAULT, null, {
                         val thumbnailUrlToBeQueued = ServiceProcessor.tryGetThumbnailOrDirectUrl(post.content)
 
                         if (thumbnailUrlToBeQueued == null)
@@ -548,7 +544,7 @@ abstract class QueueFragment : Fragment()
                         {
                             thumbnailDownloader.queueThumbnail(holder, thumbnailUrlToBeQueued)
                         }
-                    }
+                    })
                 }
                 else
                 {
@@ -646,14 +642,15 @@ abstract class QueueFragment : Fragment()
         val timeLeftUntilCantToggleSubmission = timeLeftUntilPost - Duration(SUBMISSION_TOGGLE_THRESHOLD_MS)
         if (timeLeftUntilCantToggleSubmission > Duration.ZERO)
         {
-            toggleRestrictorJob = launch(UI) {
-                delay(timeLeftUntilCantToggleSubmission.millis)
-
-                if (isActive)
-                {
-                    restrictTimerToggle()
-                }
-            }
+            toggleRestrictorJob =
+                    GlobalScope.launch(Dispatchers.Main, CoroutineStart.DEFAULT, null, {
+                        delay(timeLeftUntilCantToggleSubmission.millis)
+        
+                        if (isActive)
+                        {
+                            restrictTimerToggle()
+                        }
+                    })
         }
         else
         {
