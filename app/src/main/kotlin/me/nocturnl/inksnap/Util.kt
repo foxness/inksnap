@@ -321,19 +321,19 @@ object Util
             url: String,
             headers: Map<String, String> = mapOf(),
             data: Any? = null,
-            auth: Authorization? = null) =
-            GlobalScope.async(Dispatchers.Default, CoroutineStart.DEFAULT, null, {
-
+            auth: Authorization? = null)
+            
+            = GlobalScope.async {
         httpGet(url = url, headers = headers, data = data, auth = auth)
-    })
+    }
 
     fun httpPostAsync(
             url: String,
             headers: Map<String, String> = mapOf(),
             data: Any? = null,
-            auth: Authorization? = null) =
-            GlobalScope.async(Dispatchers.Default, CoroutineStart.DEFAULT, null, {
-
+            auth: Authorization? = null)
+            
+            = GlobalScope.async {
         httpPost(url = url, headers = headers, data = data, auth = auth)
-    })
+    }
 }

@@ -69,15 +69,12 @@ class RedditAuthFragment : Fragment()
                             processing = true
                             setLoadingIndicatorVisibility(true)
 
-                            val fetchJob = GlobalScope.launch(Dispatchers.Default,
-                                                              CoroutineStart.DEFAULT,
-                                                              null,
-                                                              {
-                                                                  redditAccount.fetchAuthTokens()
-                                                                  redditAccount.fetchName()
-                                                              })
+                            val fetchJob = GlobalScope.launch {
+                                redditAccount.fetchAuthTokens()
+                                redditAccount.fetchName()
+                            }
 
-                            GlobalScope.launch(Dispatchers.Main, CoroutineStart.DEFAULT, null, {
+                            GlobalScope.launch {
                                 fetchJob.join()
                                 processing = false
 
@@ -92,7 +89,7 @@ class RedditAuthFragment : Fragment()
 
                                 activity!!.setResult(result)
                                 activity!!.finish()
-                            })
+                            }
                         }
                         
                         Decline ->

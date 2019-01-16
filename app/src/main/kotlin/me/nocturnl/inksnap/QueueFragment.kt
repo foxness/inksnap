@@ -533,7 +533,7 @@ abstract class QueueFragment : Fragment()
                 val cachedThumbnail = thumbnailCache.get(post.getThumbnailId())
                 if (cachedThumbnail == null)
                 {
-                    GlobalScope.launch(Dispatchers.Default, CoroutineStart.DEFAULT, null, {
+                    GlobalScope.launch {
                         val thumbnailUrlToBeQueued = ServiceProcessor.tryGetThumbnailOrDirectUrl(post.content)
 
                         if (thumbnailUrlToBeQueued == null)
@@ -544,7 +544,7 @@ abstract class QueueFragment : Fragment()
                         {
                             thumbnailDownloader.queueThumbnail(holder, thumbnailUrlToBeQueued)
                         }
-                    })
+                    }
                 }
                 else
                 {
@@ -643,14 +643,14 @@ abstract class QueueFragment : Fragment()
         if (timeLeftUntilCantToggleSubmission > Duration.ZERO)
         {
             toggleRestrictorJob =
-                    GlobalScope.launch(Dispatchers.Main, CoroutineStart.DEFAULT, null, {
+                    GlobalScope.launch {
                         delay(timeLeftUntilCantToggleSubmission.millis)
         
                         if (isActive)
                         {
                             restrictTimerToggle()
                         }
-                    })
+                    }
         }
         else
         {
