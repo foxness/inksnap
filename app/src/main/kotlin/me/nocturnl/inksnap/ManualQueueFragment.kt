@@ -2,7 +2,9 @@ package me.nocturnl.inksnap
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
+import android.support.v7.app.AlertDialog
 import android.view.View
 import android.widget.TextView
 import org.joda.time.Duration
@@ -145,13 +147,27 @@ class ManualQueueFragment : QueueFragment()
             }
             else
             {
-                queue.posts.forEach {
-                    queue.deletePost(it.id)
+                val onClear = { dialogInterface: DialogInterface, which: Int ->
+                    queue.posts.forEach {
+                        queue.deletePost(it.id)
+                    }
+
+                    timerObject.cancel()
+                    updateTimerVisibility(false)
+                    updatePostList()
                 }
 
-                timerObject.cancel()
-                updateTimerVisibility(false)
-                updatePostList()
+                val onCancel = { dialogInterface: DialogInterface, which: Int ->
+                    dialogInterface.cancel()
+                }
+
+                val dialog = AlertDialog.Builder(context!!)
+                        .setMessage("Are you sure you want to clear all posts?") // todo: extract
+                        .setPositiveButton("Clear", onClear) // todo: extract
+                        .setNegativeButton(android.R.string.cancel, onCancel)
+                        .create()
+
+                dialog.show()
             }
         }
     }
