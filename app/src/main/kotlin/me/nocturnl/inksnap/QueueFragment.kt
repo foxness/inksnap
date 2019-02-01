@@ -189,14 +189,17 @@ abstract class QueueFragment : Fragment()
             {
                 if (thumbnailCache.contains(target.post.getThumbnailId()))
                 {
-                    throw Exception("How did this even happen?")
+//                    throw Exception("How did this even happen?")
                     // todo: have each thumbnail download request contain the post id
                     // to compare it here
                     
                     // todo: also add url that corresponds to the thumbnail
                 }
+                else
+                {
+                    thumbnailCache.add(target.post.getThumbnailId(), thumbnail)
+                }
                 
-                thumbnailCache.add(target.post.getThumbnailId(), thumbnail)
                 target.setThumbnail(thumbnail)
             }
         }
