@@ -26,7 +26,10 @@ class PostedFragment : Fragment()
         val v = inflater.inflate(R.layout.fragment_posted, container, false)
 
         val postedPostRepository = PostedPostRepository.getInstance(context!!)
-        val postedPosts = postedPostRepository.postedPosts
+        
+        // todo: add sorting options
+        val postedPosts = postedPostRepository.postedPosts.sortedByDescending { it.intendedSubmitDate }
+        
         val noPostedPosts = postedPosts.isEmpty()
         
         recyclerView = v.findViewById(R.id.posted_recyclerview)
