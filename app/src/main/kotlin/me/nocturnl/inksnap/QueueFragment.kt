@@ -382,6 +382,7 @@ abstract class QueueFragment : Fragment()
         val onOk = { di: DialogInterface, which: Int -> Unit
             
             val posts = input.text.toString()
+                    .trim()
                     .replace("\r", "")
                     .split("\n\n")
             
@@ -392,8 +393,8 @@ abstract class QueueFragment : Fragment()
             posts.asSequence().map { it.split("\n") }
                     .mapIndexed { index, list ->
                         val post = Post.newInstance()
-                        post.title = list[0]
-                        post.content = list[1]
+                        post.title = list[0].trim()
+                        post.content = list[1].trim()
                         post.isLink = true
                         post.subreddit = "wallpapers"
                         post.intendedSubmitDate = generatedDates[index]
