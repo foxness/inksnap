@@ -62,4 +62,5 @@
     <string name="privacy_policy">Privacy policy</string>
     <string name="privacy_policy_url">https://nocturnl.me/inksnap-privacy-policy/</string>
     <string name="import_posts">Import</string>
+    <string name="clear_all_posts">Clear All Posts</string>
 </resources>

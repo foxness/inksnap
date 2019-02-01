@@ -134,6 +134,27 @@ class ManualQueueFragment : QueueFragment()
         timerText.visibility = flag
         timerLabel.visibility = flag
     }
+    
+    override fun clear()
+    {
+        if (queue.posts.isNotEmpty())
+        {
+            if (settingsManager.submissionEnabled)
+            {
+                toast("Can't do this with post submission enabled")
+            }
+            else
+            {
+                queue.posts.forEach {
+                    queue.deletePost(it.id)
+                }
+
+                timerObject.cancel()
+                updateTimerVisibility(false)
+                updatePostList()
+            }
+        }
+    }
 
     private fun updateTimerText(timeLeft: Duration)
     {

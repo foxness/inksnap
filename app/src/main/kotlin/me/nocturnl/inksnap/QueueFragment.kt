@@ -357,6 +357,8 @@ abstract class QueueFragment : Fragment()
         toast(s)
     }
 
+    protected open fun clear() { }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean
     {
         return when (item.itemId)
@@ -366,6 +368,7 @@ abstract class QueueFragment : Fragment()
             R.id.menu_queue_export -> { exportPosts(); true }
             R.id.menu_queue_sort_by_title -> { sortByTitle(); true }
             R.id.menu_queue_sort_by_date -> { sortByDate(); true }
+            R.id.menu_queue_clear -> { clear(); true }
             R.id.menu_queue_check_service -> { checkService(); true }
             else -> super.onOptionsItemSelected(item)
         }
