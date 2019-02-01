@@ -419,7 +419,7 @@ abstract class QueueFragment : Fragment()
     
     protected fun exportPosts()
     {
-        val result = queue.posts.joinToString(separator = "") { "${it.title}\n${it.content}\n\n" }.trimEnd()
+        val result = queue.posts.sortedBy { it.intendedSubmitDate }.joinToString(separator = "") { "${it.title}\n${it.content}\n\n" }.trimEnd()
         val clipboard = context!!.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         clipboard.primaryClip = ClipData.newPlainText("Posts", result)
         toast("Copied")
