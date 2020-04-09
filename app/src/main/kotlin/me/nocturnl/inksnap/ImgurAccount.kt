@@ -5,6 +5,7 @@ import android.webkit.URLUtil.isValidUrl
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import me.nocturnl.inksnap.Util.randomState
+import org.json.JSONObject
 import java.net.HttpURLConnection
 
 class ImgurAccount(private val callbacks: Callbacks)
@@ -104,12 +105,12 @@ class ImgurAccount(private val callbacks: Callbacks)
 
         val response = Util.httpPostAsync(url = ACCESS_TOKEN_ENDPOINT, headers = headers, data = data).await()
 
-        if (response.statusCode != HttpURLConnection.HTTP_OK)
+        if (response.code != HttpURLConnection.HTTP_OK)
         {
-            throw Exception("Response code: ${response.statusCode}, response: ${response.text}")
+            throw Exception("Response code: ${response.code}, response: ${response.body!!.string()}")
         }
 
-        val json = response.jsonObject
+        val json = JSONObject(response.body!!.string())
 
         val newAccessToken = json.getString("access_token")
         val expiresIn = json.getLong("expires_in")
@@ -141,12 +142,12 @@ class ImgurAccount(private val callbacks: Callbacks)
 
         val response = Util.httpPostAsync(url = IMAGE_UPLOAD_ENDPOINT, headers = headers, data = data).await()
 
-        if (response.statusCode != HttpURLConnection.HTTP_OK)
+        if (response.code != HttpURLConnection.HTTP_OK)
         {
-            throw Exception("Response code: ${response.statusCode}, response: ${response.text}")
+            throw Exception("Response code: ${response.code}, response: ${response.body!!.string()}")
         }
 
-        val json = response.jsonObject
+        val json = JSONObject(response.body!!.string())
         if (!json.getBoolean("success"))
         {
             throw Exception("JSON response success: false; JSON: $json")

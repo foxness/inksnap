@@ -1,10 +1,12 @@
 package me.nocturnl.inksnap
 
 import android.net.Uri
-import khttp.structures.authorization.BasicAuthorization
+//import khttp.structures.authorization.BasicAuthorization
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import me.nocturnl.inksnap.Util.randomState
+import okhttp3.Credentials
+import org.json.JSONObject
 import java.net.HttpURLConnection
 
 class Reddit private constructor(private val callbacks: Callbacks)
@@ -82,13 +84,13 @@ class Reddit private constructor(private val callbacks: Callbacks)
                 "title" to post.title)
 
         val response = Util.httpPostAsync(url = SUBMIT_ENDPOINT, headers = headers, data = data).await()
-
-        if (response.statusCode != HttpURLConnection.HTTP_OK)
+        
+        if (response.code != HttpURLConnection.HTTP_OK)
         {
-            throw Exception("Response code: ${response.statusCode}, response: ${response.text}")
+            throw Exception("Response code: ${response.code}, response: ${response.body!!.string()}")
         }
-
-        val json = response.jsonObject.getJSONObject("json")
+        
+        val json = JSONObject(response.body!!.string()).getJSONObject("json")
         val errors = json.getJSONArray("errors")
         
         if (errors.length() == 0)
@@ -141,12 +143,12 @@ class Reddit private constructor(private val callbacks: Callbacks)
         
         val response = Util.httpGetAsync(url = NAME_ENDPOINT, headers = headers).await()
 
-        if (response.statusCode != HttpURLConnection.HTTP_OK)
+        if (response.code != HttpURLConnection.HTTP_OK)
         {
-            throw Exception("Response code: ${response.statusCode}, response: ${response.text}")
+            throw Exception("Response code: ${response.code}, response: ${response.body!!.string()}")
         }
-        
-        val json = response.jsonObject
+
+        val json = JSONObject(response.body!!.string())
         
         name = json.getString("name")
         callbacks.onNewName()
@@ -166,16 +168,16 @@ class Reddit private constructor(private val callbacks: Callbacks)
 
         val data = mapOf("grant_type" to "refresh_token", "refresh_token" to refreshToken)
 
-        val auth = BasicAuthorization(APP_CLIENT_ID, APP_CLIENT_SECRET)
+        val auth = Credentials.basic(APP_CLIENT_ID, APP_CLIENT_SECRET)
 
         val response = Util.httpPostAsync(url = ACCESS_TOKEN_ENDPOINT, headers = headers, data = data, auth = auth).await()
 
-        if (response.statusCode != HttpURLConnection.HTTP_OK)
+        if (response.code != HttpURLConnection.HTTP_OK)
         {
-            throw Exception("Response code: ${response.statusCode}, response: ${response.text}")
+            throw Exception("Response code: ${response.code}, response: ${response.body!!.string()}")
         }
 
-        val json = response.jsonObject
+        val json = JSONObject(response.body!!.string())
 
         val accessToken = json.getString("access_token")
         val expiresIn = json.getInt("expires_in")
@@ -201,16 +203,16 @@ class Reddit private constructor(private val callbacks: Callbacks)
                          "code" to authCode,
                          "redirect_uri" to APP_REDIRECT_URI)
 
-        val auth = BasicAuthorization(APP_CLIENT_ID, APP_CLIENT_SECRET)
+        val auth = Credentials.basic(APP_CLIENT_ID, APP_CLIENT_SECRET)
 
         val response = Util.httpPostAsync(url = ACCESS_TOKEN_ENDPOINT, headers = headers, data = data, auth = auth).await()
 
-        if (response.statusCode != HttpURLConnection.HTTP_OK)
+        if (response.code != HttpURLConnection.HTTP_OK)
         {
-            throw Exception("Response code: ${response.statusCode}, response: ${response.text}")
+            throw Exception("Response code: ${response.code}, response: ${response.body!!.string()}")
         }
-
-        val json = response.jsonObject
+        
+        val json = JSONObject(response.body!!.string())
 
         // TODO: compare received scope with intended scope?
         refreshToken = json.getString("refresh_token")
@@ -256,6 +258,7 @@ class Reddit private constructor(private val callbacks: Callbacks)
         private const val NAME_ENDPOINT = "https://oauth.reddit.com/api/v1/me"
         
         private const val LOGIN_URL = "https://www.reddit.com/login.compact"
+        private const val LOGIN_URL_UPDATED = "https://www.reddit.com/login/.compact"
 
         private const val AUTH_DURATION = "permanent"
         private const val AUTH_SCOPE = "identity submit"
@@ -266,6 +269,6 @@ class Reddit private constructor(private val callbacks: Callbacks)
         const val POST_TEXT_LENGTH_LIMIT = 40000
         const val SUBREDDIT_NAME_LENGTH_LIMIT = 21
         
-        fun isLoginUrl(url: String) = url.startsWith(LOGIN_URL)
+        fun isLoginUrl(url: String) = url.startsWith(LOGIN_URL_UPDATED)
     }
 }

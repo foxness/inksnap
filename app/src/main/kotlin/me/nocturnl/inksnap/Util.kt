@@ -12,17 +12,20 @@ import android.webkit.CookieManager
 import android.webkit.URLUtil.isValidUrl
 import android.webkit.WebView
 import android.widget.Toast
-import khttp.responses.Response
-import khttp.structures.authorization.Authorization
+//import khttp.responses.Response
+//import khttp.structures.authorization.Authorization
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
+import okhttp3.*
+import okhttp3.internal.http2.Header
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import org.joda.time.LocalTime
 import org.joda.time.format.PeriodFormatterBuilder
 import java.io.ByteArrayOutputStream
+import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 import java.security.MessageDigest
@@ -43,6 +46,8 @@ object Util
     private val messageDigest = MessageDigest.getInstance("SHA-256")
     
     private val random = Random()
+
+    private val httpClient = OkHttpClient()
 
     private val randomStartTime = LocalTime(16, 0) // 16:00
     private val randomEndTime = LocalTime(18, 0) // 18:00
@@ -302,36 +307,76 @@ object Util
     fun httpGet(
             url: String,
             headers: Map<String, String> = mapOf(),
-            data: Any? = null,
-            auth: Authorization? = null): Response
+            auth: String? = null): Response
     {
-        return khttp.get(url = url, headers = headers, data = data, auth = auth)
+        var requestBuild = Request.Builder().url(url)
+
+        if (auth != null)
+        {
+            requestBuild.addHeader("Authorization", auth)
+        }
+        
+        for ((key, value) in headers)
+        {
+            requestBuild = requestBuild.addHeader(key, value)
+        }
+        
+        val request = requestBuild.build()
+        
+        return httpClient.newCall(request).execute()
     }
 
     fun httpPost(
             url: String,
             headers: Map<String, String> = mapOf(),
-            data: Any? = null,
-            auth: Authorization? = null): Response
+            data: Map<String, String>? = null,
+            auth: String? = null): Response
     {
-        return khttp.post(url = url, headers = headers, data = data, auth = auth)
+        var requestBuild = Request.Builder().url(url)
+
+        if (auth != null)
+        {
+            requestBuild.addHeader("Authorization", auth)
+        }
+
+        for ((key, value) in headers)
+        {
+            requestBuild = requestBuild.addHeader(key, value)
+        }
+
+        if (data != null)
+        {
+            var formBuild = FormBody.Builder()
+            
+            for ((key, value) in data)
+            {
+                formBuild = formBuild.add(key, value)
+            }
+            
+            val form = formBuild.build()
+
+            requestBuild = requestBuild.post(form)
+        }
+
+        val request = requestBuild.build()
+
+        return httpClient.newCall(request).execute()
     }
     
     fun httpGetAsync(
             url: String,
             headers: Map<String, String> = mapOf(),
-            data: Any? = null,
-            auth: Authorization? = null)
+            auth: String? = null)
             
             = GlobalScope.async {
-        httpGet(url = url, headers = headers, data = data, auth = auth)
+        httpGet(url = url, headers = headers, auth = auth)
     }
 
     fun httpPostAsync(
             url: String,
             headers: Map<String, String> = mapOf(),
-            data: Any? = null,
-            auth: Authorization? = null)
+            data: Map<String, String>? = null,
+            auth: String? = null)
             
             = GlobalScope.async {
         httpPost(url = url, headers = headers, data = data, auth = auth)
