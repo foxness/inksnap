@@ -1,7 +1,7 @@
 package me.nocturnl.inksnap
 
 import android.net.Uri
-import khttp.structures.authorization.BasicAuthorization
+//import khttp.structures.authorization.BasicAuthorization
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import me.nocturnl.inksnap.Util.randomState
@@ -256,6 +256,7 @@ class Reddit private constructor(private val callbacks: Callbacks)
         private const val NAME_ENDPOINT = "https://oauth.reddit.com/api/v1/me"
         
         private const val LOGIN_URL = "https://www.reddit.com/login.compact"
+        private const val LOGIN_URL_UPDATED = "https://www.reddit.com/login/.compact"
 
         private const val AUTH_DURATION = "permanent"
         private const val AUTH_SCOPE = "identity submit"
@@ -266,6 +267,6 @@ class Reddit private constructor(private val callbacks: Callbacks)
         const val POST_TEXT_LENGTH_LIMIT = 40000
         const val SUBREDDIT_NAME_LENGTH_LIMIT = 21
         
-        fun isLoginUrl(url: String) = url.startsWith(LOGIN_URL)
+        fun isLoginUrl(url: String) = url.startsWith(LOGIN_URL_UPDATED)
     }
 }

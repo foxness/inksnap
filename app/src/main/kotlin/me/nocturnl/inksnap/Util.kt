@@ -12,8 +12,8 @@ import android.webkit.CookieManager
 import android.webkit.URLUtil.isValidUrl
 import android.webkit.WebView
 import android.widget.Toast
-import khttp.responses.Response
-import khttp.structures.authorization.Authorization
+//import khttp.responses.Response
+//import khttp.structures.authorization.Authorization
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope

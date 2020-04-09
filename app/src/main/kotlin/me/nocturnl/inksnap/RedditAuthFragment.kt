@@ -43,7 +43,7 @@ class RedditAuthFragment : Fragment()
         progressBarView = v.findViewById(R.id.progressbar_view)
         authWebview = v.findViewById(R.id.authentification_webview)
         
-        setLoadingIndicatorVisibility(true)
+        setLoadingIndicatorVisibility(false)
 
         authWebview.webViewClient = object : WebViewClient()
         {
@@ -54,7 +54,7 @@ class RedditAuthFragment : Fragment()
                 
                 if (Reddit.isLoginUrl(url))
                 {
-                    setLoadingIndicatorVisibility(false)
+                    //setLoadingIndicatorVisibility(false)
                 }
                 else
                 {

@@ -76,10 +76,11 @@ android {
 dependencies {
     def support_version = "28.0.0" // todo: use androidx instead of support library
     def room_version = "1.1.1"
-    def khttp_version = "0.1.0"
+    //def khttp_version = "0.1.0"
     def jodatime_version = "2.10"
     def kotlinx_coroutines_version = "1.1.0"
     def jodaconvert_version = "2.1.1"
+    def okhttp_version = "4.5.0"
     
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
@@ -93,7 +94,8 @@ dependencies {
     
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinx_coroutines_version"
 
-    implementation "io.karn:khttp-android:$khttp_version" // todo: get rid of this
+    implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
+    //implementation "io.karn:khttp-android:$khttp_version" // todo: get rid of this
 
     implementation "joda-time:joda-time:$jodatime_version"
     implementation group: 'org.joda', name: 'joda-convert', version: jodaconvert_version, classifier: 'classic'
