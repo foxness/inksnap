@@ -13,12 +13,12 @@ object Wallhaven
             val headers = mapOf("User-Agent" to Util.USER_AGENT)
             val response = Util.httpGetAsync(url = url, headers = headers).await()
 
-            if (response.statusCode != HttpURLConnection.HTTP_OK)
+            if (response.code != HttpURLConnection.HTTP_OK)
             {
                 return null
             }
 
-            val rawHtml = response.text
+            val rawHtml = response.body.toString()
 
             // <img id="wallpaper" src="//wallpapers.wallhaven.cc/wallpapers/full/wallhaven-599344.jpg"
             val startTag = "<img id=\"wallpaper\" src=\""
