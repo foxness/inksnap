@@ -87,7 +87,7 @@ class Reddit private constructor(private val callbacks: Callbacks)
         
         if (response.code != HttpURLConnection.HTTP_OK)
         {
-            throw Exception("Response code: ${response.code}, response: ${response.body}")
+            throw Exception("Response code: ${response.code}, response: ${response.body!!.string()}")
         }
         
         val json = JSONObject(response.body!!.string()).getJSONObject("json")
@@ -145,7 +145,7 @@ class Reddit private constructor(private val callbacks: Callbacks)
 
         if (response.code != HttpURLConnection.HTTP_OK)
         {
-            throw Exception("Response code: ${response.code}, response: ${response.body}")
+            throw Exception("Response code: ${response.code}, response: ${response.body!!.string()}")
         }
 
         val json = JSONObject(response.body!!.string())
@@ -174,7 +174,7 @@ class Reddit private constructor(private val callbacks: Callbacks)
 
         if (response.code != HttpURLConnection.HTTP_OK)
         {
-            throw Exception("Response code: ${response.code}, response: ${response.body}")
+            throw Exception("Response code: ${response.code}, response: ${response.body!!.string()}")
         }
 
         val json = JSONObject(response.body!!.string())
@@ -209,7 +209,7 @@ class Reddit private constructor(private val callbacks: Callbacks)
 
         if (response.code != HttpURLConnection.HTTP_OK)
         {
-            throw Exception("Response code: ${response.code}, response: ${response.body}")
+            throw Exception("Response code: ${response.code}, response: ${response.body!!.string()}")
         }
         
         val json = JSONObject(response.body!!.string())
