@@ -110,7 +110,7 @@ class ImgurAccount(private val callbacks: Callbacks)
             throw Exception("Response code: ${response.code}, response: ${response.body}")
         }
 
-        val json = JSONObject(response.body.toString())
+        val json = JSONObject(response.body!!.string())
 
         val newAccessToken = json.getString("access_token")
         val expiresIn = json.getLong("expires_in")
@@ -147,7 +147,7 @@ class ImgurAccount(private val callbacks: Callbacks)
             throw Exception("Response code: ${response.code}, response: ${response.body}")
         }
 
-        val json = JSONObject(response.body.toString())
+        val json = JSONObject(response.body!!.string())
         if (!json.getBoolean("success"))
         {
             throw Exception("JSON response success: false; JSON: $json")

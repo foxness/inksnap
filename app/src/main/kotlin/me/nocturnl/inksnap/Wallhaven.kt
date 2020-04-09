@@ -18,7 +18,7 @@ object Wallhaven
                 return null
             }
 
-            val rawHtml = response.body.toString()
+            val rawHtml = response.body!!.string()
 
             // <img id="wallpaper" src="//wallpapers.wallhaven.cc/wallpapers/full/wallhaven-599344.jpg"
             val startTag = "<img id=\"wallpaper\" src=\""

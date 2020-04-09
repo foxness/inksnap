@@ -90,7 +90,7 @@ class Reddit private constructor(private val callbacks: Callbacks)
             throw Exception("Response code: ${response.code}, response: ${response.body}")
         }
         
-        val json = JSONObject(response.body.toString()).getJSONObject("json")
+        val json = JSONObject(response.body!!.string()).getJSONObject("json")
         val errors = json.getJSONArray("errors")
         
         if (errors.length() == 0)
@@ -148,7 +148,7 @@ class Reddit private constructor(private val callbacks: Callbacks)
             throw Exception("Response code: ${response.code}, response: ${response.body}")
         }
 
-        val json = JSONObject(response.body.toString())
+        val json = JSONObject(response.body!!.string())
         
         name = json.getString("name")
         callbacks.onNewName()
@@ -177,7 +177,7 @@ class Reddit private constructor(private val callbacks: Callbacks)
             throw Exception("Response code: ${response.code}, response: ${response.body}")
         }
 
-        val json = JSONObject(response.body.toString())
+        val json = JSONObject(response.body!!.string())
 
         val accessToken = json.getString("access_token")
         val expiresIn = json.getInt("expires_in")
@@ -211,8 +211,8 @@ class Reddit private constructor(private val callbacks: Callbacks)
         {
             throw Exception("Response code: ${response.code}, response: ${response.body}")
         }
-
-        val json = JSONObject(response.body.toString())
+        
+        val json = JSONObject(response.body!!.string())
 
         // TODO: compare received scope with intended scope?
         refreshToken = json.getString("refresh_token")
